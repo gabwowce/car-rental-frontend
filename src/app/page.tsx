@@ -1,10 +1,9 @@
 'use client'
 
-import { Metadata } from "next"
+
 import { Automobiliai2 as Automobiliai, Rezervacijos, Uzsakymai, Saskaitos, PagalbosUzklausos } from "@/fakeData"
 import ActionButtons from "@/app/components/ActionButtons"
 import DataTable from "@/app/components/DataTable"
-import { useMemo } from "react"
 import StatCard from "./components/StatCard"
 import BarChartBox from "./components/BarChartBox"
 import PieChartBox from "./components/PieChartBox"
