@@ -1,5 +1,6 @@
 {
   "name": "car-rental-frontend",
+  "homepage": "https://gabwowce.github.io/car-rental-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
