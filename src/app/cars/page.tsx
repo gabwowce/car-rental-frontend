@@ -5,41 +5,48 @@ import { Automobiliai } from '@/fakeData'
 import DataTable from '../components/DataTable'
 import ActionButtons from '../components/ActionButtons'
 import MapComponent from '../components/MapComponent'
+import ViewModal from '../components/ViewModal'
 
 type Automobilis = typeof Automobiliai[number]
-const columns: { label: string; accessor: keyof Automobilis | ((row: Automobilis) => React.ReactNode) }[] = [
-  {
-    label: 'Modelis',
-    accessor: (a) => `${a.marke} ${a.modelis}`,
-  },
-  { label: 'Numeris', accessor: 'numeris' },
-  { label: 'Būsena', accessor: 'automobilio_statusas' },
-  { label: 'Vietos', accessor: 'sedimos_vietos' },
-  {
-    label: 'Kaina parai',
-    accessor: (a) => `${a.kaina_parai} €`,
-  },
-  {
-    label: 'Veiksmai',
-    accessor: (a: Automobilis) => (
-      <ActionButtons
-        onView={() => console.log('Peržiūrėti', a.automobilio_id)}
-        onEdit={() => console.log('Redaguoti', a.automobilio_id)}
-        onDelete={() => console.log('Ištrinti', a.automobilio_id)}
-      />
-    ),
-  },
-]
 
 export default function CarsPage() {
   const [statusFilter, setStatusFilter] = useState("visi")
   const [search, setSearch] = useState("")
+  const [selectedCar, setSelectedCar] = useState<Automobilis | null>(null)
+  const [isModalOpen, setModalOpen] = useState(false)
 
   const filtered = Automobiliai.filter((a) => {
     const matchesStatus = statusFilter === "visi" || a.automobilio_statusas === statusFilter
     const matchesSearch = `${a.marke} ${a.modelis} ${a.numeris}`.toLowerCase().includes(search.toLowerCase())
     return matchesStatus && matchesSearch
   })
+
+  const columns = [
+    {
+      label: 'Modelis',
+      accessor: (a: Automobilis) => `${a.marke} ${a.modelis}`,
+    },
+    { label: 'Numeris', accessor: 'numeris' },
+    { label: 'Būsena', accessor: 'automobilio_statusas' },
+    { label: 'Vietos', accessor: 'sedimos_vietos' },
+    {
+      label: 'Kaina parai',
+      accessor: (a: Automobilis) => `${a.kaina_parai} €`,
+    },
+    {
+      label: 'Veiksmai',
+      accessor: (a: Automobilis) => (
+        <ActionButtons
+          onView={() => {
+            setSelectedCar(a)
+            setModalOpen(true)
+          }}
+          onEdit={() => console.log('Redaguoti', a.automobilio_id)}
+          onDelete={() => console.log('Ištrinti', a.automobilio_id)}
+        />
+      ),
+    },
+  ]
 
   return (
     <div>
@@ -72,9 +79,33 @@ export default function CarsPage() {
       </div>
 
       {/* Lentelė */}
-      <DataTable columns={columns} data={filtered} rowKey={(a) => a.automobilio_id} itemsPerPage={5}/>
+      <DataTable
+        columns={columns}
+        data={filtered}
+        rowKey={(a) => a.automobilio_id}
+        itemsPerPage={5}
+      />
 
+      {/* Žemėlapis */}
       <MapComponent />
+
+      {/* Modalas */}
+      {selectedCar && (
+        <ViewModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          title={`Automobilis: ${selectedCar.marke} ${selectedCar.modelis}`}
+          content={
+            <div className="space-y-2 text-sm">
+              <p><strong>Numeris:</strong> {selectedCar.numeris}</p>
+              <p><strong>Būsena:</strong> {selectedCar.automobilio_statusas}</p>
+              <p><strong>Kaina:</strong> {selectedCar.kaina_parai} €</p>
+              <p><strong>Sėdimos vietos:</strong> {selectedCar.sedimos_vietos}</p>
+              {/* gali pridėti daugiau laukų */}
+            </div>
+          }
+        />
+      )}
     </div>
   )
 }
