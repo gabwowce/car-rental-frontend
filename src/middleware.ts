@@ -1,12 +1,26 @@
-// src/middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
 
-  const protectedPaths = ["/cars", "/clients", "/orders", "/reservations"];
+  // Leisk prieigą prie login puslapio
+  if (request.nextUrl.pathname.startsWith("/login")) {
+    return NextResponse.next();
+  }
+
+  const protectedPaths = [
+    "/cars",
+    "/clients",
+    "/orders",
+    "/reservations",
+    "/support",
+    "/invoices",
+    "/profile",
+    "/" // saugomas root kelias
+  ];
+
   const pathIsProtected = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
+    path === "/" ? request.nextUrl.pathname === "/" : request.nextUrl.pathname.startsWith(path)
   );
 
   if (pathIsProtected && !token) {
@@ -17,5 +31,14 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/cars/:path*", "/clients/:path*", "/orders/:path*", "/reservations/:path*"],
+  matcher: [
+    "/cars/:path*",
+    "/clients/:path*",
+    "/orders/:path*",
+    "/reservations/:path*",
+    "/support/:path*",
+    "/invoices/:path*",
+    "/profile/:path*",
+    "/" // jei reikia saugoti root
+  ],
 };

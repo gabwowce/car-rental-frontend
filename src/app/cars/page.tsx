@@ -1,22 +1,28 @@
 'use client'
 
 import { useState } from 'react'
-import { Automobiliai } from '@/fakeData'
+import {
+  useGetAllCarsApiV1CarsGetQuery,
+} from '@/store/carRentalApi'
+
 import DataTable from '../components/DataTable'
 import ActionButtons from '../components/ActionButtons'
 import MapComponent from '../components/MapComponent'
 import ViewModal from '../components/ViewModal'
 
-type Automobilis = typeof Automobiliai[number]
+// Tipas pagal API hook'ą
+type Automobilis = NonNullable<ReturnType<typeof useGetAllCarsApiV1CarsGetQuery>['data']>[number]
 
 export default function CarsPage() {
-  const [statusFilter, setStatusFilter] = useState("visi")
-  const [search, setSearch] = useState("")
+  const { data: automobiliai = [], isLoading } = useGetAllCarsApiV1CarsGetQuery()
+
+  const [statusFilter, setStatusFilter] = useState('visi')
+  const [search, setSearch] = useState('')
   const [selectedCar, setSelectedCar] = useState<Automobilis | null>(null)
   const [isModalOpen, setModalOpen] = useState(false)
 
-  const filtered = Automobiliai.filter((a) => {
-    const matchesStatus = statusFilter === "visi" || a.automobilio_statusas === statusFilter
+  const filtered = automobiliai.filter((a) => {
+    const matchesStatus = statusFilter === 'visi' || a.automobilio_statusas === statusFilter
     const matchesSearch = `${a.marke} ${a.modelis} ${a.numeris}`.toLowerCase().includes(search.toLowerCase())
     return matchesStatus && matchesSearch
   })
@@ -26,9 +32,18 @@ export default function CarsPage() {
       label: 'Modelis',
       accessor: (a: Automobilis) => `${a.marke} ${a.modelis}`,
     },
-    { label: 'Numeris', accessor: 'numeris' },
-    { label: 'Būsena', accessor: 'automobilio_statusas' },
-    { label: 'Vietos', accessor: 'sedimos_vietos' },
+    {
+      label: 'Numeris',
+      accessor: 'numeris',
+    },
+    {
+      label: 'Būsena',
+      accessor: 'automobilio_statusas',
+    },
+    {
+      label: 'Vietos',
+      accessor: 'sedimos_vietos',
+    },
     {
       label: 'Kaina parai',
       accessor: (a: Automobilis) => `${a.kaina_parai} €`,
@@ -79,12 +94,16 @@ export default function CarsPage() {
       </div>
 
       {/* Lentelė */}
-      <DataTable
-        columns={columns}
-        data={filtered}
-        rowKey={(a) => a.automobilio_id}
-        itemsPerPage={5}
-      />
+      {isLoading ? (
+        <p>Kraunama...</p>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filtered}
+          rowKey={(a) => a.automobilio_id}
+          itemsPerPage={5}
+        />
+      )}
 
       {/* Žemėlapis */}
       <MapComponent />
@@ -101,7 +120,7 @@ export default function CarsPage() {
               <p><strong>Būsena:</strong> {selectedCar.automobilio_statusas}</p>
               <p><strong>Kaina:</strong> {selectedCar.kaina_parai} €</p>
               <p><strong>Sėdimos vietos:</strong> {selectedCar.sedimos_vietos}</p>
-              {/* gali pridėti daugiau laukų */}
+              {/* pridėk papildomus laukus jei reikia */}
             </div>
           }
         />
