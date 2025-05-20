@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Automobiliai } from '@/fakeData'
 import DataTable from '../components/DataTable'
 import ActionButtons from '../components/ActionButtons'
+import MapComponent from '../components/MapComponent'
 
 type Automobilis = typeof Automobiliai[number]
 const columns: { label: string; accessor: keyof Automobilis | ((row: Automobilis) => React.ReactNode) }[] = [
@@ -72,6 +73,8 @@ export default function CarsPage() {
 
       {/* Lentelė */}
       <DataTable columns={columns} data={filtered} rowKey={(a) => a.automobilio_id} />
+
+      <MapComponent />
     </div>
   )
 }
