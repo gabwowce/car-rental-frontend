@@ -72,7 +72,7 @@ export default function CarsPage() {
       </div>
 
       {/* Lentelė */}
-      <DataTable columns={columns} data={filtered} rowKey={(a) => a.automobilio_id} />
+      <DataTable columns={columns} data={filtered} rowKey={(a) => a.automobilio_id} itemsPerPage={5}/>
 
       <MapComponent />
     </div>
