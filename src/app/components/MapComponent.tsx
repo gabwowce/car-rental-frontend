@@ -1,71 +1,108 @@
-'use client'
+"use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import { LatLngExpression } from 'leaflet'
-import { useEffect, useState } from 'react'
-import { useGetAllCarsApiV1CarsGetQuery } from '@/store/carRentalApi'
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { LatLngExpression, Icon } from "leaflet";
+import { useEffect, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+// Importuoti markerio paveikslėlius iš public katalogo
+// const markerIcon = new Icon({
+//   iconUrl: "/leaflet/marker-icon.png",
+//   shadowUrl: "/leaflet/marker-shadow.png",
+//   iconSize: [25, 41],
+//   iconAnchor: [12, 41],
+//   popupAnchor: [1, -34],
+//   shadowSize: [41, 41],
+// });
 
-type Lokacija = {
-  pavadinimas: string
-  adresas: string
-  miestas: string
-}
+type Automobilis = {
+  automobilio_id: number;
+  marke: string;
+  modelis: string;
+  numeris: string;
+  lokacija: {
+    pavadinimas: string;
+    adresas: string;
+    miestas?: string;
+    latitude?: number;
+    longitude?: number;
+  } | null;
+  // kiti laukai...
+};
 
-type Car = {
-  automobilio_id: number
-  lokacija: Lokacija | null
-}
+type AutoWithCoords = Automobilis & {
+  coords: LatLngExpression | null;
+};
 
-type VietaSuKoordinate = {
-  key: string
-  pavadinimas: string
-  adresas: string
-  coords: LatLngExpression | null
-}
+type MapComponentProps = {
+  cars: Automobilis[];
+};
 
-export default function MapComponent() {
-  const { data: cars = [], isLoading } = useGetAllCarsApiV1CarsGetQuery()
-  const [vietosKoord, setVietosKoord] = useState<VietaSuKoordinate[]>([])
+export default function MapComponent({ cars }: MapComponentProps) {
+  const [carsWithCoords, setCarsWithCoords] = useState<AutoWithCoords[]>([]);
 
   useEffect(() => {
-    if (!cars.length) return
-
-    const uniqueByAddress = new Map<string, VietaSuKoordinate>()
-
-    const toGeocode = cars
-      .filter((car) => car.lokacija?.adresas)
-      .map((car) => ({
-        key: `${car.lokacija!.adresas}`,
-        pavadinimas: car.lokacija!.pavadinimas,
-        adresas: car.lokacija!.adresas,
-      }))
-
-    const fetchCoords = async () => {
-      const results = await Promise.all(
-        toGeocode.map(async (v) => {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(v.adresas)}`
-          )
-          const data = await res.json()
-          const coords: LatLngExpression | null = data[0]
-            ? [parseFloat(data[0].lat), parseFloat(data[0].lon)]
-            : null
-
-          return { ...v, coords }
-        })
-      )
-
-      results.forEach((v) => {
-        if (!uniqueByAddress.has(v.key)) {
-          uniqueByAddress.set(v.key, v)
-        }
-      })
-
-      setVietosKoord(Array.from(uniqueByAddress.values()))
+    if (!cars.length) {
+      setCarsWithCoords([]);
+      return;
     }
 
-    fetchCoords()
-  }, [cars])
+    const needGeocode: Automobilis[] = [];
+    const withCoords: AutoWithCoords[] = [];
+
+    cars.forEach((car) => {
+      const loc = car.lokacija;
+      if (loc && loc.latitude && loc.longitude) {
+        withCoords.push({
+          ...car,
+          coords: [loc.latitude, loc.longitude],
+        });
+      } else if (loc && loc.adresas) {
+        needGeocode.push(car);
+      }
+    });
+
+    // Jei nieko nereikia geokoduoti, set immediately
+    if (needGeocode.length === 0) {
+      setCarsWithCoords(withCoords);
+      return;
+    }
+
+    // Geokoduojam tik tiems, kuriems reikia
+    const fetchCoords = async () => {
+      const geocoded: AutoWithCoords[] = await Promise.all(
+        needGeocode.map(async (car) => {
+          try {
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(car.lokacija!.adresas)}`
+            );
+            const data = await res.json();
+            const coords: LatLngExpression | null = data[0]
+              ? [parseFloat(data[0].lat), parseFloat(data[0].lon)]
+              : null;
+
+            return {
+              ...car,
+              coords,
+            };
+          } catch (err) {
+            // Jei geokodavimas nepavyko
+            return { ...car, coords: null };
+          }
+        })
+      );
+      setCarsWithCoords([...withCoords, ...geocoded]);
+    };
+
+    fetchCoords();
+  }, [cars]);
 
   return (
     <div className="border border-gray-300 rounded p-4 mt-6 h-[500px]">
@@ -76,22 +113,37 @@ export default function MapComponent() {
         scrollWheelZoom
       >
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
+          attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {vietosKoord.map(
-          (v, idx) =>
-            v.coords && (
-              <Marker key={idx} position={v.coords}>
-                <Popup>
-                  <strong>{v.pavadinimas}</strong>
+        {carsWithCoords
+          .filter((car) => car.coords)
+          .map((car) => (
+            <Marker
+              key={car.automobilio_id}
+              position={car.coords as LatLngExpression} // ← nenaudojam icon prop
+            >
+              <Popup>
+                <div>
+                  <strong>
+                    {car.marke} {car.modelis}
+                  </strong>
                   <br />
-                  {v.adresas}
-                </Popup>
-              </Marker>
-            )
-        )}
+                  <b>Numeris:</b> {car.numeris}
+                  <br />
+                  <b>Adresas:</b> {car.lokacija?.adresas}
+                  <br />
+                  {car.lokacija?.miestas && (
+                    <span>
+                      <b>Miestas:</b> {car.lokacija?.miestas}
+                      <br />
+                    </span>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
       </MapContainer>
     </div>
-  )
+  );
 }

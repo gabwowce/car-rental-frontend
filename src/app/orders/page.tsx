@@ -1,58 +1,112 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Uzsakymai } from '@/fakeData'
-import DataTable from '@/app/components/DataTable'
-import ActionButtons from '@/app/components/ActionButtons'
+import { useState } from "react";
+import {
+  useGetAllOrdersApiV1OrdersGetQuery,
+  useDeleteOrderApiV1OrdersUzsakymoIdDeleteMutation,
+  useGetAllClientsApiV1ClientsGetQuery,
+  useGetAllCarsApiV1CarsGetQuery,
+} from "@/store/carRentalApi";
+import DataTable from "@/app/components/DataTable";
+import ActionButtons from "@/app/components/ActionButtons";
 
-type Uzsakymas = typeof Uzsakymai[number]
-
-const columns: {
-  label: string
-  accessor: keyof Uzsakymas | ((row: Uzsakymas) => React.ReactNode)
-}[] = [
-  { label: 'Klientas', accessor: 'klientas' },
-  { label: 'Automobilis', accessor: 'automobilis' },
-  { label: 'Pradžia', accessor: 'pradzia' },
-  { label: 'Pabaiga', accessor: 'pabaiga' },
-  {
-    label: 'Būsena',
-    accessor: (r: Uzsakymas) => {
-      const colorMap: Record<string, string> = {
-        vykdomas: 'bg-blue-100 text-blue-800',
-        užbaigtas: 'bg-green-100 text-green-800',
-        atšauktas: 'bg-red-100 text-red-800',
-      }
-
-      const status = r.busena.toLowerCase()
-      return (
-        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[status] || ''}`}>
-          {r.busena}
-        </span>
-      )
-    },
-  },
-  {
-    label: 'Veiksmai',
-    accessor: (r: Uzsakymas) => (
-      <ActionButtons
-        onView={() => console.log('Peržiūrėti', r.uzsakymo_id)}
-        onEdit={() => console.log('Redaguoti', r.uzsakymo_id)}
-        onDelete={() => console.log('Ištrinti', r.uzsakymo_id)}
-      />
-    ),
-  },
-]
+type Uzsakymas = {
+  uzsakymo_id: number;
+  kliento_id: number;
+  automobilio_id: number;
+  pradzia: string;
+  pabaiga: string;
+  busena: string;
+};
 
 export default function OrdersPage() {
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('visi')
+  const { data: orders = [], isLoading } = useGetAllOrdersApiV1OrdersGetQuery();
+  const { data: clients = [] } = useGetAllClientsApiV1ClientsGetQuery();
+  const { data: cars = [] } = useGetAllCarsApiV1CarsGetQuery();
+  const [deleteOrder] = useDeleteOrderApiV1OrdersUzsakymoIdDeleteMutation();
 
-  const filtered = Uzsakymai.filter((r) => {
-    const searchMatch = `${r.klientas} ${r.automobilis}`.toLowerCase().includes(search.toLowerCase())
-    const statusMatch = statusFilter === 'visi' || r.busena === statusFilter
-    return searchMatch && statusMatch
-  })
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("visi");
+
+  const getClientName = (id: number) =>
+    clients.find((c) => c.kliento_id === id)?.vardas || `Klientas #${id}`;
+
+  const getCarName = (id: number) => {
+    const car = cars.find((c) => c.automobilio_id === id);
+    return car ? `${car.marke} ${car.modelis}` : `Automobilis #${id}`;
+  };
+
+  const handleView = (id: number) => {
+    console.log("Peržiūrėti", id);
+  };
+
+  const handleEdit = (id: number) => {
+    console.log("Redaguoti", id);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm("Ar tikrai norite ištrinti užsakymą?")) {
+      try {
+        await deleteOrder({ uzsakymoId: id }).unwrap();
+        alert("Užsakymas sėkmingai ištrintas");
+      } catch (error) {
+        console.error("Klaida trinant užsakymą", error);
+        alert("Nepavyko ištrinti užsakymo");
+      }
+    }
+  };
+
+  const columns = [
+    {
+      label: "Klientas",
+      accessor: (r: Uzsakymas) => getClientName(r.kliento_id),
+    },
+    {
+      label: "Automobilis",
+      accessor: (r: Uzsakymas) => getCarName(r.automobilio_id),
+    },
+    { label: "Pradžia", accessor: "pradzia" },
+    { label: "Pabaiga", accessor: "pabaiga" },
+    {
+      label: "Būsena",
+      accessor: (r: Uzsakymas) => {
+        const colorMap: Record<string, string> = {
+          vykdomas: "bg-blue-100 text-blue-800",
+          užbaigtas: "bg-green-100 text-green-800",
+          atšauktas: "bg-red-100 text-red-800",
+        };
+        const status = (r.busena ?? "").toLowerCase();
+
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[status] || ""}`}
+          >
+            {r.busena}
+          </span>
+        );
+      },
+    },
+    {
+      label: "Veiksmai",
+      accessor: (r: Uzsakymas) => (
+        <ActionButtons
+          onView={() => handleView(r.uzsakymo_id)}
+          onEdit={() => handleEdit(r.uzsakymo_id)}
+          onDelete={() => handleDelete(r.uzsakymo_id)}
+        />
+      ),
+    },
+  ];
+
+  const filtered = orders.filter((r) => {
+    const klientas = getClientName(r.kliento_id).toLowerCase();
+    const automobilis = getCarName(r.automobilio_id).toLowerCase();
+    const searchMatch = `${klientas} ${automobilis}`.includes(
+      search.toLowerCase()
+    );
+    const statusMatch = statusFilter === "visi" || r.busena === statusFilter;
+    return searchMatch && statusMatch;
+  });
 
   return (
     <div>
@@ -84,7 +138,15 @@ export default function OrdersPage() {
         </select>
       </div>
 
-      <DataTable columns={columns} data={filtered} rowKey={(r) => r.uzsakymo_id} />
+      {isLoading ? (
+        <p>Įkeliama...</p>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filtered}
+          rowKey={(r) => r.uzsakymo_id}
+        />
+      )}
     </div>
-  )
+  );
 }
