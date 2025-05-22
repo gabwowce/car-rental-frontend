@@ -1,58 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import {
-  useGetAllReservationsApiV1ReservationsGetQuery,
-  useDeleteReservationApiV1ReservationsRezervacijosIdDeleteMutation,
-  useGetAllClientsApiV1ClientsGetQuery,
-  useGetAllCarsApiV1CarsGetQuery,
-} from "@/store/carRentalApi";
+
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
+import { useReservationData } from "@/hooks/useReservationData";
+import LoadingScreen from "@/app/components/LoadingScreen";
 
-type Rezervacija = {
-  rezervacijos_id: number;
-  kliento_id: number;
-  automobilio_id: number;
-  rezervacijos_pradzia: string;
-  rezervacijos_pabaiga: string;
-  busena: string;
-};
+
+
+type Rezervacija = NonNullable<
+  ReturnType<typeof useReservationData>["reservations"]
+>[number];
 
 export default function ReservationsPage() {
-  const { data: reservations = [], isLoading } =
-    useGetAllReservationsApiV1ReservationsGetQuery();
-  const { data: clients = [] } = useGetAllClientsApiV1ClientsGetQuery();
-  const { data: cars = [] } = useGetAllCarsApiV1CarsGetQuery();
-  const [deleteReservation] =
-    useDeleteReservationApiV1ReservationsRezervacijosIdDeleteMutation();
 
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("visi");
-
-  const getClientName = (id: number) =>
-    clients.find((c) => c.kliento_id === id)?.vardas || `Klientas #${id}`;
-
-  const getCarName = (id: number) => {
-    const car = cars.find((c) => c.automobilio_id === id);
-    return car ? `${car.marke} ${car.modelis}` : `Automobilis #${id}`;
-  };
-
-  const handleView = (id: number) => {
-    console.log("Peržiūrėti", id);
-  };
-
-  const handleDelete = async (id: number) => {
-    if (confirm("Ar tikrai norite atšaukti rezervaciją?")) {
-      try {
-        await deleteReservation({ rezervacijosId: id }).unwrap();
-        alert("Rezervacija atšaukta sėkmingai");
-      } catch (error) {
-        console.error("Klaida trinant rezervaciją", error);
-        alert("Nepavyko atšaukti rezervacijos");
-      }
-    }
-  };
+const {
+  reservations,
+  clients,
+  cars,
+  search,
+  setSearch,
+  statusFilter,
+  setStatusFilter,
+  getClientName,
+  getCarName,
+  handleView,
+  handleDelete,
+  filtered,
+  isLoading,
+} = useReservationData();
 
   const columns = [
     {
@@ -96,15 +72,9 @@ export default function ReservationsPage() {
     },
   ];
 
-  const filtered = reservations.filter((r) => {
-    const klientas = getClientName(r.kliento_id).toLowerCase();
-    const automobilis = getCarName(r.automobilio_id).toLowerCase();
-    const searchMatch = `${klientas} ${automobilis}`.includes(
-      search.toLowerCase()
-    );
-    const statusMatch = statusFilter === "visi" || r.busena === statusFilter;
-    return searchMatch && statusMatch;
-  });
+   if (isLoading) {
+      return <LoadingScreen/>
+    }
 
   return (
     <div>

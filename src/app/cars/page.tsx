@@ -1,53 +1,40 @@
-"use client";
-
 import { useState } from "react";
-import { useGetAllCarsApiV1CarsGetQuery } from "@/store/carRentalApi";
-
 import DataTable from "../components/DataTable";
 import ActionButtons from "../components/ActionButtons";
 import MapComponent from "../components/MapComponent";
-import ViewModal from "../components/ViewModal";
+import CarViewModal from "../components/modals/CarViewModal";
+import BaseModal from "../components/ui/BaseModal";
+import { useCarsData } from "@/hooks/useCarsData";
+import LoadingScreen from "@/app/components/loadingScreen";
 
-// Tipas pagal API hook'ą
-type Automobilis = NonNullable<
-  ReturnType<typeof useGetAllCarsApiV1CarsGetQuery>["data"]
->[number];
+type Automobilis = NonNullable<ReturnType<typeof useCarsData>["automobiliai"]>[number];
 
 export default function CarsPage() {
-  const { data: automobiliai = [], isLoading } =
-    useGetAllCarsApiV1CarsGetQuery();
+  const {
+    automobiliai,
+    isLoading,
+    filtered,
+    statusFilter,
+    setStatusFilter,
+    search,
+    setSearch,
+    selectedCar,
+    setSelectedCar,
+    isModalOpen,
+    setModalOpen,
+  } = useCarsData();
 
-  const [statusFilter, setStatusFilter] = useState("visi");
-  const [search, setSearch] = useState("");
-  const [selectedCar, setSelectedCar] = useState<Automobilis | null>(null);
-  const [isModalOpen, setModalOpen] = useState(false);
-
-  const filtered = automobiliai.filter((a) => {
-    const matchesStatus =
-      statusFilter === "visi" || a.automobilio_statusas === statusFilter;
-    const matchesSearch = `${a.marke} ${a.modelis} ${a.numeris}`
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
+  const [editMode, setEditMode] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const columns = [
     {
       label: "Modelis",
       accessor: (a: Automobilis) => `${a.marke} ${a.modelis}`,
     },
-    {
-      label: "Numeris",
-      accessor: "numeris",
-    },
-    {
-      label: "Būsena",
-      accessor: "automobilio_statusas",
-    },
-    {
-      label: "Vietos",
-      accessor: "sedimos_vietos",
-    },
+    { label: "Numeris", accessor: "numeris" },
+    { label: "Būsena", accessor: "automobilio_statusas" },
+    { label: "Vietos", accessor: "sedimos_vietos" },
     {
       label: "Kaina parai",
       accessor: (a: Automobilis) => `${a.kaina_parai} €`,
@@ -58,14 +45,24 @@ export default function CarsPage() {
         <ActionButtons
           onView={() => {
             setSelectedCar(a);
+            setEditMode(false);
             setModalOpen(true);
           }}
-          onEdit={() => console.log("Redaguoti", a.automobilio_id)}
-          onDelete={() => console.log("Ištrinti", a.automobilio_id)}
+          onEdit={() => {
+            setSelectedCar(a);
+            setEditMode(true);
+            setModalOpen(true);
+          }}
+          onDelete={() => {
+            setSelectedCar(a);
+            setDeleteConfirmOpen(true);
+          }}
         />
       ),
     },
   ];
+
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <div>
@@ -76,7 +73,6 @@ export default function CarsPage() {
         </button>
       </div>
 
-      {/* Filtrai */}
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           type="text"
@@ -97,45 +93,58 @@ export default function CarsPage() {
         </select>
       </div>
 
-      {/* Lentelė */}
-      {isLoading ? (
-        <p>Kraunama...</p>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={filtered}
-          rowKey={(a) => a.automobilio_id}
-          itemsPerPage={5}
+      <DataTable
+        columns={columns}
+        data={filtered}
+        rowKey={(a) => a.automobilio_id}
+        itemsPerPage={5}
+      />
+
+      <MapComponent cars={filtered} />
+
+      {/* VIEW/EDIT Modal */}
+      {selectedCar && (
+        <CarViewModal
+          isOpen={isModalOpen}
+          car={selectedCar}
+          startInEdit={editMode}
+          onClose={() => {
+            setModalOpen(false);
+            setEditMode(false);
+          }}
+          onSave={(updated) => {
+            console.log("Išsaugotas automobilis", updated);
+            setModalOpen(false);
+            setEditMode(false);
+          }}
         />
       )}
 
-      {/* Žemėlapis */}
-      <MapComponent cars={filtered} />
-
-      {/* Modalas */}
-      {selectedCar && (
-        <ViewModal
-          isOpen={isModalOpen}
-          onClose={() => setModalOpen(false)}
-          title={`Automobilis: ${selectedCar.marke} ${selectedCar.modelis}`}
-          content={
-            <div className="space-y-2 text-sm">
-              <p>
-                <strong>Numeris:</strong> {selectedCar.numeris}
-              </p>
-              <p>
-                <strong>Būsena:</strong> {selectedCar.automobilio_statusas}
-              </p>
-              <p>
-                <strong>Kaina:</strong> {selectedCar.kaina_parai} €
-              </p>
-              <p>
-                <strong>Sėdimos vietos:</strong> {selectedCar.sedimos_vietos}
-              </p>
-              {/* pridėk papildomus laukus jei reikia */}
-            </div>
+      {/* DELETE Modal */}
+      {selectedCar && deleteConfirmOpen && (
+        <BaseModal
+          isOpen={deleteConfirmOpen}
+          onClose={() => setDeleteConfirmOpen(false)}
+          title="Ištrinti automobilį?"
+          actions={
+            <>
+              <button onClick={() => setDeleteConfirmOpen(false)} className="px-4 py-2 rounded bg-gray-200">
+                Atšaukti
+              </button>
+              <button
+                onClick={() => {
+                  console.log("Ištrinta:", selectedCar.automobilio_id);
+                  setDeleteConfirmOpen(false);
+                }}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Ištrinti
+              </button>
+            </>
           }
-        />
+        >
+          <p className="text-sm">Ar tikrai norite ištrinti šį automobilį?</p>
+        </BaseModal>
       )}
     </div>
   );

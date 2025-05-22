@@ -1,59 +1,71 @@
 'use client'
 
-import { useState } from 'react'
-import { Saskaitos } from '@/fakeData'
+import { useInvoicesData } from '@/hooks/useInvoicesData'
+import { useInvoiceModals } from '@/hooks/useInvoiceModals'
 import DataTable from '@/app/components/DataTable'
 import ActionButtons from '@/app/components/ActionButtons'
+import InvoiceViewModal from '@/app/components/modals/InvoiceViewModal'
+import ConfirmDeleteModal from '@/app/components/modals/ConfirmDeleteModal'
 
-type Saskaita = typeof Saskaitos[number]
-
-const columns: {
-  label: string
-  accessor: keyof Saskaita | ((row: Saskaita) => React.ReactNode)
-}[] = [
-  { label: 'Sąskaitos nr.', accessor: 'saskaitos_nr' },
-  { label: 'Klientas', accessor: 'klientas' },
-  { label: 'Suma', accessor: (s) => `${s.suma} €` },
-  {
-    label: 'Data',
-    accessor: (s) => new Date(s.saskaitos_data).toLocaleDateString('lt-LT'),
-  },
-  {
-    label: 'Būsena',
-    accessor: (s: Saskaita) => {
-      const colorMap: Record<string, string> = {
-        išrašyta: 'bg-gray-100 text-gray-800',
-        apmokėta: 'bg-green-100 text-green-800',
-        vėluojanti: 'bg-red-100 text-red-800',
-      }
-      return (
-        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[s.busena] || ''}`}>
-          {s.busena}
-        </span>
-      )
-    },
-  },
-  {
-    label: 'Veiksmai',
-    accessor: (s: Saskaita) => (
-      <ActionButtons
-        onView={() => console.log('Peržiūrėti', s.saskaitos_id)}
-        onEdit={() => console.log('Atsisiųsti PDF', s.saskaitos_id)}
-        show={{ delete: false }}
-      />
-    ),
-  },
-]
+type Saskaita = NonNullable<
+  ReturnType<typeof useInvoicesData>['invoices']
+>[number]
 
 export default function InvoicesPage() {
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('visi')
+  const {
+    invoices,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    filtered,
+    isLoading,
+  } = useInvoicesData();
 
-  const filtered = Saskaitos.filter((s) => {
-    const matchSearch = `${s.klientas} ${s.saskaitos_nr}`.toLowerCase().includes(search.toLowerCase())
-    const matchStatus = statusFilter === 'visi' || s.busena === statusFilter
-    return matchSearch && matchStatus
-  })
+  const { selected, mode, openView, openPdf, openDelete, close } = useInvoiceModals();
+
+  const columns = [
+    { label: 'Sąskaitos nr.', accessor: 'saskaitos_nr' },
+    { label: 'Klientas', accessor: 'klientas' },
+    {
+      label: 'Suma',
+      accessor: (s: Saskaita) => `${s.suma} €`,
+    },
+    {
+      label: 'Data',
+      accessor: (s: Saskaita) =>
+        new Date(s.saskaitos_data).toLocaleDateString('lt-LT'),
+    },
+    {
+      label: 'Būsena',
+      accessor: (s: Saskaita) => {
+        const colorMap: Record<string, string> = {
+          išrašyta: 'bg-gray-100 text-gray-800',
+          apmokėta: 'bg-green-100 text-green-800',
+          vėluojanti: 'bg-red-100 text-red-800',
+        };
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+              colorMap[s.busena] || ''
+            }`}
+          >
+            {s.busena}
+          </span>
+        );
+      },
+    },
+    {
+      label: 'Veiksmai',
+      accessor: (s: Saskaita) => (
+        <ActionButtons
+          onView={() => openView(s)}
+          onEdit={() => openPdf(s)}
+          show={{ delete: false }}
+        />
+      ),
+    },
+  ];
 
   return (
     <div>
@@ -64,7 +76,6 @@ export default function InvoicesPage() {
         </button>
       </div>
 
-      {/* Filtrai */}
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           type="text"
@@ -85,7 +96,31 @@ export default function InvoicesPage() {
         </select>
       </div>
 
-      <DataTable columns={columns} data={filtered} rowKey={(s) => s.saskaitos_id} />
+      {isLoading ? (
+        <p>Įkeliama...</p>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filtered}
+          rowKey={(s) => s.saskaitos_id}
+        />
+      )}
+
+      {selected && mode === "view" && (
+        <InvoiceViewModal invoice={selected} isOpen={true} onClose={close} />
+      )}
+
+      {selected && mode === "pdf" && (
+        <ConfirmDeleteModal
+          isOpen={true}
+          title="Atsisiųsti PDF?"
+          onClose={close}
+          onConfirm={() => {
+            console.log("Atsisiųsti PDF:", selected.saskaitos_id);
+            close();
+          }}
+        />
+      )}
     </div>
-  )
+  );
 }

@@ -1,20 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useProfileData } from "@/hooks/useProfileData";
 
 export default function ProfilePage() {
-  const [oldPassword, setOldPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [repeatPassword, setRepeatPassword] = useState('')
+  const {
+    user,
+    isLoading,
+    oldPassword,
+    newPassword,
+    repeatPassword,
+    setOldPassword,
+    setNewPassword,
+    setRepeatPassword,
+    handleSubmit,
+    message,
+  } = useProfileData();
 
-  // Feikinis naudotojo objektas
-  const user = {
-    vardas: 'Tomas',
-    pavarde: 'Vaitkus',
-    el_pastas: 'tomas@autorent.lt',
-    role: 'Administratorius',
-    prisijunge: '2025-04-25 09:12',
-  }
+  if (isLoading) return <p>Įkeliama...</p>;
+  if (!user) return <p>Nerasta vartotojo duomenų</p>;
 
   return (
     <div>
@@ -28,14 +31,14 @@ export default function ProfilePage() {
           <p><span className="font-medium">Pavardė:</span> {user.pavarde}</p>
           <p><span className="font-medium">El. paštas:</span> {user.el_pastas}</p>
           <p><span className="font-medium">Rolė:</span> {user.role}</p>
-          <p><span className="font-medium">Paskutinis prisijungimas:</span> {user.prisijunge}</p>
+          <p><span className="font-medium">Paskutinis prisijungimas:</span> {user.last_login}</p>
         </div>
       </div>
 
       {/* Slaptažodžio keitimas */}
       <div className="bg-white p-6 rounded shadow">
         <h2 className="text-lg font-semibold mb-4">Keisti slaptažodį</h2>
-        <form className="grid grid-cols-1 gap-4 max-w-md">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 max-w-md">
           <input
             type="password"
             placeholder="Dabartinis slaptažodis"
@@ -63,8 +66,9 @@ export default function ProfilePage() {
           >
             Išsaugoti pakeitimus
           </button>
+          {message && <p className="text-sm text-red-500">{message}</p>}
         </form>
       </div>
     </div>
-  )
+  );
 }
