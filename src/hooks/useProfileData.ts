@@ -1,10 +1,13 @@
 // hooks/useProfileData.ts
 import { useState } from "react";
-import { useGetCurrentUserApiV1EmployeesMeGetQuery, useChangePasswordApiV1EmployeesChangePasswordPostMutation } from "@/store/carRentalApi";
+import {
+  useMeApiV1MeGetQuery,
+  useChangePasswordMutation,
+} from "@/store/carRentalApi";
 
 export function useProfileData() {
-  const { data: user, isLoading } = useGetCurrentUserApiV1EmployeesMeGetQuery();
-  const [changePassword] = useChangePasswordApiV1EmployeesChangePasswordPostMutation();
+  const { data: user, isLoading } = useMeApiV1MeGetQuery();
+  const [changePassword] = useChangePasswordMutation();
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -21,8 +24,10 @@ export function useProfileData() {
 
     try {
       await changePassword({
-        senas_slaptazodis: oldPassword,
-        naujas_slaptazodis: newPassword,
+        changePasswordRequest: {
+          senas_slaptazodis: oldPassword,
+          naujas_slaptazodis: newPassword,
+        },
       }).unwrap();
 
       setMessage("Slaptažodis pakeistas sėkmingai");

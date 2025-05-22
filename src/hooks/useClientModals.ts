@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { Klientas } from "@/types"; // arba naudok tipą inline
+import { ClientOut } from "@/store/carRentalApi"; // arba naudok tipą inline
 
 export function useClientModals() {
-  const [selectedClient, setSelectedClient] = useState<Klientas | null>(null);
+  const [selectedClient, setSelectedClient] = useState<ClientOut | null>(null);
   const [mode, setMode] = useState<"view" | "edit" | "delete" | null>(null);
 
-  const openView = (client: Klientas) => {
+  const openView = (client: ClientOut) => {
     setSelectedClient(client);
     setMode("view");
   };
 
-  const openEdit = (client: Klientas) => {
+  const openEdit = (client: ClientOut) => {
     setSelectedClient(client);
     setMode("edit");
   };
 
-  const openDelete = (client: Klientas) => {
+  const openDelete = (client: ClientOut) => {
     setSelectedClient(client);
     setMode("delete");
   };

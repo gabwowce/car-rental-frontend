@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
 import { useOrdersData } from "@/hooks/useOrdersData";
 import { useOrderModals } from "@/hooks/useOrderModals";
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
-import OrderViewModal from "@/app/components/modals/OrderViewModal";
+import OrderViewModal from "@/app/components/modals/rderViewModal";
 import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
 import React from "react";
 
@@ -24,14 +24,8 @@ export default function OrdersPage() {
     isLoading,
   } = useOrdersData();
 
-  const {
-    selectedOrder,
-    mode,
-    openView,
-    openEdit,
-    openDelete,
-    close,
-  } = useOrderModals();
+  const { selectedOrder, mode, openView, openEdit, openDelete, close } =
+    useOrderModals();
 
   const columns = [
     {
@@ -115,11 +109,7 @@ export default function OrdersPage() {
       )}
 
       {selectedOrder && mode === "view" && (
-        <OrderViewModal
-          order={selectedOrder}
-          isOpen={true}
-          onClose={close}
-        />
+        <OrderViewModal order={selectedOrder} isOpen={true} onClose={close} />
       )}
 
       {selectedOrder && mode === "delete" && (

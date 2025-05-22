@@ -1,13 +1,16 @@
+"use client";
 import { useState } from "react";
 import DataTable from "../components/DataTable";
 import ActionButtons from "../components/ActionButtons";
 import MapComponent from "../components/MapComponent";
 import CarViewModal from "../components/modals/CarViewModal";
-import BaseModal from "../components/ui/BaseModal";
+import BaseModal from "../components/BaseModal";
 import { useCarsData } from "@/hooks/useCarsData";
 import LoadingScreen from "@/app/components/loadingScreen";
 
-type Automobilis = NonNullable<ReturnType<typeof useCarsData>["automobiliai"]>[number];
+type Automobilis = NonNullable<
+  ReturnType<typeof useCarsData>["automobiliai"]
+>[number];
 
 export default function CarsPage() {
   const {
@@ -128,7 +131,10 @@ export default function CarsPage() {
           title="Ištrinti automobilį?"
           actions={
             <>
-              <button onClick={() => setDeleteConfirmOpen(false)} className="px-4 py-2 rounded bg-gray-200">
+              <button
+                onClick={() => setDeleteConfirmOpen(false)}
+                className="px-4 py-2 rounded bg-gray-200"
+              >
                 Atšaukti
               </button>
               <button

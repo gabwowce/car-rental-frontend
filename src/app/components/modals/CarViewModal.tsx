@@ -1,6 +1,6 @@
 // components/modals/CarViewModal.tsx
 import { useState } from "react";
-import BaseModal from "@/app/components/ui/BaseModal";
+import BaseModal from "@/app/components/BaseModal";
 import { Automobilis } from "@/types";
 
 export default function CarViewModal({
@@ -31,10 +31,18 @@ export default function CarViewModal({
 
   const renderView = () => (
     <div className="space-y-2 text-sm">
-      <p><strong>Numeris:</strong> {car.numeris}</p>
-      <p><strong>Būsena:</strong> {car.automobilio_statusas}</p>
-      <p><strong>Kaina:</strong> {car.kaina_parai} €</p>
-      <p><strong>Sėdimos vietos:</strong> {car.sedimos_vietos}</p>
+      <p>
+        <strong>Numeris:</strong> {car.numeris}
+      </p>
+      <p>
+        <strong>Būsena:</strong> {car.automobilio_statusas}
+      </p>
+      <p>
+        <strong>Kaina:</strong> {car.kaina_parai} €
+      </p>
+      <p>
+        <strong>Sėdimos vietos:</strong> {car.sedimos_vietos}
+      </p>
     </div>
   );
 
@@ -63,15 +71,24 @@ export default function CarViewModal({
 
   const actions = isEditing ? (
     <>
-      <button onClick={() => setIsEditing(false)} className="bg-gray-300 px-4 py-2 rounded">
+      <button
+        onClick={() => setIsEditing(false)}
+        className="bg-gray-300 px-4 py-2 rounded"
+      >
         Atšaukti
       </button>
-      <button onClick={handleSave} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      <button
+        onClick={handleSave}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
         Išsaugoti
       </button>
     </>
   ) : (
-    <button onClick={() => setIsEditing(true)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+    <button
+      onClick={() => setIsEditing(true)}
+      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+    >
       Redaguoti
     </button>
   );

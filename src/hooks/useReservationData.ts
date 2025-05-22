@@ -1,17 +1,17 @@
 import {
-  useGetAllReservationsApiV1ReservationsGetQuery,
-  useDeleteReservationApiV1ReservationsRezervacijosIdDeleteMutation,
-  useGetAllClientsApiV1ClientsGetQuery,
-  useGetAllCarsApiV1CarsGetQuery,
+  useGetAllReservationsQuery,
+  useDeleteReservationMutation,
+  useGetAllClientsQuery,
+  useGetAllCarsQuery,
 } from "@/store/carRentalApi";
 import { useState } from "react";
 
 export function useReservationData() {
   const { data: reservations = [], isLoading: loadingR } =
-    useGetAllReservationsApiV1ReservationsGetQuery();
-  const { data: clients = [], isLoading: loadingCl } = useGetAllClientsApiV1ClientsGetQuery();
-  const { data: cars = [], isLoading: loadingC } = useGetAllCarsApiV1CarsGetQuery();
-  const [deleteReservation] = useDeleteReservationApiV1ReservationsRezervacijosIdDeleteMutation();
+    useGetAllReservationsQuery();
+  const { data: clients = [], isLoading: loadingCl } = useGetAllClientsQuery();
+  const { data: cars = [], isLoading: loadingC } = useGetAllCarsQuery();
+  const [deleteReservation] = useDeleteReservationMutation();
 
   const isLoading = loadingCl || loadingR || loadingC;
 
@@ -45,7 +45,9 @@ export function useReservationData() {
   const filtered = reservations.filter((r) => {
     const klientas = getClientName(r.kliento_id).toLowerCase();
     const automobilis = getCarName(r.automobilio_id).toLowerCase();
-    const searchMatch = `${klientas} ${automobilis}`.includes(search.toLowerCase());
+    const searchMatch = `${klientas} ${automobilis}`.includes(
+      search.toLowerCase()
+    );
     const statusMatch = statusFilter === "visi" || r.busena === statusFilter;
     return searchMatch && statusMatch;
   });

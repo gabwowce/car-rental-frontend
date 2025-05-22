@@ -1,9 +1,9 @@
 // hooks/useClientsData.ts
-import { useGetAllClientsApiV1ClientsGetQuery } from "@/store/carRentalApi";
+import { useGetAllClientsQuery } from "@/store/carRentalApi";
 import { useState, useMemo } from "react";
 
 export function useClientsData() {
-  const { data: clients = [], isLoading } = useGetAllClientsApiV1ClientsGetQuery();
+  const { data: clients = [], isLoading } = useGetAllClientsQuery();
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {

@@ -1,7 +1,14 @@
 "use client";
 
-import { FiCalendar, FiTruck, FiTool, FiCreditCard, FiAlertCircle, FiCornerDownLeft } from "react-icons/fi";
-import { useDashboardStats } from "@/app/hooks/useDashboardStats";
+import {
+  FiCalendar,
+  FiTruck,
+  FiTool,
+  FiCreditCard,
+  FiAlertCircle,
+  FiCornerDownLeft,
+} from "react-icons/fi";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 import ActionButtons from "@/app/components/ActionButtons";
 import DataTable from "@/app/components/DataTable";
 import StatCard from "./components/StatCard";
@@ -16,7 +23,9 @@ export type Column<T> = {
   className?: string;
 };
 
-type ReservationOut = ReturnType<typeof useDashboardStats>["rezervacijos"][number];
+type ReservationOut = ReturnType<
+  typeof useDashboardStats
+>["rezervacijos"][number];
 
 export default function DashboardPage() {
   const {
@@ -30,7 +39,7 @@ export default function DashboardPage() {
     siandienGrązinimai,
     getAutomobilis,
     getKlientas,
-    isLoading
+    isLoading,
   } = useDashboardStats();
 
   const columns: Column<ReservationOut>[] = [
@@ -42,9 +51,13 @@ export default function DashboardPage() {
       label: "Veiksmai",
       accessor: (r) => (
         <ActionButtons
-          onView={() => console.log("Peržiūrėti rezervaciją", r.rezervacijos_id)}
+          onView={() =>
+            console.log("Peržiūrėti rezervaciją", r.rezervacijos_id)
+          }
           onEdit={() => console.log("Redaguoti rezervaciją", r.rezervacijos_id)}
-          onDelete={() => console.log("Atšaukti rezervaciją", r.rezervacijos_id)}
+          onDelete={() =>
+            console.log("Atšaukti rezervaciją", r.rezervacijos_id)
+          }
           show={{ view: true, edit: true, delete: false }}
         />
       ),
@@ -52,7 +65,7 @@ export default function DashboardPage() {
   ];
 
   if (isLoading) {
-    return <LoadingScreen/>
+    return <LoadingScreen />;
   }
 
   return (
@@ -60,12 +73,42 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-        <StatCard color="bg-blue-100" title="Rezervacijos šiandien" value="5" icon={<FiCalendar />} />
-        <StatCard color="bg-teal-200" title="Laisvi automobiliai" value={laisvi} icon={<FiTruck />} />
-        <StatCard color="bg-yellow-100" title="Servise esantys automobiliai" value={servise} icon={<FiTool />} />
-        <StatCard color="bg-red-100" title="Neapmokėtos sąskaitos" value={neapmoketosSaskaitos} icon={<FiCreditCard />} />
-        <StatCard color="bg-purple-100" title="Neatsakytos užklausos" value={neatsakytosUzklausos} icon={<FiAlertCircle />} />
-        <StatCard color="bg-indigo-100" title="Grąžinimai šiandien" value={siandienGrązinimai} icon={<FiCornerDownLeft />} />
+        <StatCard
+          color="bg-blue-100"
+          title="Rezervacijos šiandien"
+          value="5"
+          icon={<FiCalendar />}
+        />
+        <StatCard
+          color="bg-teal-200"
+          title="Laisvi automobiliai"
+          value={laisvi}
+          icon={<FiTruck />}
+        />
+        <StatCard
+          color="bg-yellow-100"
+          title="Servise esantys automobiliai"
+          value={servise}
+          icon={<FiTool />}
+        />
+        <StatCard
+          color="bg-red-100"
+          title="Neapmokėtos sąskaitos"
+          value={neapmoketosSaskaitos}
+          icon={<FiCreditCard />}
+        />
+        <StatCard
+          color="bg-purple-100"
+          title="Neatsakytos užklausos"
+          value={neatsakytosUzklausos}
+          icon={<FiAlertCircle />}
+        />
+        <StatCard
+          color="bg-indigo-100"
+          title="Grąžinimai šiandien"
+          value={siandienGrązinimai}
+          icon={<FiCornerDownLeft />}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

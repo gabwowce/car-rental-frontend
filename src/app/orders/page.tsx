@@ -1,17 +1,19 @@
-'use client';
+"use client";
 
-import { useOrdersData } from '@/hooks/useOrdersData';
-import { useOrderModals } from '@/hooks/useOrderModals';
-import DataTable from '@/app/components/DataTable';
-import ActionButtons from '@/app/components/ActionButtons';
-import OrderViewModal from '@/app/components/modals/OrderViewModal';
-import OrderEditModal from '@/app/components/modals/OrderEditModal';
-import ConfirmDeleteModal from '@/app/components/modals/ConfirmDeleteModal';
-import React from 'react';
+import { useOrdersData } from "@/hooks/useOrdersData";
+import { useOrderModals } from "@/hooks/useOrderModals";
+import DataTable from "@/app/components/DataTable";
+import ActionButtons from "@/app/components/ActionButtons";
+import OrderViewModal from "@/app/components/modals/rderViewModal";
+import OrderEditModal from "@/app/components/modals/OrderEditModal";
+import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
+import React from "react";
+import { OrderOut } from "@/store/carRentalApi";
 
-type Uzsakymas = NonNullable<
-  ReturnType<typeof useOrdersData>['orders']
->[number];
+type Column<T> = {
+  label: string;
+  accessor: keyof T | ((row: T) => React.ReactNode);
+};
 
 export default function OrdersPage() {
   const {
@@ -25,49 +27,41 @@ export default function OrdersPage() {
     isLoading,
   } = useOrdersData();
 
-  const {
-    selectedOrder,
-    mode,
-    openView,
-    openEdit,
-    openDelete,
-    close,
-  } = useOrderModals();
+  const { selectedOrder, mode, openView, openEdit, openDelete, close } =
+    useOrderModals();
 
-  const columns = [
+  const columns: Column<OrderOut>[] = [
     {
-      label: 'Klientas',
-      accessor: (r: Uzsakymas) => getClientName(r.kliento_id),
+      label: "Klientas",
+      accessor: (r) => getClientName(r.kliento_id),
     },
     {
-      label: 'Automobilis',
-      accessor: (r: Uzsakymas) => getCarName(r.automobilio_id),
+      label: "Automobilis",
+      accessor: (r) => getCarName(r.automobilio_id),
     },
-    { label: 'Pradžia', accessor: 'pradzia' },
-    { label: 'Pabaiga', accessor: 'pabaiga' },
+    { label: "Pradžia", accessor: "nuomos_data" },
+    { label: "Pabaiga", accessor: "grazinimo_data" },
     {
-      label: 'Būsena',
-      accessor: (r: Uzsakymas) => {
+      label: "Būsena",
+      accessor: (r) => {
         const colorMap: Record<string, string> = {
-          vykdomas: 'bg-blue-100 text-blue-800',
-          užbaigtas: 'bg-green-100 text-green-800',
-          atšauktas: 'bg-red-100 text-red-800',
+          vykdomas: "bg-blue-100 text-blue-800",
+          užbaigtas: "bg-green-100 text-green-800",
+          atšauktas: "bg-red-100 text-red-800",
         };
-        const status = (r.busena ?? '').toLowerCase();
+        const status = (r.uzsakymo_busena ?? "").toLowerCase();
         return (
           <span
-            className={`px-2 py-1 rounded-full text-xs font-semibold ${
-              colorMap[status] || ''
-            }`}
+            className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[status] || ""}`}
           >
-            {r.busena}
+            {r.uzsakymo_busena}
           </span>
         );
       },
     },
     {
-      label: 'Veiksmai',
-      accessor: (r: Uzsakymas) => (
+      label: "Veiksmai",
+      accessor: (r) => (
         <ActionButtons
           onView={() => openView(r)}
           onEdit={() => openEdit(r)}
@@ -116,21 +110,26 @@ export default function OrdersPage() {
         />
       )}
 
-      {selectedOrder && mode === 'view' && (
+      {selectedOrder && mode === "view" && (
         <OrderViewModal order={selectedOrder} isOpen={true} onClose={close} />
       )}
-      {selectedOrder && mode === 'edit' && (
-        <OrderEditModal order={selectedOrder} isOpen={true} onClose={close} onSave={(updated) => {
-          console.log('Atnaujinta:', updated);
-          close();
-        }} />
+      {selectedOrder && mode === "edit" && (
+        <OrderEditModal
+          order={selectedOrder}
+          isOpen={true}
+          onClose={close}
+          onSave={(updated: OrderOut) => {
+            console.log("Atnaujinta:", updated);
+            close();
+          }}
+        />
       )}
-      {selectedOrder && mode === 'delete' && (
+      {selectedOrder && mode === "delete" && (
         <ConfirmDeleteModal
           isOpen={true}
           onClose={close}
           onConfirm={() => {
-            console.log('Ištrintas:', selectedOrder.uzsakymo_id);
+            console.log("Ištrintas:", selectedOrder.uzsakymo_id);
             close();
           }}
         />

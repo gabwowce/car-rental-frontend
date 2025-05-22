@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { Saskaita } from "@/types"; // arba naudok iš hook tipo
+import { InvoiceOut } from "@/store/carRentalApi"; // arba naudok iš hook tipo
 
 export function useInvoiceModals() {
-  const [selected, setSelected] = useState<Saskaita | null>(null);
+  const [selected, setSelected] = useState<InvoiceOut | null>(null);
   const [mode, setMode] = useState<"view" | "pdf" | "delete" | null>(null);
 
-  const openView = (s: Saskaita) => {
+  const openView = (s: InvoiceOut) => {
     setSelected(s);
     setMode("view");
   };
 
-  const openPdf = (s: Saskaita) => {
+  const openPdf = (s: InvoiceOut) => {
     setSelected(s);
     setMode("pdf");
   };
 
-  const openDelete = (s: Saskaita) => {
+  const openDelete = (s: InvoiceOut) => {
     setSelected(s);
     setMode("delete");
   };

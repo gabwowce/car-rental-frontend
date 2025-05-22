@@ -1,5 +1,5 @@
 import { useState } from "react";
-import BaseModal from "@/app/components/ui/BaseModal";
+import BaseModal from "@/app/components/BaseModal";
 import { Klientas } from "@/types";
 
 export default function ClientEditModal({

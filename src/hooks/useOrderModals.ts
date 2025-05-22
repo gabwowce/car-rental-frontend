@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { Uzsakymas } from "@/types";
+import { OrderOut } from "@/store/carRentalApi";
 
 export function useOrderModals() {
-  const [selectedOrder, setSelectedOrder] = useState<Uzsakymas | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<OrderOut | null>(null);
   const [mode, setMode] = useState<"view" | "edit" | "delete" | null>(null);
 
-  const openView = (o: Uzsakymas) => {
+  const openView = (o: OrderOut) => {
     setSelectedOrder(o);
     setMode("view");
   };
 
-  const openEdit = (o: Uzsakymas) => {
+  const openEdit = (o: OrderOut) => {
     setSelectedOrder(o);
     setMode("edit");
   };
 
-  const openDelete = (o: Uzsakymas) => {
+  const openDelete = (o: OrderOut) => {
     setSelectedOrder(o);
     setMode("delete");
   };

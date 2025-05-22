@@ -1,38 +1,29 @@
 import { baseApi as api } from "./baseApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
-    loginApiV1LoginPost: build.mutation<
-      LoginApiV1LoginPostApiResponse,
-      LoginApiV1LoginPostApiArg
-    >({
+    login: build.mutation<LoginApiResponse, LoginApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/login`,
         method: "POST",
         body: queryArg.loginRequest,
       }),
     }),
-    registerApiV1RegisterPost: build.mutation<
-      RegisterApiV1RegisterPostApiResponse,
-      RegisterApiV1RegisterPostApiArg
-    >({
+    register: build.mutation<RegisterApiResponse, RegisterApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/register`,
         method: "POST",
         body: queryArg.registerRequest,
       }),
     }),
-    logoutApiV1LogoutPost: build.mutation<
-      LogoutApiV1LogoutPostApiResponse,
-      LogoutApiV1LogoutPostApiArg
-    >({
+    logout: build.mutation<LogoutApiResponse, LogoutApiArg>({
       query: () => ({ url: `/api/v1/logout`, method: "POST" }),
     }),
     meApiV1MeGet: build.query<MeApiV1MeGetApiResponse, MeApiV1MeGetApiArg>({
       query: () => ({ url: `/api/v1/me` }),
     }),
-    changePasswordApiV1ChangePasswordPost: build.mutation<
-      ChangePasswordApiV1ChangePasswordPostApiResponse,
-      ChangePasswordApiV1ChangePasswordPostApiArg
+    changePassword: build.mutation<
+      ChangePasswordApiResponse,
+      ChangePasswordApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/change-password`,
@@ -40,23 +31,20 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.changePasswordRequest,
       }),
     }),
-    getEmployeesApiV1EmployeesGet: build.query<
-      GetEmployeesApiV1EmployeesGetApiResponse,
-      GetEmployeesApiV1EmployeesGetApiArg
+    getAllEmployees: build.query<
+      GetAllEmployeesApiResponse,
+      GetAllEmployeesApiArg
     >({
       query: () => ({ url: `/api/v1/employees/` }),
     }),
-    getEmployeeApiV1EmployeesEmployeeIdGet: build.query<
-      GetEmployeeApiV1EmployeesEmployeeIdGetApiResponse,
-      GetEmployeeApiV1EmployeesEmployeeIdGetApiArg
-    >({
+    getEmployee: build.query<GetEmployeeApiResponse, GetEmployeeApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/employees/${queryArg.employeeId}`,
       }),
     }),
-    updateEmployeeApiV1EmployeesEmployeeIdPut: build.mutation<
-      UpdateEmployeeApiV1EmployeesEmployeeIdPutApiResponse,
-      UpdateEmployeeApiV1EmployeesEmployeeIdPutApiArg
+    updateEmployee: build.mutation<
+      UpdateEmployeeApiResponse,
+      UpdateEmployeeApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/employees/${queryArg.employeeId}`,
@@ -64,59 +52,44 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.employeeUpdate,
       }),
     }),
-    deleteEmployeeApiV1EmployeesEmployeeIdDelete: build.mutation<
-      DeleteEmployeeApiV1EmployeesEmployeeIdDeleteApiResponse,
-      DeleteEmployeeApiV1EmployeesEmployeeIdDeleteApiArg
+    deleteEmployee: build.mutation<
+      DeleteEmployeeApiResponse,
+      DeleteEmployeeApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/employees/${queryArg.employeeId}`,
         method: "DELETE",
       }),
     }),
-    getAllCarsApiV1CarsGet: build.query<
-      GetAllCarsApiV1CarsGetApiResponse,
-      GetAllCarsApiV1CarsGetApiArg
-    >({
+    getAllCars: build.query<GetAllCarsApiResponse, GetAllCarsApiArg>({
       query: () => ({ url: `/api/v1/cars/` }),
     }),
-    createCarApiV1CarsPost: build.mutation<
-      CreateCarApiV1CarsPostApiResponse,
-      CreateCarApiV1CarsPostApiArg
-    >({
+    createCar: build.mutation<CreateCarApiResponse, CreateCarApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/cars/`,
         method: "POST",
         body: queryArg.carCreate,
       }),
     }),
-    getCarApiV1CarsCarIdGet: build.query<
-      GetCarApiV1CarsCarIdGetApiResponse,
-      GetCarApiV1CarsCarIdGetApiArg
-    >({
+    getCarById: build.query<GetCarByIdApiResponse, GetCarByIdApiArg>({
       query: (queryArg) => ({ url: `/api/v1/cars/${queryArg.carId}` }),
     }),
-    updateCarApiV1CarsCarIdPut: build.mutation<
-      UpdateCarApiV1CarsCarIdPutApiResponse,
-      UpdateCarApiV1CarsCarIdPutApiArg
-    >({
+    updateCar: build.mutation<UpdateCarApiResponse, UpdateCarApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/cars/${queryArg.carId}`,
         method: "PUT",
         body: queryArg.carUpdate,
       }),
     }),
-    deleteCarApiV1CarsCarIdDelete: build.mutation<
-      DeleteCarApiV1CarsCarIdDeleteApiResponse,
-      DeleteCarApiV1CarsCarIdDeleteApiArg
-    >({
+    deleteCar: build.mutation<DeleteCarApiResponse, DeleteCarApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/cars/${queryArg.carId}`,
         method: "DELETE",
       }),
     }),
-    updateCarStatusApiV1CarsCarIdStatusPatch: build.mutation<
-      UpdateCarStatusApiV1CarsCarIdStatusPatchApiResponse,
-      UpdateCarStatusApiV1CarsCarIdStatusPatchApiArg
+    updateCarStatus: build.mutation<
+      UpdateCarStatusApiResponse,
+      UpdateCarStatusApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/cars/${queryArg.carId}/status`,
@@ -124,10 +97,7 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.carStatusUpdate,
       }),
     }),
-    searchCarsApiV1CarsSearchGet: build.query<
-      SearchCarsApiV1CarsSearchGetApiResponse,
-      SearchCarsApiV1CarsSearchGetApiArg
-    >({
+    searchCars: build.query<SearchCarsApiResponse, SearchCarsApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/cars/search`,
         params: {
@@ -141,15 +111,15 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
-    getAllReservationsApiV1ReservationsGet: build.query<
-      GetAllReservationsApiV1ReservationsGetApiResponse,
-      GetAllReservationsApiV1ReservationsGetApiArg
+    getAllReservations: build.query<
+      GetAllReservationsApiResponse,
+      GetAllReservationsApiArg
     >({
       query: () => ({ url: `/api/v1/reservations/` }),
     }),
-    createReservationApiV1ReservationsPost: build.mutation<
-      CreateReservationApiV1ReservationsPostApiResponse,
-      CreateReservationApiV1ReservationsPostApiArg
+    createReservation: build.mutation<
+      CreateReservationApiResponse,
+      CreateReservationApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/reservations/`,
@@ -157,26 +127,26 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.reservationCreate,
       }),
     }),
-    getReservationApiV1ReservationsRezervacijosIdGet: build.query<
-      GetReservationApiV1ReservationsRezervacijosIdGetApiResponse,
-      GetReservationApiV1ReservationsRezervacijosIdGetApiArg
+    getReservationById: build.query<
+      GetReservationByIdApiResponse,
+      GetReservationByIdApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/reservations/${queryArg.rezervacijosId}`,
       }),
     }),
-    deleteReservationApiV1ReservationsRezervacijosIdDelete: build.mutation<
-      DeleteReservationApiV1ReservationsRezervacijosIdDeleteApiResponse,
-      DeleteReservationApiV1ReservationsRezervacijosIdDeleteApiArg
+    deleteReservation: build.mutation<
+      DeleteReservationApiResponse,
+      DeleteReservationApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/reservations/${queryArg.rezervacijosId}`,
         method: "DELETE",
       }),
     }),
-    getLatestReservationsApiV1ReservationsLatestGet: build.query<
-      GetLatestReservationsApiV1ReservationsLatestGetApiResponse,
-      GetLatestReservationsApiV1ReservationsLatestGetApiArg
+    getLatestReservations: build.query<
+      GetLatestReservationsApiResponse,
+      GetLatestReservationsApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/reservations/latest`,
@@ -185,9 +155,9 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
-    searchReservationsApiV1ReservationsSearchGet: build.query<
-      SearchReservationsApiV1ReservationsSearchGetApiResponse,
-      SearchReservationsApiV1ReservationsSearchGetApiArg
+    searchReservations: build.query<
+      SearchReservationsApiResponse,
+      SearchReservationsApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/reservations/search`,
@@ -200,99 +170,75 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
-    getAllOrdersApiV1OrdersGet: build.query<
-      GetAllOrdersApiV1OrdersGetApiResponse,
-      GetAllOrdersApiV1OrdersGetApiArg
-    >({
+    getAllOrders: build.query<GetAllOrdersApiResponse, GetAllOrdersApiArg>({
       query: () => ({ url: `/api/v1/orders/` }),
     }),
-    createOrderApiV1OrdersPost: build.mutation<
-      CreateOrderApiV1OrdersPostApiResponse,
-      CreateOrderApiV1OrdersPostApiArg
-    >({
+    createOrder: build.mutation<CreateOrderApiResponse, CreateOrderApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/orders/`,
         method: "POST",
         body: queryArg.orderCreate,
       }),
     }),
-    getOrderApiV1OrdersUzsakymoIdGet: build.query<
-      GetOrderApiV1OrdersUzsakymoIdGetApiResponse,
-      GetOrderApiV1OrdersUzsakymoIdGetApiArg
-    >({
+    getOrderById: build.query<GetOrderByIdApiResponse, GetOrderByIdApiArg>({
       query: (queryArg) => ({ url: `/api/v1/orders/${queryArg.uzsakymoId}` }),
     }),
-    deleteOrderApiV1OrdersUzsakymoIdDelete: build.mutation<
-      DeleteOrderApiV1OrdersUzsakymoIdDeleteApiResponse,
-      DeleteOrderApiV1OrdersUzsakymoIdDeleteApiArg
-    >({
+    deleteOrder: build.mutation<DeleteOrderApiResponse, DeleteOrderApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/orders/${queryArg.uzsakymoId}`,
         method: "DELETE",
       }),
     }),
-    getOrderStatsByStatusApiV1OrdersStatsByStatusGet: build.query<
-      GetOrderStatsByStatusApiV1OrdersStatsByStatusGetApiResponse,
-      GetOrderStatsByStatusApiV1OrdersStatsByStatusGetApiArg
+    getOrderStatsByStatus: build.query<
+      GetOrderStatsByStatusApiResponse,
+      GetOrderStatsByStatusApiArg
     >({
       query: () => ({ url: `/api/v1/orders/stats/by-status` }),
     }),
-    getOrdersByClientApiV1OrdersByClientKlientoIdGet: build.query<
-      GetOrdersByClientApiV1OrdersByClientKlientoIdGetApiResponse,
-      GetOrdersByClientApiV1OrdersByClientKlientoIdGetApiArg
+    getOrderByClient: build.query<
+      GetOrderByClientApiResponse,
+      GetOrderByClientApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/orders/by-client/${queryArg.klientoId}`,
       }),
     }),
-    getAllClientsApiV1ClientsGet: build.query<
-      GetAllClientsApiV1ClientsGetApiResponse,
-      GetAllClientsApiV1ClientsGetApiArg
-    >({
+    getAllClients: build.query<GetAllClientsApiResponse, GetAllClientsApiArg>({
       query: () => ({ url: `/api/v1/clients/` }),
     }),
-    createClientApiV1ClientsPost: build.mutation<
-      CreateClientApiV1ClientsPostApiResponse,
-      CreateClientApiV1ClientsPostApiArg
-    >({
+    createClient: build.mutation<CreateClientApiResponse, CreateClientApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/clients/`,
         method: "POST",
         body: queryArg.clientCreate,
       }),
     }),
-    getClientApiV1ClientsKlientoIdGet: build.query<
-      GetClientApiV1ClientsKlientoIdGetApiResponse,
-      GetClientApiV1ClientsKlientoIdGetApiArg
-    >({
+    getClientById: build.query<GetClientByIdApiResponse, GetClientByIdApiArg>({
       query: (queryArg) => ({ url: `/api/v1/clients/${queryArg.klientoId}` }),
     }),
-    deleteClientApiV1ClientsKlientoIdDelete: build.mutation<
-      DeleteClientApiV1ClientsKlientoIdDeleteApiResponse,
-      DeleteClientApiV1ClientsKlientoIdDeleteApiArg
-    >({
+    deleteClient: build.mutation<DeleteClientApiResponse, DeleteClientApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/clients/${queryArg.klientoId}`,
         method: "DELETE",
       }),
     }),
-    getClientOrdersApiV1ClientsKlientoIdOrdersGet: build.query<
-      GetClientOrdersApiV1ClientsKlientoIdOrdersGetApiResponse,
-      GetClientOrdersApiV1ClientsKlientoIdOrdersGetApiArg
+    getClientOrder: build.query<
+      GetClientOrderApiResponse,
+      GetClientOrderApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/clients/${queryArg.klientoId}/orders`,
       }),
     }),
-    getAllSupportsApiV1SupportGet: build.query<
-      GetAllSupportsApiV1SupportGetApiResponse,
-      GetAllSupportsApiV1SupportGetApiArg
+    getAllSupports: build.query<
+      GetAllSupportsApiResponse,
+      GetAllSupportsApiArg
     >({
       query: () => ({ url: `/api/v1/support/` }),
     }),
-    createSupportApiV1SupportPost: build.mutation<
-      CreateSupportApiV1SupportPostApiResponse,
-      CreateSupportApiV1SupportPostApiArg
+    createSupport: build.mutation<
+      CreateSupportApiResponse,
+      CreateSupportApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/support/`,
@@ -300,15 +246,12 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.clientSupportCreate,
       }),
     }),
-    getSupportApiV1SupportUzklausosIdGet: build.query<
-      GetSupportApiV1SupportUzklausosIdGetApiResponse,
-      GetSupportApiV1SupportUzklausosIdGetApiArg
-    >({
+    getSupport: build.query<GetSupportApiResponse, GetSupportApiArg>({
       query: (queryArg) => ({ url: `/api/v1/support/${queryArg.uzklausosId}` }),
     }),
-    answerToSupportApiV1SupportUzklausosIdPatch: build.mutation<
-      AnswerToSupportApiV1SupportUzklausosIdPatchApiResponse,
-      AnswerToSupportApiV1SupportUzklausosIdPatchApiArg
+    answerToSupport: build.mutation<
+      AnswerToSupportApiResponse,
+      AnswerToSupportApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/support/${queryArg.uzklausosId}`,
@@ -316,21 +259,21 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.clientSupportUpdate,
       }),
     }),
-    getUnansweredSupportsApiV1SupportUnansweredGet: build.query<
-      GetUnansweredSupportsApiV1SupportUnansweredGetApiResponse,
-      GetUnansweredSupportsApiV1SupportUnansweredGetApiArg
+    getUnansweredSupports: build.query<
+      GetUnansweredSupportsApiResponse,
+      GetUnansweredSupportsApiArg
     >({
       query: () => ({ url: `/api/v1/support/unanswered` }),
     }),
-    getAllInvoicesApiV1InvoicesGet: build.query<
-      GetAllInvoicesApiV1InvoicesGetApiResponse,
-      GetAllInvoicesApiV1InvoicesGetApiArg
+    getAllInvoices: build.query<
+      GetAllInvoicesApiResponse,
+      GetAllInvoicesApiArg
     >({
       query: () => ({ url: `/api/v1/invoices/` }),
     }),
-    createInvoiceApiV1InvoicesPost: build.mutation<
-      CreateInvoiceApiV1InvoicesPostApiResponse,
-      CreateInvoiceApiV1InvoicesPostApiArg
+    createInvoice: build.mutation<
+      CreateInvoiceApiResponse,
+      CreateInvoiceApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/invoices/`,
@@ -338,28 +281,25 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.invoiceCreate,
       }),
     }),
-    deleteInvoiceApiV1InvoicesInvoiceIdDelete: build.mutation<
-      DeleteInvoiceApiV1InvoicesInvoiceIdDeleteApiResponse,
-      DeleteInvoiceApiV1InvoicesInvoiceIdDeleteApiArg
+    deleteInvoice: build.mutation<
+      DeleteInvoiceApiResponse,
+      DeleteInvoiceApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/invoices/${queryArg.invoiceId}`,
         method: "DELETE",
       }),
     }),
-    updateStatusApiV1InvoicesInvoiceIdStatusPatch: build.mutation<
-      UpdateStatusApiV1InvoicesInvoiceIdStatusPatchApiResponse,
-      UpdateStatusApiV1InvoicesInvoiceIdStatusPatchApiArg
-    >({
+    updateStatus: build.mutation<UpdateStatusApiResponse, UpdateStatusApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/invoices/${queryArg.invoiceId}/status`,
         method: "PATCH",
         body: queryArg.invoiceStatusUpdate,
       }),
     }),
-    getWeatherForecastApiV1WeatherGet: build.query<
-      GetWeatherForecastApiV1WeatherGetApiResponse,
-      GetWeatherForecastApiV1WeatherGetApiArg
+    getWeatherForecast: build.query<
+      GetWeatherForecastApiResponse,
+      GetWeatherForecastApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/weather`,
@@ -373,79 +313,74 @@ const injectedRtkApi = api.injectEndpoints({
   overrideExisting: false,
 });
 export { injectedRtkApi as carRentalApi };
-export type LoginApiV1LoginPostApiResponse =
+export type LoginApiResponse =
   /** status 200 Successful Response */ TokenResponse;
-export type LoginApiV1LoginPostApiArg = {
+export type LoginApiArg = {
   loginRequest: LoginRequest;
 };
-export type RegisterApiV1RegisterPostApiResponse =
-  /** status 200 Successful Response */ any;
-export type RegisterApiV1RegisterPostApiArg = {
+export type RegisterApiResponse = /** status 200 Successful Response */ any;
+export type RegisterApiArg = {
   registerRequest: RegisterRequest;
 };
-export type LogoutApiV1LogoutPostApiResponse =
-  /** status 200 Successful Response */ any;
-export type LogoutApiV1LogoutPostApiArg = void;
+export type LogoutApiResponse = /** status 200 Successful Response */ any;
+export type LogoutApiArg = void;
 export type MeApiV1MeGetApiResponse =
   /** status 200 Successful Response */ UserInfo;
 export type MeApiV1MeGetApiArg = void;
-export type ChangePasswordApiV1ChangePasswordPostApiResponse =
+export type ChangePasswordApiResponse =
   /** status 200 Successful Response */ any;
-export type ChangePasswordApiV1ChangePasswordPostApiArg = {
+export type ChangePasswordApiArg = {
   changePasswordRequest: ChangePasswordRequest;
 };
-export type GetEmployeesApiV1EmployeesGetApiResponse =
+export type GetAllEmployeesApiResponse =
   /** status 200 Successful Response */ EmployeeOut[];
-export type GetEmployeesApiV1EmployeesGetApiArg = void;
-export type GetEmployeeApiV1EmployeesEmployeeIdGetApiResponse =
+export type GetAllEmployeesApiArg = void;
+export type GetEmployeeApiResponse =
   /** status 200 Successful Response */ EmployeeOut;
-export type GetEmployeeApiV1EmployeesEmployeeIdGetApiArg = {
+export type GetEmployeeApiArg = {
   employeeId: number;
 };
-export type UpdateEmployeeApiV1EmployeesEmployeeIdPutApiResponse =
+export type UpdateEmployeeApiResponse =
   /** status 200 Successful Response */ EmployeeOut;
-export type UpdateEmployeeApiV1EmployeesEmployeeIdPutApiArg = {
+export type UpdateEmployeeApiArg = {
   employeeId: number;
   employeeUpdate: EmployeeUpdate;
 };
-export type DeleteEmployeeApiV1EmployeesEmployeeIdDeleteApiResponse =
+export type DeleteEmployeeApiResponse =
   /** status 200 Successful Response */ any;
-export type DeleteEmployeeApiV1EmployeesEmployeeIdDeleteApiArg = {
+export type DeleteEmployeeApiArg = {
   employeeId: number;
 };
-export type GetAllCarsApiV1CarsGetApiResponse =
+export type GetAllCarsApiResponse =
   /** status 200 Successful Response */ CarOut[];
-export type GetAllCarsApiV1CarsGetApiArg = void;
-export type CreateCarApiV1CarsPostApiResponse =
-  /** status 200 Successful Response */ CarOut;
-export type CreateCarApiV1CarsPostApiArg = {
+export type GetAllCarsApiArg = void;
+export type CreateCarApiResponse = /** status 200 Successful Response */ CarOut;
+export type CreateCarApiArg = {
   carCreate: CarCreate;
 };
-export type GetCarApiV1CarsCarIdGetApiResponse =
+export type GetCarByIdApiResponse =
   /** status 200 Successful Response */ CarOut;
-export type GetCarApiV1CarsCarIdGetApiArg = {
+export type GetCarByIdApiArg = {
   carId: number;
 };
-export type UpdateCarApiV1CarsCarIdPutApiResponse =
-  /** status 200 Successful Response */ CarOut;
-export type UpdateCarApiV1CarsCarIdPutApiArg = {
+export type UpdateCarApiResponse = /** status 200 Successful Response */ CarOut;
+export type UpdateCarApiArg = {
   carId: number;
   carUpdate: CarUpdate;
 };
-export type DeleteCarApiV1CarsCarIdDeleteApiResponse =
-  /** status 200 Successful Response */ any;
-export type DeleteCarApiV1CarsCarIdDeleteApiArg = {
+export type DeleteCarApiResponse = /** status 200 Successful Response */ any;
+export type DeleteCarApiArg = {
   carId: number;
 };
-export type UpdateCarStatusApiV1CarsCarIdStatusPatchApiResponse =
+export type UpdateCarStatusApiResponse =
   /** status 200 Successful Response */ CarOut;
-export type UpdateCarStatusApiV1CarsCarIdStatusPatchApiArg = {
+export type UpdateCarStatusApiArg = {
   carId: number;
   carStatusUpdate: CarStatusUpdate;
 };
-export type SearchCarsApiV1CarsSearchGetApiResponse =
+export type SearchCarsApiResponse =
   /** status 200 Successful Response */ CarOut[];
-export type SearchCarsApiV1CarsSearchGetApiArg = {
+export type SearchCarsApiArg = {
   marke?: string | null;
   modelis?: string | null;
   spalva?: string | null;
@@ -454,131 +389,129 @@ export type SearchCarsApiV1CarsSearchGetApiArg = {
   metai?: number | null;
   sedimosVietos?: number | null;
 };
-export type GetAllReservationsApiV1ReservationsGetApiResponse =
+export type GetAllReservationsApiResponse =
   /** status 200 Successful Response */ ReservationOut[];
-export type GetAllReservationsApiV1ReservationsGetApiArg = void;
-export type CreateReservationApiV1ReservationsPostApiResponse =
+export type GetAllReservationsApiArg = void;
+export type CreateReservationApiResponse =
   /** status 200 Successful Response */ ReservationOut;
-export type CreateReservationApiV1ReservationsPostApiArg = {
+export type CreateReservationApiArg = {
   reservationCreate: ReservationCreate;
 };
-export type GetReservationApiV1ReservationsRezervacijosIdGetApiResponse =
+export type GetReservationByIdApiResponse =
   /** status 200 Successful Response */ ReservationOut;
-export type GetReservationApiV1ReservationsRezervacijosIdGetApiArg = {
+export type GetReservationByIdApiArg = {
   rezervacijosId: number;
 };
-export type DeleteReservationApiV1ReservationsRezervacijosIdDeleteApiResponse =
+export type DeleteReservationApiResponse =
   /** status 200 Successful Response */ any;
-export type DeleteReservationApiV1ReservationsRezervacijosIdDeleteApiArg = {
+export type DeleteReservationApiArg = {
   rezervacijosId: number;
 };
-export type GetLatestReservationsApiV1ReservationsLatestGetApiResponse =
+export type GetLatestReservationsApiResponse =
   /** status 200 Successful Response */ ReservationSummary[];
-export type GetLatestReservationsApiV1ReservationsLatestGetApiArg = {
+export type GetLatestReservationsApiArg = {
   limit?: number;
 };
-export type SearchReservationsApiV1ReservationsSearchGetApiResponse =
+export type SearchReservationsApiResponse =
   /** status 200 Successful Response */ ReservationOut[];
-export type SearchReservationsApiV1ReservationsSearchGetApiArg = {
+export type SearchReservationsApiArg = {
   klientoId?: number | null;
   automobilioId?: number | null;
   nuo?: string | null;
   iki?: string | null;
   busena?: string | null;
 };
-export type GetAllOrdersApiV1OrdersGetApiResponse =
+export type GetAllOrdersApiResponse =
   /** status 200 Successful Response */ OrderOut[];
-export type GetAllOrdersApiV1OrdersGetApiArg = void;
-export type CreateOrderApiV1OrdersPostApiResponse =
+export type GetAllOrdersApiArg = void;
+export type CreateOrderApiResponse =
   /** status 200 Successful Response */ OrderOut;
-export type CreateOrderApiV1OrdersPostApiArg = {
+export type CreateOrderApiArg = {
   orderCreate: OrderCreate;
 };
-export type GetOrderApiV1OrdersUzsakymoIdGetApiResponse =
+export type GetOrderByIdApiResponse =
   /** status 200 Successful Response */ OrderOut;
-export type GetOrderApiV1OrdersUzsakymoIdGetApiArg = {
+export type GetOrderByIdApiArg = {
   uzsakymoId: number;
 };
-export type DeleteOrderApiV1OrdersUzsakymoIdDeleteApiResponse =
-  /** status 200 Successful Response */ any;
-export type DeleteOrderApiV1OrdersUzsakymoIdDeleteApiArg = {
+export type DeleteOrderApiResponse = /** status 200 Successful Response */ any;
+export type DeleteOrderApiArg = {
   uzsakymoId: number;
 };
-export type GetOrderStatsByStatusApiV1OrdersStatsByStatusGetApiResponse =
+export type GetOrderStatsByStatusApiResponse =
   /** status 200 Successful Response */ any;
-export type GetOrderStatsByStatusApiV1OrdersStatsByStatusGetApiArg = void;
-export type GetOrdersByClientApiV1OrdersByClientKlientoIdGetApiResponse =
+export type GetOrderStatsByStatusApiArg = void;
+export type GetOrderByClientApiResponse =
   /** status 200 Successful Response */ OrderOut[];
-export type GetOrdersByClientApiV1OrdersByClientKlientoIdGetApiArg = {
+export type GetOrderByClientApiArg = {
   klientoId: number;
 };
-export type GetAllClientsApiV1ClientsGetApiResponse =
+export type GetAllClientsApiResponse =
   /** status 200 Successful Response */ ClientOut[];
-export type GetAllClientsApiV1ClientsGetApiArg = void;
-export type CreateClientApiV1ClientsPostApiResponse =
+export type GetAllClientsApiArg = void;
+export type CreateClientApiResponse =
   /** status 200 Successful Response */ ClientOut;
-export type CreateClientApiV1ClientsPostApiArg = {
+export type CreateClientApiArg = {
   clientCreate: ClientCreate;
 };
-export type GetClientApiV1ClientsKlientoIdGetApiResponse =
+export type GetClientByIdApiResponse =
   /** status 200 Successful Response */ ClientOut;
-export type GetClientApiV1ClientsKlientoIdGetApiArg = {
+export type GetClientByIdApiArg = {
   klientoId: number;
 };
-export type DeleteClientApiV1ClientsKlientoIdDeleteApiResponse =
-  /** status 200 Successful Response */ any;
-export type DeleteClientApiV1ClientsKlientoIdDeleteApiArg = {
+export type DeleteClientApiResponse = /** status 200 Successful Response */ any;
+export type DeleteClientApiArg = {
   klientoId: number;
 };
-export type GetClientOrdersApiV1ClientsKlientoIdOrdersGetApiResponse =
+export type GetClientOrderApiResponse =
   /** status 200 Successful Response */ OrderOut[];
-export type GetClientOrdersApiV1ClientsKlientoIdOrdersGetApiArg = {
+export type GetClientOrderApiArg = {
   klientoId: number;
 };
-export type GetAllSupportsApiV1SupportGetApiResponse =
+export type GetAllSupportsApiResponse =
   /** status 200 Successful Response */ ClientSupportOut[];
-export type GetAllSupportsApiV1SupportGetApiArg = void;
-export type CreateSupportApiV1SupportPostApiResponse =
+export type GetAllSupportsApiArg = void;
+export type CreateSupportApiResponse =
   /** status 200 Successful Response */ ClientSupportOut;
-export type CreateSupportApiV1SupportPostApiArg = {
+export type CreateSupportApiArg = {
   clientSupportCreate: ClientSupportCreate;
 };
-export type GetSupportApiV1SupportUzklausosIdGetApiResponse =
+export type GetSupportApiResponse =
   /** status 200 Successful Response */ ClientSupportOut;
-export type GetSupportApiV1SupportUzklausosIdGetApiArg = {
+export type GetSupportApiArg = {
   uzklausosId: number;
 };
-export type AnswerToSupportApiV1SupportUzklausosIdPatchApiResponse =
+export type AnswerToSupportApiResponse =
   /** status 200 Successful Response */ ClientSupportOut;
-export type AnswerToSupportApiV1SupportUzklausosIdPatchApiArg = {
+export type AnswerToSupportApiArg = {
   uzklausosId: number;
   clientSupportUpdate: ClientSupportUpdate;
 };
-export type GetUnansweredSupportsApiV1SupportUnansweredGetApiResponse =
+export type GetUnansweredSupportsApiResponse =
   /** status 200 Successful Response */ ClientSupportOut[];
-export type GetUnansweredSupportsApiV1SupportUnansweredGetApiArg = void;
-export type GetAllInvoicesApiV1InvoicesGetApiResponse =
+export type GetUnansweredSupportsApiArg = void;
+export type GetAllInvoicesApiResponse =
   /** status 200 Successful Response */ InvoiceOut[];
-export type GetAllInvoicesApiV1InvoicesGetApiArg = void;
-export type CreateInvoiceApiV1InvoicesPostApiResponse =
+export type GetAllInvoicesApiArg = void;
+export type CreateInvoiceApiResponse =
   /** status 200 Successful Response */ InvoiceOut;
-export type CreateInvoiceApiV1InvoicesPostApiArg = {
+export type CreateInvoiceApiArg = {
   invoiceCreate: InvoiceCreate;
 };
-export type DeleteInvoiceApiV1InvoicesInvoiceIdDeleteApiResponse =
+export type DeleteInvoiceApiResponse =
   /** status 200 Successful Response */ any;
-export type DeleteInvoiceApiV1InvoicesInvoiceIdDeleteApiArg = {
+export type DeleteInvoiceApiArg = {
   invoiceId: number;
 };
-export type UpdateStatusApiV1InvoicesInvoiceIdStatusPatchApiResponse =
+export type UpdateStatusApiResponse =
   /** status 200 Successful Response */ InvoiceOut;
-export type UpdateStatusApiV1InvoicesInvoiceIdStatusPatchApiArg = {
+export type UpdateStatusApiArg = {
   invoiceId: number;
   invoiceStatusUpdate: InvoiceStatusUpdate;
 };
-export type GetWeatherForecastApiV1WeatherGetApiResponse =
+export type GetWeatherForecastApiResponse =
   /** status 200 Successful Response */ any;
-export type GetWeatherForecastApiV1WeatherGetApiArg = {
+export type GetWeatherForecastApiArg = {
   city: string;
   date: string;
 };
@@ -851,47 +784,47 @@ export type InvoiceStatusUpdate = {
   status: string;
 };
 export const {
-  useLoginApiV1LoginPostMutation,
-  useRegisterApiV1RegisterPostMutation,
-  useLogoutApiV1LogoutPostMutation,
+  useLoginMutation,
+  useRegisterMutation,
+  useLogoutMutation,
   useMeApiV1MeGetQuery,
-  useChangePasswordApiV1ChangePasswordPostMutation,
-  useGetEmployeesApiV1EmployeesGetQuery,
-  useGetEmployeeApiV1EmployeesEmployeeIdGetQuery,
-  useUpdateEmployeeApiV1EmployeesEmployeeIdPutMutation,
-  useDeleteEmployeeApiV1EmployeesEmployeeIdDeleteMutation,
-  useGetAllCarsApiV1CarsGetQuery,
-  useCreateCarApiV1CarsPostMutation,
-  useGetCarApiV1CarsCarIdGetQuery,
-  useUpdateCarApiV1CarsCarIdPutMutation,
-  useDeleteCarApiV1CarsCarIdDeleteMutation,
-  useUpdateCarStatusApiV1CarsCarIdStatusPatchMutation,
-  useSearchCarsApiV1CarsSearchGetQuery,
-  useGetAllReservationsApiV1ReservationsGetQuery,
-  useCreateReservationApiV1ReservationsPostMutation,
-  useGetReservationApiV1ReservationsRezervacijosIdGetQuery,
-  useDeleteReservationApiV1ReservationsRezervacijosIdDeleteMutation,
-  useGetLatestReservationsApiV1ReservationsLatestGetQuery,
-  useSearchReservationsApiV1ReservationsSearchGetQuery,
-  useGetAllOrdersApiV1OrdersGetQuery,
-  useCreateOrderApiV1OrdersPostMutation,
-  useGetOrderApiV1OrdersUzsakymoIdGetQuery,
-  useDeleteOrderApiV1OrdersUzsakymoIdDeleteMutation,
-  useGetOrderStatsByStatusApiV1OrdersStatsByStatusGetQuery,
-  useGetOrdersByClientApiV1OrdersByClientKlientoIdGetQuery,
-  useGetAllClientsApiV1ClientsGetQuery,
-  useCreateClientApiV1ClientsPostMutation,
-  useGetClientApiV1ClientsKlientoIdGetQuery,
-  useDeleteClientApiV1ClientsKlientoIdDeleteMutation,
-  useGetClientOrdersApiV1ClientsKlientoIdOrdersGetQuery,
-  useGetAllSupportsApiV1SupportGetQuery,
-  useCreateSupportApiV1SupportPostMutation,
-  useGetSupportApiV1SupportUzklausosIdGetQuery,
-  useAnswerToSupportApiV1SupportUzklausosIdPatchMutation,
-  useGetUnansweredSupportsApiV1SupportUnansweredGetQuery,
-  useGetAllInvoicesApiV1InvoicesGetQuery,
-  useCreateInvoiceApiV1InvoicesPostMutation,
-  useDeleteInvoiceApiV1InvoicesInvoiceIdDeleteMutation,
-  useUpdateStatusApiV1InvoicesInvoiceIdStatusPatchMutation,
-  useGetWeatherForecastApiV1WeatherGetQuery,
+  useChangePasswordMutation,
+  useGetAllEmployeesQuery,
+  useGetEmployeeQuery,
+  useUpdateEmployeeMutation,
+  useDeleteEmployeeMutation,
+  useGetAllCarsQuery,
+  useCreateCarMutation,
+  useGetCarByIdQuery,
+  useUpdateCarMutation,
+  useDeleteCarMutation,
+  useUpdateCarStatusMutation,
+  useSearchCarsQuery,
+  useGetAllReservationsQuery,
+  useCreateReservationMutation,
+  useGetReservationByIdQuery,
+  useDeleteReservationMutation,
+  useGetLatestReservationsQuery,
+  useSearchReservationsQuery,
+  useGetAllOrdersQuery,
+  useCreateOrderMutation,
+  useGetOrderByIdQuery,
+  useDeleteOrderMutation,
+  useGetOrderStatsByStatusQuery,
+  useGetOrderByClientQuery,
+  useGetAllClientsQuery,
+  useCreateClientMutation,
+  useGetClientByIdQuery,
+  useDeleteClientMutation,
+  useGetClientOrderQuery,
+  useGetAllSupportsQuery,
+  useCreateSupportMutation,
+  useGetSupportQuery,
+  useAnswerToSupportMutation,
+  useGetUnansweredSupportsQuery,
+  useGetAllInvoicesQuery,
+  useCreateInvoiceMutation,
+  useDeleteInvoiceMutation,
+  useUpdateStatusMutation,
+  useGetWeatherForecastQuery,
 } = injectedRtkApi;

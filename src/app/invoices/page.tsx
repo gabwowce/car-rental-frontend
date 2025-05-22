@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { useInvoicesData } from '@/hooks/useInvoicesData'
-import { useInvoiceModals } from '@/hooks/useInvoiceModals'
-import DataTable from '@/app/components/DataTable'
-import ActionButtons from '@/app/components/ActionButtons'
-import InvoiceViewModal from '@/app/components/modals/InvoiceViewModal'
-import ConfirmDeleteModal from '@/app/components/modals/ConfirmDeleteModal'
+import { useInvoicesData } from "@/hooks/useInvoicesData";
+import { useInvoiceModals } from "@/hooks/useInvoiceModals";
+import DataTable from "@/app/components/DataTable";
+import ActionButtons from "@/app/components/ActionButtons";
+import InvoiceViewModal from "@/app/components/modals/InvoiceViewModal";
+import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
 
 type Saskaita = NonNullable<
-  ReturnType<typeof useInvoicesData>['invoices']
->[number]
+  ReturnType<typeof useInvoicesData>["invoices"]
+>[number];
 
 export default function InvoicesPage() {
   const {
@@ -22,41 +22,45 @@ export default function InvoicesPage() {
     isLoading,
   } = useInvoicesData();
 
-  const { selected, mode, openView, openPdf, openDelete, close } = useInvoiceModals();
+  const { selected, mode, openView, openPdf, openDelete, close } =
+    useInvoiceModals();
 
   const columns = [
-    { label: 'Sąskaitos nr.', accessor: 'saskaitos_nr' },
-    { label: 'Klientas', accessor: 'klientas' },
+    { label: "Sąskaitos nr.", accessor: "invoice_id" },
     {
-      label: 'Suma',
-      accessor: (s: Saskaita) => `${s.suma} €`,
+      label: "Klientas",
+      accessor: (s: Saskaita) => `${s.client_first_name} ${s.client_last_name}`,
     },
     {
-      label: 'Data',
+      label: "Suma",
+      accessor: (s: Saskaita) => `${s.total} €`,
+    },
+    {
+      label: "Data",
       accessor: (s: Saskaita) =>
-        new Date(s.saskaitos_data).toLocaleDateString('lt-LT'),
+        new Date(s.invoice_date).toLocaleDateString("lt-LT"),
     },
     {
-      label: 'Būsena',
+      label: "Būsena",
       accessor: (s: Saskaita) => {
         const colorMap: Record<string, string> = {
-          išrašyta: 'bg-gray-100 text-gray-800',
-          apmokėta: 'bg-green-100 text-green-800',
-          vėluojanti: 'bg-red-100 text-red-800',
+          išrašyta: "bg-gray-100 text-gray-800",
+          apmokėta: "bg-green-100 text-green-800",
+          vėluojanti: "bg-red-100 text-red-800",
         };
         return (
           <span
             className={`px-2 py-1 rounded-full text-xs font-semibold ${
-              colorMap[s.busena] || ''
+              colorMap[s.status] || ""
             }`}
           >
-            {s.busena}
+            {s.status}
           </span>
         );
       },
     },
     {
-      label: 'Veiksmai',
+      label: "Veiksmai",
       accessor: (s: Saskaita) => (
         <ActionButtons
           onView={() => openView(s)}
@@ -102,7 +106,7 @@ export default function InvoicesPage() {
         <DataTable
           columns={columns}
           data={filtered}
-          rowKey={(s) => s.saskaitos_id}
+          rowKey={(s) => s.invoice_id}
         />
       )}
 
@@ -116,7 +120,7 @@ export default function InvoicesPage() {
           title="Atsisiųsti PDF?"
           onClose={close}
           onConfirm={() => {
-            console.log("Atsisiųsti PDF:", selected.saskaitos_id);
+            console.log("Atsisiųsti PDF:", selected.invoice_id);
             close();
           }}
         />

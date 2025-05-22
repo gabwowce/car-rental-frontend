@@ -1,17 +1,19 @@
 // hooks/useOrdersData.ts
 import { useState, useMemo } from "react";
 import {
-  useGetAllOrdersApiV1OrdersGetQuery,
-  useDeleteOrderApiV1OrdersUzsakymoIdDeleteMutation,
-  useGetAllClientsApiV1ClientsGetQuery,
-  useGetAllCarsApiV1CarsGetQuery,
+  useGetAllOrdersQuery,
+  useDeleteOrderMutation,
+  useGetAllClientsQuery,
+  useGetAllCarsQuery,
 } from "@/store/carRentalApi";
 
 export function useOrdersData() {
-  const { data: orders = [], isLoading: loadingOrders } = useGetAllOrdersApiV1OrdersGetQuery();
-  const { data: clients = [], isLoading: loadingClients } = useGetAllClientsApiV1ClientsGetQuery();
-  const { data: cars = [], isLoading: loadingCars } = useGetAllCarsApiV1CarsGetQuery();
-  const [deleteOrder] = useDeleteOrderApiV1OrdersUzsakymoIdDeleteMutation();
+  const { data: orders = [], isLoading: loadingOrders } =
+    useGetAllOrdersQuery();
+  const { data: clients = [], isLoading: loadingClients } =
+    useGetAllClientsQuery();
+  const { data: cars = [], isLoading: loadingCars } = useGetAllCarsQuery();
+  const [deleteOrder] = useDeleteOrderMutation();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("visi");
@@ -50,8 +52,11 @@ export function useOrdersData() {
     return orders.filter((r) => {
       const klientas = getClientName(r.kliento_id).toLowerCase();
       const automobilis = getCarName(r.automobilio_id).toLowerCase();
-      const searchMatch = `${klientas} ${automobilis}`.includes(search.toLowerCase());
-      const statusMatch = statusFilter === "visi" || r.busena === statusFilter;
+      const searchMatch = `${klientas} ${automobilis}`.includes(
+        search.toLowerCase()
+      );
+      const statusMatch =
+        statusFilter === "visi" || r.uzsakymo_busena === statusFilter;
       return searchMatch && statusMatch;
     });
   }, [orders, clients, cars, search, statusFilter]);

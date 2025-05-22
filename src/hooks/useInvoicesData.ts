@@ -1,18 +1,18 @@
 // hooks/useInvoicesData.ts
-import { useGetAllInvoicesApiV1InvoicesGetQuery } from "@/store/carRentalApi";
+import { useGetAllInvoicesQuery } from "@/store/carRentalApi";
 import { useState, useMemo } from "react";
 
 export function useInvoicesData() {
-  const { data: invoices = [], isLoading } = useGetAllInvoicesApiV1InvoicesGetQuery();
+  const { data: invoices = [], isLoading } = useGetAllInvoicesQuery();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("visi");
 
   const filtered = useMemo(() => {
     return invoices.filter((s) => {
-      const matchSearch = `${s.klientas} ${s.saskaitos_nr}`
+      const matchSearch = `${s.client_first_name} ${s.invoice_id}`
         .toLowerCase()
         .includes(search.toLowerCase());
-      const matchStatus = statusFilter === "visi" || s.busena === statusFilter;
+      const matchStatus = statusFilter === "visi" || s.status === statusFilter;
       return matchSearch && matchStatus;
     });
   }, [invoices, search, statusFilter]);
