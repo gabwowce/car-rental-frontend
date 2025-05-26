@@ -309,6 +309,13 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    geoCode: build.mutation<GeoCodeApiResponse, GeoCodeApiArg>({
+      query: (queryArg) => ({
+        url: `/api/v1/api/geocode`,
+        method: "POST",
+        body: queryArg.geocodeRequest,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -514,6 +521,11 @@ export type GetWeatherForecastApiResponse =
 export type GetWeatherForecastApiArg = {
   city: string;
   date: string;
+};
+export type GeoCodeApiResponse =
+  /** status 200 Successful Response */ GeocodeResponse;
+export type GeoCodeApiArg = {
+  geocodeRequest: GeocodeRequest;
 };
 export type TokenResponse = {
   access_token: string;
@@ -783,6 +795,13 @@ export type InvoiceCreate = {
 export type InvoiceStatusUpdate = {
   status: string;
 };
+export type GeocodeResponse = {
+  lat: number;
+  lng: number;
+};
+export type GeocodeRequest = {
+  adresas: string;
+};
 export const {
   useLoginMutation,
   useRegisterMutation,
@@ -827,4 +846,5 @@ export const {
   useDeleteInvoiceMutation,
   useUpdateStatusMutation,
   useGetWeatherForecastQuery,
+  useGeoCodeMutation,
 } = injectedRtkApi;
