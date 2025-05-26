@@ -51,17 +51,13 @@ git clone https://github.com/gabwowce/car-rental-frontend.git
 cd car‑rental‑frontend
 
 # 2. install deps (uses package.json above)
-pnpm install    # or npm i / yarn
+npm install    # or npm i / yarn
 
-# 3. set env (optional)
-cp .env.example .env
-#   NEXT_PUBLIC_API_URL=http://localhost:8000  (backend URL)
+# 3. dev server
+npm dev        # open http://localhost:3000
 
-# 4. dev server
-pnpm dev        # open http://localhost:3000
-
-# 5. production build
-pnpm build && pnpm start
+# 4. production build
+npm build && pnpm start
 ```
 
 ### GitHub Pages deployment
