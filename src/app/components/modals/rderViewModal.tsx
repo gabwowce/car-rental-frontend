@@ -1,5 +1,5 @@
 import BaseModal from "@/app/components/BaseModal";
-import { Uzsakymas } from "@/types";
+import { Uzsakymas } from "@/store/carRentalApi";
 
 export default function OrderViewModal({
   order,

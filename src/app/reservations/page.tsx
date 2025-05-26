@@ -1,34 +1,42 @@
 "use client";
 
-
+import { useState } from "react";
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
+import EntityModal from "@/app/components/modals/EntityModal";
+import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
+import LoadingScreen from "@/app/components/loadingScreen";
 import { useReservationData } from "@/hooks/useReservationData";
-import LoadingScreen from "@/app/components/LoadingScreen";
-
-
 
 type Rezervacija = NonNullable<
   ReturnType<typeof useReservationData>["reservations"]
 >[number];
 
 export default function ReservationsPage() {
+  const [selectedReservation, setSelectedReservation] =
+    useState<Rezervacija | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-const {
-  reservations,
-  clients,
-  cars,
-  search,
-  setSearch,
-  statusFilter,
-  setStatusFilter,
-  getClientName,
-  getCarName,
-  handleView,
-  handleDelete,
-  filtered,
-  isLoading,
-} = useReservationData();
+  const {
+    reservations,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    getClientName,
+    getCarName,
+    handleDelete,
+    filtered,
+    isLoading,
+    reservationFields,
+  } = useReservationData();
+
+  const handleSave = (updated: Rezervacija) => {
+    console.log("Išsaugota (implementuok API):", updated);
+    setModalOpen(false);
+    setSelectedReservation(null);
+  };
 
   const columns = [
     {
@@ -64,17 +72,20 @@ const {
       label: "Veiksmai",
       accessor: (r: Rezervacija) => (
         <ActionButtons
-          onView={() => handleView(r.rezervacijos_id)}
-          onDelete={() => handleDelete(r.rezervacijos_id)}
-          show={{ view: true, edit: false, delete: true }}
+          onEdit={() => {
+            setSelectedReservation(r);
+            setModalOpen(true);
+          }}
+          onDelete={() => {
+            setSelectedReservation(r);
+            setDeleteConfirmOpen(true);
+          }}
         />
       ),
     },
   ];
 
-   if (isLoading) {
-      return <LoadingScreen/>
-    }
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <div>
@@ -105,13 +116,38 @@ const {
         </select>
       </div>
 
-      {isLoading ? (
-        <p>Įkeliama...</p>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={filtered}
-          rowKey={(r) => r.rezervacijos_id}
+      <DataTable
+        columns={columns}
+        data={filtered}
+        rowKey={(r) => r.rezervacijos_id}
+      />
+
+      {/* Redagavimo/peržiūros modalas */}
+      {selectedReservation && (
+        <EntityModal
+          title={`Rezervacija #${selectedReservation.rezervacijos_id}`}
+          entity={selectedReservation}
+          fields={reservationFields}
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setSelectedReservation(null);
+          }}
+          onSave={handleSave}
+          startInEdit={false}
+        />
+      )}
+
+      {/* Ištrynimo patvirtinimo modalas */}
+      {selectedReservation && deleteConfirmOpen && (
+        <ConfirmDeleteModal
+          isOpen={deleteConfirmOpen}
+          onClose={() => setDeleteConfirmOpen(false)}
+          onConfirm={() => {
+            handleDelete(selectedReservation.rezervacijos_id);
+            setSelectedReservation(null);
+          }}
+          entityName="rezervaciją"
         />
       )}
     </div>

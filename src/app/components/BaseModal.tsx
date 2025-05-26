@@ -17,7 +17,7 @@ export default function BaseModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgb(34,34,34,0.8)]">
       <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative animate-fade-in">
         <button
           onClick={onClose}

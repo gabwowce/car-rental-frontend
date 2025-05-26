@@ -1,45 +1,46 @@
-'use client'
+"use client";
 
-import { useClientsData } from '@/hooks/useClientsData'
-import { useClientModals } from '@/hooks/useClientModals'
-import DataTable from '@/app/components/DataTable'
-import ActionButtons from '@/app/components/ActionButtons'
-import ClientViewModal from '@/app/components/modals/ClientViewModal'
-import ClientEditModal from '@/app/components/modals/ClientEditModal'
-import ConfirmDeleteModal from '@/app/components/modals/ConfirmDeleteModal'
+import { useClientsData } from "@/hooks/useClientsData";
+import { useClientModals } from "@/hooks/useClientModals";
+import DataTable from "@/app/components/DataTable";
+import ActionButtons from "@/app/components/ActionButtons";
+import EntityModal from "@/app/components/modals/EntityModal";
+import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
+import { useOrdersData } from "@/hooks/useOrdersData"; // dėl clientFields
 
 type Klientas = NonNullable<
-  ReturnType<typeof useClientsData>['clients']
->[number]
+  ReturnType<typeof useClientsData>["clients"]
+>[number];
 
 export default function ClientsPage() {
-  const { search, setSearch, filtered, isLoading } = useClientsData()
-  const { selectedClient, mode, openView, openEdit, openDelete, close } = useClientModals()
+  const { search, setSearch, filtered, isLoading, clientFields } =
+    useClientsData();
+  const { selectedClient, mode, openView, openEdit, openDelete, close } =
+    useClientModals();
 
   const columns = [
     {
-      label: 'Vardas',
+      label: "Vardas",
       accessor: (k: Klientas) => `${k.vardas} ${k.pavarde}`,
     },
-    { label: 'El. paštas', accessor: 'el_pastas' },
-    { label: 'Tel. nr.', accessor: 'telefono_nr' },
+    { label: "El. paštas", accessor: "el_pastas" },
+    { label: "Tel. nr.", accessor: "telefono_nr" },
     {
-      label: 'Registracijos data',
+      label: "Registracijos data",
       accessor: (k: Klientas) =>
-        new Date(k.registracijos_data).toLocaleDateString('lt-LT'),
+        new Date(k.registracijos_data).toLocaleDateString("lt-LT"),
     },
-    { label: 'Bonus taškai', accessor: 'bonus_taskai' },
+    { label: "Bonus taškai", accessor: "bonus_taskai" },
     {
-      label: 'Veiksmai',
+      label: "Veiksmai",
       accessor: (k: Klientas) => (
         <ActionButtons
-          onView={() => openView(k)}
           onEdit={() => openEdit(k)}
           onDelete={() => openDelete(k)}
         />
       ),
     },
-  ]
+  ];
 
   return (
     <div>
@@ -63,27 +64,39 @@ export default function ClientsPage() {
       {isLoading ? (
         <p>Įkeliama...</p>
       ) : (
-        <DataTable columns={columns} data={filtered} rowKey={(k) => k.kliento_id} />
+        <DataTable
+          columns={columns}
+          data={filtered}
+          rowKey={(k) => k.kliento_id}
+        />
       )}
 
-      {selectedClient && mode === "view" && (
-        <ClientViewModal client={selectedClient} isOpen={true} onClose={close} />
-      )}
       {selectedClient && mode === "edit" && (
-        <ClientEditModal client={selectedClient} isOpen={true} onClose={close} onSave={(updated) => {
-          console.log("Išsaugotas klientas", updated)
-        }} />
+        <EntityModal
+          title="Redaguoti klientą"
+          entity={selectedClient}
+          fields={clientFields}
+          isOpen={true}
+          onClose={close}
+          onSave={(updated) => {
+            console.log("Išsaugotas klientas", updated);
+            close();
+          }}
+          startInEdit={false}
+        />
       )}
+
       {selectedClient && mode === "delete" && (
         <ConfirmDeleteModal
           isOpen={true}
           onClose={close}
           onConfirm={() => {
-            console.log("Ištrintas:", selectedClient.kliento_id)
-            close()
+            console.log("Ištrintas:", selectedClient.kliento_id);
+            close();
           }}
+          entityName="klientą"
         />
       )}
     </div>
-  )
+  );
 }

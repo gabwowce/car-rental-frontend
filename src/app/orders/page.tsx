@@ -1,19 +1,14 @@
 "use client";
 
-import { useOrdersData } from "@/hooks/useOrdersData";
-import { useOrderModals } from "@/hooks/useOrderModals";
+import { useState } from "react";
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
-import OrderViewModal from "@/app/components/modals/rderViewModal";
-import OrderEditModal from "@/app/components/modals/OrderEditModal";
+import EntityModal from "@/app/components/modals/EntityModal";
 import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
-import React from "react";
+import { useOrdersData } from "@/hooks/useOrdersData";
+import { useOrderModals } from "@/hooks/useOrderModals";
 import { OrderOut } from "@/store/carRentalApi";
-
-type Column<T> = {
-  label: string;
-  accessor: keyof T | ((row: T) => React.ReactNode);
-};
+import React from "react";
 
 export default function OrdersPage() {
   const {
@@ -25,25 +20,36 @@ export default function OrdersPage() {
     getCarName,
     filtered,
     isLoading,
+    orderFields,
   } = useOrdersData();
 
   const { selectedOrder, mode, openView, openEdit, openDelete, close } =
     useOrderModals();
 
-  const columns: Column<OrderOut>[] = [
+  const handleSave = (updated: OrderOut) => {
+    console.log("Atnaujinta:", updated);
+    close();
+  };
+
+  const handleDelete = () => {
+    console.log("Ištrintas:", selectedOrder?.uzsakymo_id);
+    close();
+  };
+
+  const columns = [
     {
       label: "Klientas",
-      accessor: (r) => getClientName(r.kliento_id),
+      accessor: (r: OrderOut) => getClientName(r.kliento_id),
     },
     {
       label: "Automobilis",
-      accessor: (r) => getCarName(r.automobilio_id),
+      accessor: (r: OrderOut) => getCarName(r.automobilio_id),
     },
     { label: "Pradžia", accessor: "nuomos_data" },
     { label: "Pabaiga", accessor: "grazinimo_data" },
     {
       label: "Būsena",
-      accessor: (r) => {
+      accessor: (r: OrderOut) => {
         const colorMap: Record<string, string> = {
           vykdomas: "bg-blue-100 text-blue-800",
           užbaigtas: "bg-green-100 text-green-800",
@@ -61,9 +67,8 @@ export default function OrdersPage() {
     },
     {
       label: "Veiksmai",
-      accessor: (r) => (
+      accessor: (r: OrderOut) => (
         <ActionButtons
-          onView={() => openView(r)}
           onEdit={() => openEdit(r)}
           onDelete={() => openDelete(r)}
         />
@@ -110,28 +115,24 @@ export default function OrdersPage() {
         />
       )}
 
-      {selectedOrder && mode === "view" && (
-        <OrderViewModal order={selectedOrder} isOpen={true} onClose={close} />
-      )}
       {selectedOrder && mode === "edit" && (
-        <OrderEditModal
-          order={selectedOrder}
+        <EntityModal
+          title={`Redaguoti užsakymą #${selectedOrder.uzsakymo_id}`}
+          entity={selectedOrder}
+          fields={orderFields}
           isOpen={true}
           onClose={close}
-          onSave={(updated: OrderOut) => {
-            console.log("Atnaujinta:", updated);
-            close();
-          }}
+          onSave={handleSave}
+          startInEdit={false}
         />
       )}
+
       {selectedOrder && mode === "delete" && (
         <ConfirmDeleteModal
           isOpen={true}
           onClose={close}
-          onConfirm={() => {
-            console.log("Ištrintas:", selectedOrder.uzsakymo_id);
-            close();
-          }}
+          onConfirm={handleDelete}
+          entityName="užsakymą"
         />
       )}
     </div>

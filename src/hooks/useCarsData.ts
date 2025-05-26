@@ -1,10 +1,32 @@
 import { useGetAllCarsQuery } from "@/store/carRentalApi";
 import { useState } from "react";
+import EntityModal, { FieldConfig } from "@/app/components/modals/EntityModal";
 
 type Automobilis = NonNullable<
   ReturnType<typeof useGetAllCarsQuery>["data"]
 >[number];
 export function useCarsData() {
+  const carFields: FieldConfig<Automobilis>[] = [
+    { name: "numeris", label: "Numeris" },
+    {
+      name: "automobilio_statusas",
+      label: "Būsena",
+      type: "select",
+      options: [
+        { value: "laisvas", label: "Laisvas" },
+        { value: "isnuomotas", label: "Išnuomotas" },
+        { value: "servise", label: "Servise" },
+      ],
+    },
+    {
+      name: "kaina_parai",
+      label: "Kaina (€/para)",
+      type: "number",
+      format: (v) => `${v} €`,
+    },
+    { name: "sedimos_vietos", label: "Sėdimos vietos", type: "number" },
+  ];
+
   const { data: automobiliai = [], isLoading } = useGetAllCarsQuery();
 
   const [statusFilter, setStatusFilter] = useState("visi");
@@ -32,5 +54,6 @@ export function useCarsData() {
     setSelectedCar,
     isModalOpen,
     setModalOpen,
+    carFields,
   };
 }

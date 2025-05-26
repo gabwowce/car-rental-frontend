@@ -7,6 +7,8 @@ import CarViewModal from "../components/modals/CarViewModal";
 import BaseModal from "../components/BaseModal";
 import { useCarsData } from "@/hooks/useCarsData";
 import LoadingScreen from "@/app/components/loadingScreen";
+import EntityModal from "../components/modals/EntityModal";
+import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
 
 type Automobilis = NonNullable<
   ReturnType<typeof useCarsData>["automobiliai"]
@@ -25,6 +27,7 @@ export default function CarsPage() {
     setSelectedCar,
     isModalOpen,
     setModalOpen,
+    carFields,
   } = useCarsData();
 
   const [editMode, setEditMode] = useState(false);
@@ -46,14 +49,9 @@ export default function CarsPage() {
       label: "Veiksmai",
       accessor: (a: Automobilis) => (
         <ActionButtons
-          onView={() => {
-            setSelectedCar(a);
-            setEditMode(false);
-            setModalOpen(true);
-          }}
           onEdit={() => {
             setSelectedCar(a);
-            setEditMode(true);
+            setEditMode(false);
             setModalOpen(true);
           }}
           onDelete={() => {
@@ -105,52 +103,32 @@ export default function CarsPage() {
 
       <MapComponent cars={filtered} />
 
-      {/* VIEW/EDIT Modal */}
       {selectedCar && (
-        <CarViewModal
+        <EntityModal
+          title={`Automobilis: ${selectedCar.marke} ${selectedCar.modelis}`}
+          entity={selectedCar}
+          fields={carFields}
           isOpen={isModalOpen}
-          car={selectedCar}
-          startInEdit={editMode}
-          onClose={() => {
-            setModalOpen(false);
-            setEditMode(false);
-          }}
+          onClose={() => setModalOpen(false)}
           onSave={(updated) => {
-            console.log("Išsaugotas automobilis", updated);
+            // persist changes here…
             setModalOpen(false);
-            setEditMode(false);
           }}
+          startInEdit={editMode}
         />
       )}
 
       {/* DELETE Modal */}
-      {selectedCar && deleteConfirmOpen && (
-        <BaseModal
+      {selectedCar && (
+        <ConfirmDeleteModal
           isOpen={deleteConfirmOpen}
           onClose={() => setDeleteConfirmOpen(false)}
-          title="Ištrinti automobilį?"
-          actions={
-            <>
-              <button
-                onClick={() => setDeleteConfirmOpen(false)}
-                className="px-4 py-2 rounded bg-gray-200"
-              >
-                Atšaukti
-              </button>
-              <button
-                onClick={() => {
-                  console.log("Ištrinta:", selectedCar.automobilio_id);
-                  setDeleteConfirmOpen(false);
-                }}
-                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-              >
-                Ištrinti
-              </button>
-            </>
-          }
-        >
-          <p className="text-sm">Ar tikrai norite ištrinti šį automobilį?</p>
-        </BaseModal>
+          onConfirm={() => {
+            console.log("Ištrinta:", selectedCar.automobilio_id);
+            setDeleteConfirmOpen(false);
+          }}
+          entityName="automobilį"
+        />
       )}
     </div>
   );

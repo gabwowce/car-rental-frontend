@@ -30,7 +30,7 @@ export default function CarViewModal({
   };
 
   const renderView = () => (
-    <div className="space-y-2 text-sm">
+    <div className="space-y-2 text-sm z-50">
       <p>
         <strong>Numeris:</strong> {car.numeris}
       </p>
@@ -47,7 +47,7 @@ export default function CarViewModal({
   );
 
   const renderEdit = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 z-50">
       <input
         className="border p-2 rounded w-full"
         name="numeris"

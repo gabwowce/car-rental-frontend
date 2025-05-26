@@ -2,38 +2,38 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLoginApiV1LoginPostMutation } from "../../store/carRentalApi"; // <- svarbu: pataisyk kelią pagal save
+import { useLoginMutation } from "../../store/carRentalApi"; // <- svarbu: pataisyk kelią pagal save
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [login, { isLoading, isError }] = useLoginApiV1LoginPostMutation();
+  const [login, { isLoading, isError }] = useLoginMutation();
 
   const handleLogin = async () => {
-  try {
-    const result = await login({
-      loginRequest: {
-        el_pastas: email,
-        slaptazodis: password,
-      },
-    });
+    try {
+      const result = await login({
+        loginRequest: {
+          el_pastas: email,
+          slaptazodis: password,
+        },
+      });
 
-    console.log("RTK result >>>", result);
+      console.log("RTK result >>>", result);
 
-    if ("data" in result) {
-      document.cookie = `token=${result.data?.access_token}; path=/`;
-      router.push("/profile");
-    } else {
-      console.error("Login error:", result.error);
-      alert("Neteisingi prisijungimo duomenys");
+      if ("data" in result) {
+        document.cookie = `token=${result.data?.access_token}; path=/`;
+        router.push("/profile");
+      } else {
+        console.error("Login error:", result.error);
+        alert("Neteisingi prisijungimo duomenys");
+      }
+    } catch (err) {
+      console.error("Catch klaida:", err);
+      alert("Įvyko klaida prisijungiant");
     }
-  } catch (err) {
-    console.error("Catch klaida:", err);
-    alert("Įvyko klaida prisijungiant");
-  }
-};
+  };
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -60,7 +60,9 @@ export default function LoginPage() {
         >
           {isLoading ? "Jungiamasi..." : "Prisijungti"}
         </button>
-        {isError && <p className="text-red-500 text-sm mt-2">Nepavyko prisijungti</p>}
+        {isError && (
+          <p className="text-red-500 text-sm mt-2">Nepavyko prisijungti</p>
+        )}
       </div>
     </div>
   );
