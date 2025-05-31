@@ -1,20 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { PagalbosUzklausos } from "@/fakeData";
 import DataTable from "@/app/components/DataTable";
-import ActionButtons from "@/app/components/ActionButtons";
-import EntityModal from "@/app/components/modals/EntityModal";
-import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
-import { FieldConfig } from "@/app/components/modals/EntityModal";
+import { useSupportData } from "@/hooks/useSupportData";
 
 export default function SupportPage() {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("visi");
-  const [selected, setSelected] = useState<any | null>(null);
-  const [mode, setMode] = useState<"edit" | "delete" | null>(null);
+  const { supports, isLoading, answer } = useSupportData();
 
-  const filtered = PagalbosUzklausos.filter((u) => {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "visi" | "neatsakyta" | "atsakyta"
+  >("visi");
+
+  const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+  const [responses, setResponses] = useState<Record<number, string>>({});
+  const [sendingId, setSendingId] = useState<number | null>(null);
+
+  const filtered = supports.filter((u) => {
     const matchSearch = `${u.klientas} ${u.tema}`
       .toLowerCase()
       .includes(search.toLowerCase());
@@ -25,25 +27,6 @@ export default function SupportPage() {
     return matchSearch && matchStatus;
   });
 
-  const supportFields: FieldConfig<any>[] = [
-    { name: "klientas", label: "Klientas", type: "text" },
-    { name: "tema", label: "Tema", type: "text" },
-    {
-      name: "pateikimo_data",
-      label: "Pateikta",
-      type: "text",
-      format: (v) => new Date(v).toLocaleString("lt-LT"),
-    },
-    { name: "pranesimas", label: "Pranešimas", type: "textarea" },
-    { name: "atsakymas", label: "Atsakymas", type: "textarea" },
-    {
-      name: "atsakymo_data",
-      label: "Atsakyta",
-      type: "text",
-      format: (v) => (v ? new Date(v).toLocaleString("lt-LT") : "—"),
-    },
-  ];
-
   const columns = [
     { label: "Klientas", accessor: "klientas" },
     { label: "Tema", accessor: "tema" },
@@ -52,26 +35,72 @@ export default function SupportPage() {
       accessor: (u: any) => new Date(u.pateikimo_data).toLocaleString("lt-LT"),
     },
     { label: "Pranešimas", accessor: "pranesimas" },
-    { label: "Atsakymas", accessor: "atsakymas" },
+    {
+      label: "Atsakymas",
+      accessor: (u: any) => {
+        if (u.atsakymas) return u.atsakymas;
+
+        if (activeReplyId !== u.uzklausos_id) {
+          return (
+            <button
+              onClick={() => setActiveReplyId(u.uzklausos_id)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded text-sm"
+            >
+              Atsakyti
+            </button>
+          );
+        }
+
+        return (
+          <div className="flex flex-col gap-2">
+            <textarea
+              placeholder="Įveskite atsakymą..."
+              value={responses[u.uzklausos_id] || ""}
+              onChange={(e) =>
+                setResponses((prev) => ({
+                  ...prev,
+                  [u.uzklausos_id]: e.target.value,
+                }))
+              }
+              className="border rounded p-2 w-full"
+              rows={2}
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  const text = responses[u.uzklausos_id]?.trim();
+                  if (!text) return;
+                  setSendingId(u.uzklausos_id);
+                  await answer(u.uzklausos_id, text);
+                  setResponses((prev) => ({ ...prev, [u.uzklausos_id]: "" }));
+                  setActiveReplyId(null);
+                  setSendingId(null);
+                }}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded text-sm"
+                disabled={sendingId === u.uzklausos_id}
+              >
+                {sendingId === u.uzklausos_id ? "Siunčiama..." : "Siųsti"}
+              </button>
+              <button
+                onClick={() => {
+                  setActiveReplyId(null);
+                  setResponses((prev) => ({ ...prev, [u.uzklausos_id]: "" }));
+                }}
+                className="text-sm text-gray-500 hover:underline"
+              >
+                Atšaukti
+              </button>
+            </div>
+          </div>
+        );
+      },
+    },
     {
       label: "Atsakyta",
       accessor: (u: any) =>
-        u.atsakymas ? new Date(u.atsakymo_data).toLocaleString("lt-LT") : "—",
-    },
-    {
-      label: "Veiksmai",
-      accessor: (u: any) => (
-        <ActionButtons
-          onEdit={() => {
-            setSelected(u);
-            setMode("edit");
-          }}
-          onDelete={() => {
-            setSelected(u);
-            setMode("delete");
-          }}
-        />
-      ),
+        u.atsakymo_data
+          ? new Date(u.atsakymo_data).toLocaleString("lt-LT")
+          : "—",
     },
   ];
 
@@ -91,7 +120,7 @@ export default function SupportPage() {
         />
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
           className="border p-2 rounded"
         >
           <option value="visi">Visos</option>
@@ -100,44 +129,13 @@ export default function SupportPage() {
         </select>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        rowKey={(u) => u.uzklausos_id}
-      />
-
-      {selected && mode === "edit" && (
-        <EntityModal
-          title={`Atsakyti klientui: ${selected.klientas}`}
-          entity={selected}
-          fields={supportFields}
-          isOpen={true}
-          onClose={() => {
-            setSelected(null);
-            setMode(null);
-          }}
-          onSave={(updated) => {
-            console.log("Atsakyta į užklausą:", updated);
-            setSelected(null);
-            setMode(null);
-          }}
-          startInEdit={false}
-        />
-      )}
-
-      {selected && mode === "delete" && (
-        <ConfirmDeleteModal
-          isOpen={true}
-          onClose={() => {
-            setSelected(null);
-            setMode(null);
-          }}
-          onConfirm={() => {
-            console.log("Ištrinta užklausa:", selected.uzklausos_id);
-            setSelected(null);
-            setMode(null);
-          }}
-          entityName="užklausą"
+      {isLoading ? (
+        <p>Kraunama...</p>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filtered}
+          rowKey={(u) => u.uzklausos_id}
         />
       )}
     </div>

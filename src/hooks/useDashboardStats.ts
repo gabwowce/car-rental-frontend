@@ -2,17 +2,28 @@ import { useMemo } from "react";
 import {
   useGetAllCarsQuery,
   useGetAllOrdersQuery,
-  useGetAllReservationsQuery,
   useGetAllInvoicesQuery,
   useGetAllSupportsQuery,
   useGetAllClientsQuery,
-} from "../store/carRentalApi";
+  useGetAllReservationsQuery,
+  useGetLatestReservationsQuery,
+} from "@/store/carRentalApi";
 
 export function useDashboardStats() {
+  /* --- Naujausios rezervacijos (5) ir filtras atšauktoms --- */
+  const {
+    data: latest = [],
+    isLoading: loadingLatest,
+    refetch: refetchReservations,
+  } = useGetLatestReservationsQuery(5);
+
+  const latestReservations = latest.filter(
+    (r) => r.busena?.toLowerCase() !== "atšaukta"
+  );
+
+  /* --- Kiti užklausimai --- */
   const { data: automobiliai = [], isLoading: loadingA } = useGetAllCarsQuery();
   const { data: uzsakymai = [], isLoading: loadingU } = useGetAllOrdersQuery();
-  const { data: rezervacijos = [], isLoading: loadingR } =
-    useGetAllReservationsQuery();
   const { data: klientai = [], isLoading: loadingK } = useGetAllClientsQuery();
   const { data: saskaitos = [], isLoading: loadingS } =
     useGetAllInvoicesQuery();
@@ -20,8 +31,9 @@ export function useDashboardStats() {
     useGetAllSupportsQuery();
 
   const isLoading =
-    loadingA || loadingU || loadingR || loadingK || loadingS || loadingP;
-  // Greitesnis lookup per Map
+    loadingLatest || loadingA || loadingU || loadingK || loadingS || loadingP;
+
+  /* --- Map’ai greitam lookup’ui --- */
   const automobiliaiMap = useMemo(
     () => new Map(automobiliai.map((a) => [a.automobilio_id, a])),
     [automobiliai]
@@ -31,7 +43,7 @@ export function useDashboardStats() {
     [klientai]
   );
 
-  // Statistika
+  /* --- Statistika --- */
   const laisvi = automobiliai.filter(
     (a) => a.automobilio_statusas === "laisvas"
   ).length;
@@ -41,6 +53,7 @@ export function useDashboardStats() {
   const isnuomoti = automobiliai.filter(
     (a) => a.automobilio_statusas === "isnuomotas"
   ).length;
+
   const neapmoketosSaskaitos = saskaitos.filter(
     (s) => s.status === "vėluojanti"
   ).length;
@@ -86,19 +99,18 @@ export function useDashboardStats() {
     { name: "Išnuomoti", value: isnuomoti },
   ];
 
-  // Paprasti getteriai pagal ID
+  /* --- Getteriai --- */
   const getAutomobilis = (id: number) => {
     const a = automobiliaiMap.get(id);
     return a ? `${a.marke} ${a.modelis}` : `#${id}`;
   };
-
   const getKlientas = (id: number) => {
     const k = klientaiMap.get(id);
     return k ? `${k.vardas} ${k.pavarde}` : `Klientas #${id}`;
   };
 
   return {
-    rezervacijos,
+    latestReservations,
     barData,
     pieData,
     laisvi,
@@ -109,5 +121,6 @@ export function useDashboardStats() {
     getAutomobilis,
     getKlientas,
     isLoading,
+    refetchReservations,
   };
 }

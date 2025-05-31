@@ -9,7 +9,7 @@ import { useOrdersData } from "@/hooks/useOrdersData";
 import { useOrderModals } from "@/hooks/useOrderModals";
 import { OrderOut } from "@/store/carRentalApi";
 import React from "react";
-
+import StatusBadge from "@/app/components/StatusBadge";
 export default function OrdersPage() {
   const {
     search,
@@ -49,21 +49,9 @@ export default function OrdersPage() {
     { label: "Pabaiga", accessor: "grazinimo_data" },
     {
       label: "Būsena",
-      accessor: (r: OrderOut) => {
-        const colorMap: Record<string, string> = {
-          vykdomas: "bg-blue-100 text-blue-800",
-          užbaigtas: "bg-green-100 text-green-800",
-          atšauktas: "bg-red-100 text-red-800",
-        };
-        const status = (r.uzsakymo_busena ?? "").toLowerCase();
-        return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[status] || ""}`}
-          >
-            {r.uzsakymo_busena}
-          </span>
-        );
-      },
+      accessor: (r: OrderOut) => (
+        <StatusBadge status={r.uzsakymo_busena || ""} />
+      ),
     },
     {
       label: "Veiksmai",

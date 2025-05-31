@@ -3,13 +3,13 @@ import { useState } from "react";
 import DataTable from "../components/DataTable";
 import ActionButtons from "../components/ActionButtons";
 import MapComponent from "../components/MapComponent";
-import CarViewModal from "../components/modals/CarViewModal";
-import BaseModal from "../components/BaseModal";
-import { useCarsData } from "@/hooks/useCarsData";
-import LoadingScreen from "@/app/components/loadingScreen";
 import EntityModal from "../components/modals/EntityModal";
 import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
+import { useCarsData } from "@/hooks/useCarsData";
+import LoadingScreen from "@/app/components/loadingScreen";
+import { useUpdateCarMutation } from "@/store/carRentalApi";
 
+// Tipas vienam automobiliui
 type Automobilis = NonNullable<
   ReturnType<typeof useCarsData>["automobiliai"]
 >[number];
@@ -28,10 +28,12 @@ export default function CarsPage() {
     isModalOpen,
     setModalOpen,
     carFields,
+    refetchCars,
   } = useCarsData();
 
   const [editMode, setEditMode] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [updateCar] = useUpdateCarMutation();
 
   const columns = [
     {
@@ -51,7 +53,7 @@ export default function CarsPage() {
         <ActionButtons
           onEdit={() => {
             setSelectedCar(a);
-            setEditMode(false);
+            setEditMode(true);
             setModalOpen(true);
           }}
           onDelete={() => {
@@ -110,15 +112,43 @@ export default function CarsPage() {
           fields={carFields}
           isOpen={isModalOpen}
           onClose={() => setModalOpen(false)}
-          onSave={(updated) => {
-            // persist changes here…
-            setModalOpen(false);
+          onSave={async (updated) => {
+            try {
+              await updateCar({
+                carId: selectedCar.automobilio_id,
+                carUpdate: {
+                  marke: updated.marke,
+                  modelis: updated.modelis,
+                  metai: updated.metai,
+                  numeris: updated.numeris,
+                  vin_kodas: updated.vin_kodas,
+                  spalva: updated.spalva,
+                  kebulo_tipas: updated.kebulo_tipas,
+                  pavarų_deze: updated.pavarų_deze,
+                  variklio_turis: updated.variklio_turis,
+                  galia_kw: updated.galia_kw,
+                  kuro_tipas: updated.kuro_tipas,
+                  rida: updated.rida,
+                  sedimos_vietos: updated.sedimos_vietos,
+                  klimato_kontrole: updated.klimato_kontrole,
+                  navigacija: updated.navigacija,
+                  kaina_parai: updated.kaina_parai,
+                  automobilio_statusas: updated.automobilio_statusas,
+                  technikines_galiojimas: updated.technikines_galiojimas,
+                  dabartine_vieta_id: updated.dabartine_vieta_id,
+                  pastabos: updated.pastabos,
+                },
+              }).unwrap();
+              await refetchCars();
+              setModalOpen(false);
+            } catch (e) {
+              console.error("Nepavyko atnaujinti automobilio:", e);
+            }
           }}
-          startInEdit={editMode}
+          startInEdit={false}
         />
       )}
 
-      {/* DELETE Modal */}
       {selectedCar && (
         <ConfirmDeleteModal
           isOpen={deleteConfirmOpen}

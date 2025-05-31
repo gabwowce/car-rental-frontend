@@ -59,11 +59,13 @@ export default function EntityModal<T extends Record<string, any>>({
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const commit = () => {
-    if (onSave) onSave(form);
-    setIsEditing(false);
+  const commit = async () => {
+    if (onSave) {
+      await onSave(form); // 👈 laukiam kol `CarsPage` atnaujins DB
+    }
+    setIsEditing(false); // grįžtam į view mode
+    onClose(); // uždarom modalą
   };
-
   // ----- renderers -----
   const renderFieldView = (cfg: FieldConfig<T>) => {
     const raw = entity[cfg.name];

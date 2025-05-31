@@ -1,24 +1,46 @@
 "use client";
 
-import { useProfileData } from "@/hooks/useProfileData";
+import { useState } from "react";
+import {
+  useMeApiV1MeGetQuery,
+  useChangePasswordMutation,
+} from "@/store/carRentalApi"; // <-- pritaikyk path
+import type { FormEvent } from "react";
 
 export default function ProfilePage() {
-  const {
-    user,
-    isLoading,
-    oldPassword,
-    newPassword,
-    repeatPassword,
-    setOldPassword,
-    setNewPassword,
-    setRepeatPassword,
-    handleSubmit,
-    message,
-  } = useProfileData();
+  const { data: user, isLoading } = useMeApiV1MeGetQuery();
+  const [changePassword, { isLoading: isChanging }] =
+    useChangePasswordMutation();
+
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== repeatPassword) {
+      setMessage("Slaptažodžiai nesutampa.");
+      return;
+    }
+    try {
+      await changePassword({
+        changePasswordRequest: {
+          senas_slaptazodis: oldPassword,
+          naujas_slaptazodis: newPassword,
+        },
+      }).unwrap();
+      setMessage("Slaptažodis pakeistas sėkmingai.");
+      setOldPassword("");
+      setNewPassword("");
+      setRepeatPassword("");
+    } catch (err: any) {
+      setMessage("Klaida keičiant slaptažodį.");
+    }
+  };
 
   if (isLoading) return <p>Įkeliama...</p>;
   if (!user) return <p>Nerasta vartotojo duomenų</p>;
-  console.log("USER: " + user);
 
   return (
     <div>
@@ -74,8 +96,9 @@ export default function ProfilePage() {
           <button
             type="submit"
             className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            disabled={isChanging}
           >
-            Išsaugoti pakeitimus
+            {isChanging ? "Keičiama..." : "Išsaugoti pakeitimus"}
           </button>
           {message && <p className="text-sm text-red-500">{message}</p>}
         </form>

@@ -7,6 +7,7 @@ import EntityModal from "@/app/components/modals/EntityModal";
 import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
 import LoadingScreen from "@/app/components/loadingScreen";
 import { useReservationData } from "@/hooks/useReservationData";
+import StatusBadge from "@/app/components/StatusBadge";
 
 type Rezervacija = NonNullable<
   ReturnType<typeof useReservationData>["reservations"]
@@ -51,22 +52,7 @@ export default function ReservationsPage() {
     { label: "Pabaiga", accessor: "rezervacijos_pabaiga" },
     {
       label: "Būsena",
-      accessor: (r: Rezervacija) => {
-        const status = r.busena.toLowerCase();
-        const colorMap: Record<string, string> = {
-          aktyvi: "bg-green-100 text-green-800",
-          patvirtinta: "bg-green-100 text-green-800",
-          atšaukta: "bg-red-100 text-red-800",
-          laukia: "bg-yellow-100 text-yellow-800",
-        };
-        return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[status] || ""}`}
-          >
-            {r.busena}
-          </span>
-        );
-      },
+      accessor: (r: Rezervacija) => <StatusBadge status={r.busena} />,
     },
     {
       label: "Veiksmai",

@@ -111,39 +111,6 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
-    getAllReservations: build.query<
-      GetAllReservationsApiResponse,
-      GetAllReservationsApiArg
-    >({
-      query: () => ({ url: `/api/v1/reservations/` }),
-    }),
-    createReservation: build.mutation<
-      CreateReservationApiResponse,
-      CreateReservationApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/reservations/`,
-        method: "POST",
-        body: queryArg.reservationCreate,
-      }),
-    }),
-    getReservationById: build.query<
-      GetReservationByIdApiResponse,
-      GetReservationByIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/reservations/${queryArg.rezervacijosId}`,
-      }),
-    }),
-    deleteReservation: build.mutation<
-      DeleteReservationApiResponse,
-      DeleteReservationApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/reservations/${queryArg.rezervacijosId}`,
-        method: "DELETE",
-      }),
-    }),
     getLatestReservations: build.query<
       GetLatestReservationsApiResponse,
       GetLatestReservationsApiArg
@@ -168,6 +135,49 @@ const injectedRtkApi = api.injectEndpoints({
           iki: queryArg.iki,
           busena: queryArg.busena,
         },
+      }),
+    }),
+    getAllReservations: build.query<
+      GetAllReservationsApiResponse,
+      GetAllReservationsApiArg
+    >({
+      query: () => ({ url: `/api/v1/reservations/` }),
+    }),
+    createReservation: build.mutation<
+      CreateReservationApiResponse,
+      CreateReservationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/reservations/`,
+        method: "POST",
+        body: queryArg.reservationCreate,
+      }),
+    }),
+    getReservationById: build.query<
+      GetReservationByIdApiResponse,
+      GetReservationByIdApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/reservations/${queryArg.rezervacijosId}`,
+      }),
+    }),
+    updateReservation: build.mutation<
+      UpdateReservationApiResponse,
+      UpdateReservationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/reservations/${queryArg.rezervacijosId}`,
+        method: "PUT",
+        body: queryArg.reservationUpdate,
+      }),
+    }),
+    deleteReservation: build.mutation<
+      DeleteReservationApiResponse,
+      DeleteReservationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/reservations/${queryArg.rezervacijosId}`,
+        method: "DELETE",
       }),
     }),
     getAllOrders: build.query<GetAllOrdersApiResponse, GetAllOrdersApiArg>({
@@ -396,24 +406,6 @@ export type SearchCarsApiArg = {
   metai?: number | null;
   sedimosVietos?: number | null;
 };
-export type GetAllReservationsApiResponse =
-  /** status 200 Successful Response */ ReservationOut[];
-export type GetAllReservationsApiArg = void;
-export type CreateReservationApiResponse =
-  /** status 200 Successful Response */ ReservationOut;
-export type CreateReservationApiArg = {
-  reservationCreate: ReservationCreate;
-};
-export type GetReservationByIdApiResponse =
-  /** status 200 Successful Response */ ReservationOut;
-export type GetReservationByIdApiArg = {
-  rezervacijosId: number;
-};
-export type DeleteReservationApiResponse =
-  /** status 200 Successful Response */ any;
-export type DeleteReservationApiArg = {
-  rezervacijosId: number;
-};
 export type GetLatestReservationsApiResponse =
   /** status 200 Successful Response */ ReservationSummary[];
 export type GetLatestReservationsApiArg = {
@@ -427,6 +419,30 @@ export type SearchReservationsApiArg = {
   nuo?: string | null;
   iki?: string | null;
   busena?: string | null;
+};
+export type GetAllReservationsApiResponse =
+  /** status 200 Successful Response */ ReservationOut[];
+export type GetAllReservationsApiArg = void;
+export type CreateReservationApiResponse =
+  /** status 200 Successful Response */ ReservationOut;
+export type CreateReservationApiArg = {
+  reservationCreate: ReservationCreate;
+};
+export type GetReservationByIdApiResponse =
+  /** status 200 Successful Response */ ReservationOut;
+export type GetReservationByIdApiArg = {
+  rezervacijosId: number;
+};
+export type UpdateReservationApiResponse =
+  /** status 200 Successful Response */ ReservationOut;
+export type UpdateReservationApiArg = {
+  rezervacijosId: number;
+  reservationUpdate: ReservationUpdate;
+};
+export type DeleteReservationApiResponse =
+  /** status 200 Successful Response */ any;
+export type DeleteReservationApiArg = {
+  rezervacijosId: number;
 };
 export type GetAllOrdersApiResponse =
   /** status 200 Successful Response */ OrderOut[];
@@ -595,26 +611,26 @@ export type LocationOut = {
   miestas: string;
 };
 export type CarOut = {
-  marke: string;
-  modelis: string;
-  metai: number;
-  numeris: string;
-  vin_kodas: string;
-  spalva: string;
-  kebulo_tipas: string;
-  pavarų_deze: string;
-  variklio_turis: number;
-  galia_kw: number;
-  kuro_tipas: string;
-  rida: number;
-  sedimos_vietos: number;
-  klimato_kontrole: boolean;
-  navigacija: boolean;
-  kaina_parai: number;
-  automobilio_statusas: string;
-  technikines_galiojimas: string;
-  dabartine_vieta_id: number;
-  pastabos: string | null;
+  marke?: string | null;
+  modelis?: string | null;
+  metai?: number | null;
+  numeris?: string | null;
+  vin_kodas?: string | null;
+  spalva?: string | null;
+  kebulo_tipas?: string | null;
+  pavarų_deze?: string | null;
+  variklio_turis?: number | null;
+  galia_kw?: number | null;
+  kuro_tipas?: string | null;
+  rida?: number | null;
+  sedimos_vietos?: number | null;
+  klimato_kontrole?: boolean | null;
+  navigacija?: boolean | null;
+  kaina_parai?: number | null;
+  automobilio_statusas?: string | null;
+  technikines_galiojimas?: string | null;
+  dabartine_vieta_id?: number | null;
+  pastabos?: string | null;
   automobilio_id: number;
   lokacija: LocationOut | null;
   links: {
@@ -622,51 +638,66 @@ export type CarOut = {
   }[];
 };
 export type CarCreate = {
-  marke: string;
-  modelis: string;
-  metai: number;
-  numeris: string;
-  vin_kodas: string;
-  spalva: string;
-  kebulo_tipas: string;
-  pavarų_deze: string;
-  variklio_turis: number;
-  galia_kw: number;
-  kuro_tipas: string;
-  rida: number;
-  sedimos_vietos: number;
-  klimato_kontrole: boolean;
-  navigacija: boolean;
-  kaina_parai: number;
-  automobilio_statusas: string;
-  technikines_galiojimas: string;
-  dabartine_vieta_id: number;
-  pastabos: string | null;
+  marke?: string | null;
+  modelis?: string | null;
+  metai?: number | null;
+  numeris?: string | null;
+  vin_kodas?: string | null;
+  spalva?: string | null;
+  kebulo_tipas?: string | null;
+  pavarų_deze?: string | null;
+  variklio_turis?: number | null;
+  galia_kw?: number | null;
+  kuro_tipas?: string | null;
+  rida?: number | null;
+  sedimos_vietos?: number | null;
+  klimato_kontrole?: boolean | null;
+  navigacija?: boolean | null;
+  kaina_parai?: number | null;
+  automobilio_statusas?: string | null;
+  technikines_galiojimas?: string | null;
+  dabartine_vieta_id?: number | null;
+  pastabos?: string | null;
 };
 export type CarUpdate = {
-  marke: string;
-  modelis: string;
-  metai: number;
-  numeris: string;
-  vin_kodas: string;
-  spalva: string;
-  kebulo_tipas: string;
-  pavarų_deze: string;
-  variklio_turis: number;
-  galia_kw: number;
-  kuro_tipas: string;
-  rida: number;
-  sedimos_vietos: number;
-  klimato_kontrole: boolean;
-  navigacija: boolean;
-  kaina_parai: number;
-  automobilio_statusas: string;
-  technikines_galiojimas: string;
-  dabartine_vieta_id: number;
-  pastabos: string | null;
+  marke?: string | null;
+  modelis?: string | null;
+  metai?: number | null;
+  numeris?: string | null;
+  vin_kodas?: string | null;
+  spalva?: string | null;
+  kebulo_tipas?: string | null;
+  pavarų_deze?: string | null;
+  variklio_turis?: number | null;
+  galia_kw?: number | null;
+  kuro_tipas?: string | null;
+  rida?: number | null;
+  sedimos_vietos?: number | null;
+  klimato_kontrole?: boolean | null;
+  navigacija?: boolean | null;
+  kaina_parai?: number | null;
+  automobilio_statusas?: string | null;
+  technikines_galiojimas?: string | null;
+  dabartine_vieta_id?: number | null;
+  pastabos?: string | null;
 };
 export type CarStatusUpdate = {
   status: string;
+};
+export type ReservationSummary = {
+  rezervacijos_id: number;
+  kliento_id: number;
+  automobilio_id: number;
+  rezervacijos_pradzia: string;
+  rezervacijos_pabaiga: string;
+  busena: string;
+  marke: string;
+  modelis: string;
+  vardas: string;
+  pavarde: string;
+  links: {
+    [key: string]: any;
+  }[];
 };
 export type ReservationOut = {
   kliento_id: number;
@@ -686,17 +717,10 @@ export type ReservationCreate = {
   rezervacijos_pabaiga: string;
   busena: string;
 };
-export type ReservationSummary = {
-  rezervacijos_id: number;
-  rezervacijos_pradzia: string;
-  rezervacijos_pabaiga: string;
-  marke: string;
-  modelis: string;
-  vardas: string;
-  pavarde: string;
-  links: {
-    [key: string]: any;
-  }[];
+export type ReservationUpdate = {
+  rezervacijos_pradzia?: string | null;
+  rezervacijos_pabaiga?: string | null;
+  busena?: string | null;
 };
 export type OrderOut = {
   kliento_id: number;
@@ -819,12 +843,13 @@ export const {
   useDeleteCarMutation,
   useUpdateCarStatusMutation,
   useSearchCarsQuery,
+  useGetLatestReservationsQuery,
+  useSearchReservationsQuery,
   useGetAllReservationsQuery,
   useCreateReservationMutation,
   useGetReservationByIdQuery,
+  useUpdateReservationMutation,
   useDeleteReservationMutation,
-  useGetLatestReservationsQuery,
-  useSearchReservationsQuery,
   useGetAllOrdersQuery,
   useCreateOrderMutation,
   useGetOrderByIdQuery,

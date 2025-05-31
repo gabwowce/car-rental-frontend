@@ -6,7 +6,7 @@ import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
 import InvoiceViewModal from "@/app/components/modals/InvoiceViewModal";
 import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
-
+import StatusBadge from "@/app/components/StatusBadge";
 type Saskaita = NonNullable<
   ReturnType<typeof useInvoicesData>["invoices"]
 >[number];
@@ -42,23 +42,9 @@ export default function InvoicesPage() {
     },
     {
       label: "Būsena",
-      accessor: (s: Saskaita) => {
-        const colorMap: Record<string, string> = {
-          išrašyta: "bg-gray-100 text-gray-800",
-          apmokėta: "bg-green-100 text-green-800",
-          vėluojanti: "bg-red-100 text-red-800",
-        };
-        return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-semibold ${
-              colorMap[s.status] || ""
-            }`}
-          >
-            {s.status}
-          </span>
-        );
-      },
+      accessor: (s: Saskaita) => <StatusBadge status={s.status} />,
     },
+
     {
       label: "Veiksmai",
       accessor: (s: Saskaita) => (
@@ -107,6 +93,16 @@ export default function InvoicesPage() {
           columns={columns}
           data={filtered}
           rowKey={(s) => s.invoice_id}
+          rowClassName={(s) => {
+            const base = "transition";
+            const map: Record<string, string> = {
+              patvirtinta: "bg-blue-50",
+              užbaigta: "bg-yellow-50",
+              apmokėta: "bg-green-50",
+              vėluojanti: "bg-red-50",
+            };
+            return `${base} ${map[s.status] || ""}`;
+          }}
         />
       )}
 
