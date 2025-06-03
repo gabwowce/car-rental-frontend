@@ -5,7 +5,6 @@ import { useOrderModals } from "@/hooks/useOrderModals";
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
 import OrderViewModal from "@/app/components/modals/rderViewModal";
-import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
 import React from "react";
 
 type Uzsakymas = NonNullable<
@@ -26,6 +25,18 @@ export default function OrdersPage() {
 
   const { selectedOrder, mode, openView, openEdit, openDelete, close } =
     useOrderModals();
+
+  const handleDelete = () => {
+    if (!selectedOrder) return;
+    const confirmed = window.confirm(
+      `Ar tikrai norite ištrinti užsakymą #${selectedOrder.uzsakymo_id}?`
+    );
+    if (confirmed) {
+      console.log("Užsakymas ištrintas:", selectedOrder.uzsakymo_id);
+      // Tikras ištrynimas būtų čia (pvz. await deleteOrderById())
+    }
+    close();
+  };
 
   const columns = [
     {
@@ -112,16 +123,12 @@ export default function OrdersPage() {
         <OrderViewModal order={selectedOrder} isOpen={true} onClose={close} />
       )}
 
-      {selectedOrder && mode === "delete" && (
-        <ConfirmDeleteModal
-          isOpen={true}
-          onClose={close}
-          onConfirm={() => {
-            console.log("Užsakymas ištrintas:", selectedOrder.uzsakymo_id);
-            close();
-          }}
-        />
-      )}
+      {selectedOrder &&
+        mode === "delete" &&
+        (() => {
+          handleDelete();
+          return null;
+        })()}
     </div>
   );
 }

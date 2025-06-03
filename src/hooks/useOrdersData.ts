@@ -1,48 +1,77 @@
-import { useState, useMemo } from "react";
+// hooks/useOrdersData.ts
 import {
   useGetAllOrdersQuery,
+  useUpdateOrderMutation,
   useDeleteOrderMutation,
   useGetAllClientsQuery,
   useGetAllCarsQuery,
 } from "@/store/carRentalApi";
+import { useState, useMemo } from "react";
 import { FieldConfig } from "@/app/components/modals/EntityModal";
-import { OrderOut } from "@/store/carRentalApi";
+import type { OrderOut } from "@/store/carRentalApi";
 
 export function useOrdersData() {
-  const { data: orders = [], isLoading: loadingOrders } =
-    useGetAllOrdersQuery();
+  /* ----- užsakymai + refetch ----- */
+  const {
+    data: orders = [],
+    isLoading: loadingOrders,
+    refetch: refetchOrders,
+  } = useGetAllOrdersQuery();
+
+  /* ----- lookup’ai klientui / auto ----- */
   const { data: clients = [], isLoading: loadingClients } =
     useGetAllClientsQuery();
   const { data: cars = [], isLoading: loadingCars } = useGetAllCarsQuery();
-  const [deleteOrder] = useDeleteOrderMutation();
-
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("visi");
-
-  const isLoading = loadingOrders || loadingClients || loadingCars;
 
   const getClientName = (id: number) =>
-    clients.find((c) => c.kliento_id === id)?.vardas || `Klientas #${id}`;
+    clients.find((c: any) => c.kliento_id === id)
+      ? `${clients.find((c: any) => c.kliento_id === id)!.vardas} ${
+          clients.find((c: any) => c.kliento_id === id)!.pavarde
+        }`
+      : `Klientas #${id}`;
 
   const getCarName = (id: number) => {
-    const car = cars.find((c) => c.automobilio_id === id);
+    const car = cars.find((c: any) => c.automobilio_id === id);
     return car ? `${car.marke} ${car.modelis}` : `Automobilis #${id}`;
   };
 
+  /* ----- mutation’ai ----- */
+  const [updateOrder, { isLoading: updating }] = useUpdateOrderMutation();
+  const [deleteOrder, { isLoading: deleting }] = useDeleteOrderMutation();
+
+  /* ----- CRUD helperiai ----- */
+  const saveOrder = async (id: number, data: Partial<OrderOut>) => {
+    await updateOrder({
+      uzsakymoId: id,
+      orderUpdate: data,
+    }).unwrap();
+    await refetchOrders();
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm(`Ar tikrai norite ištrinti užsakymą #${id}?`)) return;
+    await deleteOrder({ uzsakymoId: id }).unwrap();
+    await refetchOrders();
+  };
+
+  /* ----- filtravimas ----- */
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("visi");
+
+  const filtered = useMemo(() => {
+    return orders.filter((o: any) => {
+      const target = `${getClientName(o.kliento_id)} ${getCarName(
+        o.automobilio_id
+      )}`.toLowerCase();
+      const matchSearch = target.includes(search.toLowerCase());
+      const matchStatus =
+        statusFilter === "visi" || o.uzsakymo_busena === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [orders, clients, cars, search, statusFilter]);
+
+  /* ----- laukų konfigas modalui ----- */
   const orderFields: FieldConfig<OrderOut>[] = [
-    { name: "uzsakymo_id", label: "ID", type: "text" },
-    {
-      name: "kliento_id",
-      label: "Klientas",
-      type: "text",
-      format: (_, r) => getClientName(r.kliento_id),
-    },
-    {
-      name: "automobilio_id",
-      label: "Automobilis",
-      type: "text",
-      format: (_, r) => getCarName(r.automobilio_id),
-    },
     { name: "nuomos_data", label: "Nuomos data", type: "text" },
     { name: "grazinimo_data", label: "Grąžinimo data", type: "text" },
     {
@@ -57,42 +86,30 @@ export function useOrdersData() {
     },
   ];
 
-  const filtered = useMemo(() => {
-    return orders.filter((r) => {
-      const klientas = getClientName(r.kliento_id).toLowerCase();
-      const automobilis = getCarName(r.automobilio_id).toLowerCase();
-      const searchMatch = `${klientas} ${automobilis}`.includes(
-        search.toLowerCase()
-      );
-      const statusMatch =
-        statusFilter === "visi" || r.uzsakymo_busena === statusFilter;
-      return searchMatch && statusMatch;
-    });
-  }, [orders, clients, cars, search, statusFilter]);
-
   return {
-    orders,
+    /* duomenys */
+    filtered,
+    isLoading:
+      loadingOrders || loadingClients || loadingCars || updating || deleting,
+
+    /* filtravimas */
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
+
+    /* helpers */
     getClientName,
     getCarName,
-    handleView: (id: number) => console.log("Peržiūrėti", id),
-    handleEdit: (id: number) => console.log("Redaguoti", id),
-    handleDelete: async (id: number) => {
-      if (confirm("Ar tikrai norite ištrinti užsakymą?")) {
-        try {
-          await deleteOrder({ uzsakymoId: id }).unwrap();
-          alert("Užsakymas sėkmingai ištrintas");
-        } catch (error) {
-          console.error("Klaida trinant užsakymą", error);
-          alert("Nepavyko ištrinti užsakymo");
-        }
-      }
-    },
-    filtered,
-    isLoading,
+
+    /* CRUD */
+    saveOrder,
+    handleDelete,
+
+    /* modal fields */
     orderFields,
+
+    /* refetch – jei norėtum kviesti iš išorės */
+    refetchOrders,
   };
 }

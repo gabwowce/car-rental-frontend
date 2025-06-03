@@ -37,6 +37,16 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: () => ({ url: `/api/v1/employees/` }),
     }),
+    createEmployee: build.mutation<
+      CreateEmployeeApiResponse,
+      CreateEmployeeApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/employees/`,
+        method: "POST",
+        body: queryArg.employeeCreate,
+      }),
+    }),
     getEmployee: build.query<GetEmployeeApiResponse, GetEmployeeApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/employees/${queryArg.employeeId}`,
@@ -122,21 +132,6 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
-    searchReservations: build.query<
-      SearchReservationsApiResponse,
-      SearchReservationsApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/reservations/search`,
-        params: {
-          kliento_id: queryArg.klientoId,
-          automobilio_id: queryArg.automobilioId,
-          nuo: queryArg.nuo,
-          iki: queryArg.iki,
-          busena: queryArg.busena,
-        },
-      }),
-    }),
     getAllReservations: build.query<
       GetAllReservationsApiResponse,
       GetAllReservationsApiArg
@@ -151,14 +146,6 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v1/reservations/`,
         method: "POST",
         body: queryArg.reservationCreate,
-      }),
-    }),
-    getReservationById: build.query<
-      GetReservationByIdApiResponse,
-      GetReservationByIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/reservations/${queryArg.rezervacijosId}`,
       }),
     }),
     updateReservation: build.mutation<
@@ -180,6 +167,29 @@ const injectedRtkApi = api.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    getReservationById: build.query<
+      GetReservationByIdApiResponse,
+      GetReservationByIdApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/reservations/${queryArg.rezervacijosId}`,
+      }),
+    }),
+    searchReservations: build.query<
+      SearchReservationsApiResponse,
+      SearchReservationsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/reservations/search`,
+        params: {
+          kliento_id: queryArg.klientoId,
+          automobilio_id: queryArg.automobilioId,
+          nuo: queryArg.nuo,
+          iki: queryArg.iki,
+          busena: queryArg.busena,
+        },
+      }),
+    }),
     getAllOrders: build.query<GetAllOrdersApiResponse, GetAllOrdersApiArg>({
       query: () => ({ url: `/api/v1/orders/` }),
     }),
@@ -197,6 +207,13 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v1/orders/${queryArg.uzsakymoId}`,
         method: "DELETE",
+      }),
+    }),
+    updateOrder: build.mutation<UpdateOrderApiResponse, UpdateOrderApiArg>({
+      query: (queryArg) => ({
+        url: `/api/v1/orders/${queryArg.uzsakymoId}`,
+        method: "PUT",
+        body: queryArg.orderUpdate,
       }),
     }),
     getOrderStatsByStatus: build.query<
@@ -225,6 +242,13 @@ const injectedRtkApi = api.injectEndpoints({
     }),
     getClientById: build.query<GetClientByIdApiResponse, GetClientByIdApiArg>({
       query: (queryArg) => ({ url: `/api/v1/clients/${queryArg.klientoId}` }),
+    }),
+    updateClient: build.mutation<UpdateClientApiResponse, UpdateClientApiArg>({
+      query: (queryArg) => ({
+        url: `/api/v1/clients/${queryArg.klientoId}`,
+        method: "PUT",
+        body: queryArg.clientUpdate,
+      }),
     }),
     deleteClient: build.mutation<DeleteClientApiResponse, DeleteClientApiArg>({
       query: (queryArg) => ({
@@ -256,6 +280,12 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.clientSupportCreate,
       }),
     }),
+    getUnansweredSupports: build.query<
+      GetUnansweredSupportsApiResponse,
+      GetUnansweredSupportsApiArg
+    >({
+      query: () => ({ url: `/api/v1/support/unanswered` }),
+    }),
     getSupport: build.query<GetSupportApiResponse, GetSupportApiArg>({
       query: (queryArg) => ({ url: `/api/v1/support/${queryArg.uzklausosId}` }),
     }),
@@ -268,12 +298,6 @@ const injectedRtkApi = api.injectEndpoints({
         method: "PATCH",
         body: queryArg.clientSupportUpdate,
       }),
-    }),
-    getUnansweredSupports: build.query<
-      GetUnansweredSupportsApiResponse,
-      GetUnansweredSupportsApiArg
-    >({
-      query: () => ({ url: `/api/v1/support/unanswered` }),
     }),
     getAllInvoices: build.query<
       GetAllInvoicesApiResponse,
@@ -307,21 +331,9 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.invoiceStatusUpdate,
       }),
     }),
-    getWeatherForecast: build.query<
-      GetWeatherForecastApiResponse,
-      GetWeatherForecastApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/weather`,
-        params: {
-          city: queryArg.city,
-          date: queryArg.date,
-        },
-      }),
-    }),
     geoCode: build.mutation<GeoCodeApiResponse, GeoCodeApiArg>({
       query: (queryArg) => ({
-        url: `/api/v1/api/geocode`,
+        url: `/api/v1/geocode`,
         method: "POST",
         body: queryArg.geocodeRequest,
       }),
@@ -352,6 +364,11 @@ export type ChangePasswordApiArg = {
 export type GetAllEmployeesApiResponse =
   /** status 200 Successful Response */ EmployeeOut[];
 export type GetAllEmployeesApiArg = void;
+export type CreateEmployeeApiResponse =
+  /** status 200 Successful Response */ EmployeeOut;
+export type CreateEmployeeApiArg = {
+  employeeCreate: EmployeeCreate;
+};
 export type GetEmployeeApiResponse =
   /** status 200 Successful Response */ EmployeeOut;
 export type GetEmployeeApiArg = {
@@ -411,15 +428,6 @@ export type GetLatestReservationsApiResponse =
 export type GetLatestReservationsApiArg = {
   limit?: number;
 };
-export type SearchReservationsApiResponse =
-  /** status 200 Successful Response */ ReservationOut[];
-export type SearchReservationsApiArg = {
-  klientoId?: number | null;
-  automobilioId?: number | null;
-  nuo?: string | null;
-  iki?: string | null;
-  busena?: string | null;
-};
 export type GetAllReservationsApiResponse =
   /** status 200 Successful Response */ ReservationOut[];
 export type GetAllReservationsApiArg = void;
@@ -427,11 +435,6 @@ export type CreateReservationApiResponse =
   /** status 200 Successful Response */ ReservationOut;
 export type CreateReservationApiArg = {
   reservationCreate: ReservationCreate;
-};
-export type GetReservationByIdApiResponse =
-  /** status 200 Successful Response */ ReservationOut;
-export type GetReservationByIdApiArg = {
-  rezervacijosId: number;
 };
 export type UpdateReservationApiResponse =
   /** status 200 Successful Response */ ReservationOut;
@@ -443,6 +446,20 @@ export type DeleteReservationApiResponse =
   /** status 200 Successful Response */ any;
 export type DeleteReservationApiArg = {
   rezervacijosId: number;
+};
+export type GetReservationByIdApiResponse =
+  /** status 200 Successful Response */ ReservationOut;
+export type GetReservationByIdApiArg = {
+  rezervacijosId: number;
+};
+export type SearchReservationsApiResponse =
+  /** status 200 Successful Response */ ReservationOut[];
+export type SearchReservationsApiArg = {
+  klientoId?: number | null;
+  automobilioId?: number | null;
+  nuo?: string | null;
+  iki?: string | null;
+  busena?: string | null;
 };
 export type GetAllOrdersApiResponse =
   /** status 200 Successful Response */ OrderOut[];
@@ -460,6 +477,12 @@ export type GetOrderByIdApiArg = {
 export type DeleteOrderApiResponse = /** status 200 Successful Response */ any;
 export type DeleteOrderApiArg = {
   uzsakymoId: number;
+};
+export type UpdateOrderApiResponse =
+  /** status 200 Successful Response */ OrderOut;
+export type UpdateOrderApiArg = {
+  uzsakymoId: number;
+  orderUpdate: OrderUpdate;
 };
 export type GetOrderStatsByStatusApiResponse =
   /** status 200 Successful Response */ any;
@@ -482,6 +505,12 @@ export type GetClientByIdApiResponse =
 export type GetClientByIdApiArg = {
   klientoId: number;
 };
+export type UpdateClientApiResponse =
+  /** status 200 Successful Response */ ClientOut;
+export type UpdateClientApiArg = {
+  klientoId: number;
+  clientUpdate: ClientUpdate;
+};
 export type DeleteClientApiResponse = /** status 200 Successful Response */ any;
 export type DeleteClientApiArg = {
   klientoId: number;
@@ -499,6 +528,9 @@ export type CreateSupportApiResponse =
 export type CreateSupportApiArg = {
   clientSupportCreate: ClientSupportCreate;
 };
+export type GetUnansweredSupportsApiResponse =
+  /** status 200 Successful Response */ ClientSupportOut[];
+export type GetUnansweredSupportsApiArg = void;
 export type GetSupportApiResponse =
   /** status 200 Successful Response */ ClientSupportOut;
 export type GetSupportApiArg = {
@@ -510,9 +542,6 @@ export type AnswerToSupportApiArg = {
   uzklausosId: number;
   clientSupportUpdate: ClientSupportUpdate;
 };
-export type GetUnansweredSupportsApiResponse =
-  /** status 200 Successful Response */ ClientSupportOut[];
-export type GetUnansweredSupportsApiArg = void;
 export type GetAllInvoicesApiResponse =
   /** status 200 Successful Response */ InvoiceOut[];
 export type GetAllInvoicesApiArg = void;
@@ -531,12 +560,6 @@ export type UpdateStatusApiResponse =
 export type UpdateStatusApiArg = {
   invoiceId: number;
   invoiceStatusUpdate: InvoiceStatusUpdate;
-};
-export type GetWeatherForecastApiResponse =
-  /** status 200 Successful Response */ any;
-export type GetWeatherForecastApiArg = {
-  city: string;
-  date: string;
 };
 export type GeoCodeApiResponse =
   /** status 200 Successful Response */ GeocodeResponse;
@@ -594,6 +617,16 @@ export type EmployeeOut = {
     [key: string]: any;
   }[];
 };
+export type EmployeeCreate = {
+  vardas: string;
+  pavarde: string;
+  el_pastas: string;
+  telefono_nr: string | null;
+  pareigos: string;
+  atlyginimas: number;
+  isidarbinimo_data: string;
+  slaptazodis: string;
+};
 export type EmployeeUpdate = {
   vardas?: string | null;
   pavarde?: string | null;
@@ -611,26 +644,26 @@ export type LocationOut = {
   miestas: string;
 };
 export type CarOut = {
-  marke?: string | null;
-  modelis?: string | null;
-  metai?: number | null;
-  numeris?: string | null;
-  vin_kodas?: string | null;
-  spalva?: string | null;
-  kebulo_tipas?: string | null;
-  pavarų_deze?: string | null;
-  variklio_turis?: number | null;
-  galia_kw?: number | null;
-  kuro_tipas?: string | null;
-  rida?: number | null;
-  sedimos_vietos?: number | null;
-  klimato_kontrole?: boolean | null;
-  navigacija?: boolean | null;
-  kaina_parai?: number | null;
-  automobilio_statusas?: string | null;
-  technikines_galiojimas?: string | null;
-  dabartine_vieta_id?: number | null;
-  pastabos?: string | null;
+  marke: string;
+  modelis: string;
+  metai: number;
+  numeris: string;
+  vin_kodas: string;
+  spalva: string;
+  kebulo_tipas: string;
+  pavarų_deze: string;
+  variklio_turis: number;
+  galia_kw: number;
+  kuro_tipas: string;
+  rida: number;
+  sedimos_vietos: number;
+  klimato_kontrole: boolean;
+  navigacija: boolean;
+  kaina_parai: number;
+  automobilio_statusas: string;
+  technikines_galiojimas: string;
+  dabartine_vieta_id: number;
+  pastabos: string | null;
   automobilio_id: number;
   lokacija: LocationOut | null;
   links: {
@@ -638,26 +671,26 @@ export type CarOut = {
   }[];
 };
 export type CarCreate = {
-  marke?: string | null;
-  modelis?: string | null;
-  metai?: number | null;
-  numeris?: string | null;
-  vin_kodas?: string | null;
-  spalva?: string | null;
-  kebulo_tipas?: string | null;
-  pavarų_deze?: string | null;
-  variklio_turis?: number | null;
-  galia_kw?: number | null;
-  kuro_tipas?: string | null;
-  rida?: number | null;
-  sedimos_vietos?: number | null;
-  klimato_kontrole?: boolean | null;
-  navigacija?: boolean | null;
-  kaina_parai?: number | null;
-  automobilio_statusas?: string | null;
-  technikines_galiojimas?: string | null;
-  dabartine_vieta_id?: number | null;
-  pastabos?: string | null;
+  marke: string;
+  modelis: string;
+  metai: number;
+  numeris: string;
+  vin_kodas: string;
+  spalva: string;
+  kebulo_tipas: string;
+  pavarų_deze: string;
+  variklio_turis: number;
+  galia_kw: number;
+  kuro_tipas: string;
+  rida: number;
+  sedimos_vietos: number;
+  klimato_kontrole: boolean;
+  navigacija: boolean;
+  kaina_parai: number;
+  automobilio_statusas: string;
+  technikines_galiojimas: string;
+  dabartine_vieta_id: number;
+  pastabos: string | null;
 };
 export type CarUpdate = {
   marke?: string | null;
@@ -750,35 +783,49 @@ export type OrderCreate = {
   uzsakymo_busena: string;
   turi_papildomas_paslaugas: boolean;
 };
+export type OrderUpdate = {
+  uzsakymo_busena?: string | null;
+  grazinimo_data?: string | null;
+  turi_papildomas_paslaugas?: boolean | null;
+};
 export type ClientOut = {
-  vardas: string;
-  pavarde: string;
-  el_pastas: string;
-  telefono_nr: string;
-  gimimo_data: string;
-  registracijos_data: string;
-  bonus_taskai: number;
+  vardas?: string;
+  pavarde?: string;
+  el_pastas?: string;
+  telefono_nr?: string;
+  gimimo_data?: string;
+  registracijos_data?: string;
+  bonus_taskai?: number;
   kliento_id: number;
   links: {
     [key: string]: any;
   }[];
 };
 export type ClientCreate = {
-  vardas: string;
-  pavarde: string;
-  el_pastas: string;
-  telefono_nr: string;
-  gimimo_data: string;
-  registracijos_data: string;
-  bonus_taskai: number;
+  vardas?: string;
+  pavarde?: string;
+  el_pastas?: string;
+  telefono_nr?: string;
+  gimimo_data?: string;
+  registracijos_data?: string;
+  bonus_taskai?: number;
+};
+export type ClientUpdate = {
+  vardas?: string;
+  pavarde?: string;
+  el_pastas?: string;
+  telefono_nr?: string;
+  gimimo_data?: string;
+  registracijos_data?: string;
+  bonus_taskai?: number;
 };
 export type ClientSupportOut = {
   kliento_id: number;
-  darbuotojo_id: number;
+  darbuotojo_id?: number | null;
   tema: string;
   pranesimas: string;
   atsakymas?: string | null;
-  pateikimo_data: string;
+  pateikimo_data?: string | null;
   atsakymo_data?: string | null;
   uzklausos_id: number;
   links: {
@@ -791,12 +838,13 @@ export type ClientSupportCreate = {
   tema: string;
   pranesimas: string;
   atsakymas?: string | null;
-  pateikimo_data: string;
+  pateikimo_data?: string | null;
   atsakymo_data?: string | null;
 };
 export type ClientSupportUpdate = {
-  atsakymas: string | null;
-  atsakymo_data: string | null;
+  atsakymas?: string | null;
+  atsakymo_data?: string | null;
+  darbuotojo_id?: number | null;
 };
 export type InvoiceOut = {
   order_id: number;
@@ -833,6 +881,7 @@ export const {
   useMeApiV1MeGetQuery,
   useChangePasswordMutation,
   useGetAllEmployeesQuery,
+  useCreateEmployeeMutation,
   useGetEmployeeQuery,
   useUpdateEmployeeMutation,
   useDeleteEmployeeMutation,
@@ -844,32 +893,33 @@ export const {
   useUpdateCarStatusMutation,
   useSearchCarsQuery,
   useGetLatestReservationsQuery,
-  useSearchReservationsQuery,
   useGetAllReservationsQuery,
   useCreateReservationMutation,
-  useGetReservationByIdQuery,
   useUpdateReservationMutation,
   useDeleteReservationMutation,
+  useGetReservationByIdQuery,
+  useSearchReservationsQuery,
   useGetAllOrdersQuery,
   useCreateOrderMutation,
   useGetOrderByIdQuery,
   useDeleteOrderMutation,
+  useUpdateOrderMutation,
   useGetOrderStatsByStatusQuery,
   useGetOrderByClientQuery,
   useGetAllClientsQuery,
   useCreateClientMutation,
   useGetClientByIdQuery,
+  useUpdateClientMutation,
   useDeleteClientMutation,
   useGetClientOrderQuery,
   useGetAllSupportsQuery,
   useCreateSupportMutation,
+  useGetUnansweredSupportsQuery,
   useGetSupportQuery,
   useAnswerToSupportMutation,
-  useGetUnansweredSupportsQuery,
   useGetAllInvoicesQuery,
   useCreateInvoiceMutation,
   useDeleteInvoiceMutation,
   useUpdateStatusMutation,
-  useGetWeatherForecastQuery,
   useGeoCodeMutation,
 } = injectedRtkApi;

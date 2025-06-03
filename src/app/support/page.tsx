@@ -1,12 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import DataTable from "@/app/components/DataTable";
 import { useSupportData } from "@/hooks/useSupportData";
+import { useClientsData } from "@/hooks/useClientsData";
 
 export default function SupportPage() {
+  /* --- duomenys iš API --- */
   const { supports, isLoading, answer } = useSupportData();
+  const { clients } = useClientsData();
 
+  /* --- Greitas kliento vardo lookupʼas --- */
+  const clientMap = useMemo(
+    () =>
+      new Map(
+        clients.map((c: any) => [c.kliento_id, `${c.vardas} ${c.pavarde}`])
+      ),
+    [clients]
+  );
+  const getClientName = (id: number) => clientMap.get(id) ?? `#${id}`;
+
+  /* --- React state --- */
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "visi" | "neatsakyta" | "atsakyta"
@@ -16,10 +30,10 @@ export default function SupportPage() {
   const [responses, setResponses] = useState<Record<number, string>>({});
   const [sendingId, setSendingId] = useState<number | null>(null);
 
-  const filtered = supports.filter((u) => {
-    const matchSearch = `${u.klientas} ${u.tema}`
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  /* --- Filtravimas pagal paiešką ir būseną --- */
+  const filtered = supports.filter((u: any) => {
+    const target = `${getClientName(u.kliento_id)} ${u.tema}`.toLowerCase();
+    const matchSearch = target.includes(search.toLowerCase());
     const matchStatus =
       statusFilter === "visi" ||
       (statusFilter === "neatsakyta" && !u.atsakymas) ||
@@ -27,8 +41,9 @@ export default function SupportPage() {
     return matchSearch && matchStatus;
   });
 
+  /* --- Lentelės stulpeliai --- */
   const columns = [
-    { label: "Klientas", accessor: "klientas" },
+    { label: "Klientas", accessor: (u: any) => getClientName(u.kliento_id) },
     { label: "Tema", accessor: "tema" },
     {
       label: "Pateikta",
@@ -38,8 +53,10 @@ export default function SupportPage() {
     {
       label: "Atsakymas",
       accessor: (u: any) => {
+        /* Jei jau atsakyta – rodom tekstą */
         if (u.atsakymas) return u.atsakymas;
 
+        /* Mygtukas „Atsakyti“ */
         if (activeReplyId !== u.uzklausos_id) {
           return (
             <button
@@ -51,9 +68,12 @@ export default function SupportPage() {
           );
         }
 
+        /* Atsakymo forma */
         return (
           <div className="flex flex-col gap-2">
             <textarea
+              className="border rounded p-2 w-full"
+              rows={2}
               placeholder="Įveskite atsakymą..."
               value={responses[u.uzklausos_id] || ""}
               onChange={(e) =>
@@ -62,11 +82,11 @@ export default function SupportPage() {
                   [u.uzklausos_id]: e.target.value,
                 }))
               }
-              className="border rounded p-2 w-full"
-              rows={2}
             />
             <div className="flex gap-2">
               <button
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded text-sm"
+                disabled={sendingId === u.uzklausos_id}
                 onClick={async () => {
                   const text = responses[u.uzklausos_id]?.trim();
                   if (!text) return;
@@ -76,17 +96,18 @@ export default function SupportPage() {
                   setActiveReplyId(null);
                   setSendingId(null);
                 }}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded text-sm"
-                disabled={sendingId === u.uzklausos_id}
               >
                 {sendingId === u.uzklausos_id ? "Siunčiama..." : "Siųsti"}
               </button>
               <button
+                className="text-sm text-gray-500 hover:underline"
                 onClick={() => {
                   setActiveReplyId(null);
-                  setResponses((prev) => ({ ...prev, [u.uzklausos_id]: "" }));
+                  setResponses((prev) => ({
+                    ...prev,
+                    [u.uzklausos_id]: "",
+                  }));
                 }}
-                className="text-sm text-gray-500 hover:underline"
               >
                 Atšaukti
               </button>
@@ -104,6 +125,7 @@ export default function SupportPage() {
     },
   ];
 
+  /* --- UI --- */
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -119,9 +141,11 @@ export default function SupportPage() {
           className="border p-2 rounded w-64"
         />
         <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as any)}
           className="border p-2 rounded"
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value as "visi" | "neatsakyta" | "atsakyta")
+          }
         >
           <option value="visi">Visos</option>
           <option value="neatsakyta">Neatsakytos</option>

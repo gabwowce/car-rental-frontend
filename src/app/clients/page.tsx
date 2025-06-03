@@ -1,23 +1,33 @@
 "use client";
 
-import { useClientsData } from "@/hooks/useClientsData";
-import { useClientModals } from "@/hooks/useClientModals";
+import { useState } from "react";
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
 import EntityModal from "@/app/components/modals/EntityModal";
-import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
-import { useOrdersData } from "@/hooks/useOrdersData"; // dėl clientFields
+import LoadingScreen from "@/app/components/loadingScreen";
+import { useClientsData } from "@/hooks/useClientsData";
 
 type Klientas = NonNullable<
   ReturnType<typeof useClientsData>["clients"]
 >[number];
 
 export default function ClientsPage() {
-  const { search, setSearch, filtered, isLoading, clientFields } =
-    useClientsData();
-  const { selectedClient, mode, openView, openEdit, openDelete, close } =
-    useClientModals();
+  /* --- hook'as --- */
+  const {
+    filtered,
+    isLoading,
+    search,
+    setSearch,
+    clientFields,
+    saveClient,
+    removeClient,
+  } = useClientsData();
 
+  /* --- modal state --- */
+  const [selected, setSelected] = useState<Klientas | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  /* --- lentelės stulpeliai --- */
   const columns = [
     {
       label: "Vardas",
@@ -35,66 +45,61 @@ export default function ClientsPage() {
       label: "Veiksmai",
       accessor: (k: Klientas) => (
         <ActionButtons
-          onEdit={() => openEdit(k)}
-          onDelete={() => openDelete(k)}
+          onEdit={() => {
+            setSelected(k);
+            setModalOpen(true);
+          }}
+          onDelete={async () => {
+            const ok = window.confirm(
+              `Ar tikrai norite ištrinti klientą ${k.vardas} ${k.pavarde}?`,
+            );
+            if (ok) await removeClient(k.kliento_id);
+          }}
         />
       ),
     },
   ];
 
+  /* --- UI --- */
+  if (isLoading) return <LoadingScreen />;
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Klientai</h1>
+        {/* mygtukas „+ Naujas“ - nepridėtas logikos čia */}
         <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
           + Naujas klientas
         </button>
       </div>
 
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Ieškoti pagal vardą, pavardę ar el. paštą"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-full max-w-md"
-        />
-      </div>
+      {/* paieška */}
+      <input
+        className="border p-2 rounded mb-6 w-full max-w-md"
+        placeholder="Ieškoti pagal vardą, pavardę ar el. paštą"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-      {isLoading ? (
-        <p>Įkeliama...</p>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={filtered}
-          rowKey={(k) => k.kliento_id}
-        />
-      )}
+      <DataTable columns={columns} data={filtered} rowKey={(k) => k.kliento_id} />
 
-      {selectedClient && mode === "edit" && (
+      {/* modalas */}
+      {selected && (
         <EntityModal
-          title="Redaguoti klientą"
-          entity={selectedClient}
+          title={`Redaguoti klientą #${selected.kliento_id}`}
+          entity={selected}
           fields={clientFields}
-          isOpen={true}
-          onClose={close}
-          onSave={(updated) => {
-            console.log("Išsaugotas klientas", updated);
-            close();
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setSelected(null);
+          }}
+          onSave={async (upd) => {
+            await saveClient(selected.kliento_id, upd);
+            setModalOpen(false);
+            setSelected(null);
           }}
           startInEdit={false}
-        />
-      )}
-
-      {selectedClient && mode === "delete" && (
-        <ConfirmDeleteModal
-          isOpen={true}
-          onClose={close}
-          onConfirm={() => {
-            console.log("Ištrintas:", selectedClient.kliento_id);
-            close();
-          }}
-          entityName="klientą"
         />
       )}
     </div>

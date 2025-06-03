@@ -1,51 +1,95 @@
-// useReservationData.ts -----------------------------------------------------
+// hooks/useReservationData.ts
 import {
   useGetAllReservationsQuery,
+  useUpdateReservationMutation,
   useDeleteReservationMutation,
-  useGetAllClientsQuery,
-  useGetAllCarsQuery,
 } from "@/store/carRentalApi";
-import { useState } from "react";
-import { FieldConfig } from "@/app/components/modals/EntityModal";
 
-/* 1️⃣  Apibrėžiame tipą, kad TypeScript žinotų laukus.
-      Pritaikyk pagal realų API objektą, jei trūksta laukų. */
-export interface Rezervacija {
-  rezervacijos_id: number;
-  kliento_id: number;
-  automobilio_id: number;
-  rezervacijos_pradzia: string; // arba Date, jei konvertuoji
-  rezervacijos_pabaiga: string;
-  busena: string;
-}
+import { useClientsData } from "./useClientsData";
+import { useCarsData } from "./useCarsData";
+import { useState, useMemo } from "react";
 
-export function useReservationData() {
-  // --- API užklausos -------------------------------------------------------
-  const { data: reservations = [], isLoading: loadingR } =
-    useGetAllReservationsQuery();
-  const { data: clients = [], isLoading: loadingCl } = useGetAllClientsQuery();
-  const { data: cars = [], isLoading: loadingC } = useGetAllCarsQuery();
-  const [deleteReservation] = useDeleteReservationMutation();
+export const useReservationData = () => {
+  /* ----- API sąrašas ----- */
+  const {
+    data: reservations = [],
+    isLoading,
+    refetch,
+  } = useGetAllReservationsQuery();
 
-  const isLoading = loadingCl || loadingR || loadingC;
+  /* ----- lookup’ai ----- */
+  const { clients } = useClientsData();
+  const { automobiliai } = useCarsData();
 
-  // --- paieška / filtrai ---------------------------------------------------
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("visi");
+  const clientMap = useMemo(
+    () =>
+      new Map(
+        clients.map((c: any) => [c.kliento_id, `${c.vardas} ${c.pavarde}`])
+      ),
+    [clients]
+  );
+  const carMap = useMemo(
+    () =>
+      new Map(
+        automobiliai.map((a: any) => [
+          a.automobilio_id,
+          `${a.marke} ${a.modelis}`,
+        ])
+      ),
+    [automobiliai]
+  );
 
-  // --- helper-funkcijos ----------------------------------------------------
-  const getClientName = (id: number) =>
-    clients.find((c) => c.kliento_id === id)?.vardas || `Klientas #${id}`;
+  const getClientName = (id: number) => clientMap.get(id) ?? `#${id}`;
+  const getCarName = (id: number) => carMap.get(id) ?? `#${id}`;
 
-  const getCarName = (id: number) => {
-    const car = cars.find((c) => c.automobilio_id === id);
-    return car ? `${car.marke} ${car.modelis}` : `Automobilis #${id}`;
+  /* ----- mutation’ai ----- */
+  const [updateReservation, { isLoading: updating }] =
+    useUpdateReservationMutation();
+  const [deleteReservation, { isLoading: deleting }] =
+    useDeleteReservationMutation();
+
+  /** Atnaujinti rezervaciją */
+  const saveReservation = async (
+    rezervacijos_id: number,
+    data: {
+      rezervacijos_pradzia?: string;
+      rezervacijos_pabaiga?: string;
+      busena?: string;
+    }
+  ) => {
+    await updateReservation({
+      rezervacijosId: rezervacijos_id, // <-- sugeneruoto hook’o param.
+      reservationUpdate: data,
+    }).unwrap();
+    await refetch();
   };
 
-  // --- laukų aprašas EntityModal’ui (reikėjo po helperių!) ----------------
-  const reservationFields: FieldConfig<Rezervacija>[] = [
-    { name: "kliento_id", label: "Klientas", type: "text" },
-    { name: "automobilio_id", label: "Automobilis", type: "text" },
+  /** Ištrinti rezervaciją */
+  const handleDelete = async (rezervacijos_id: number) => {
+    await deleteReservation({ rezervacijosId: rezervacijos_id }).unwrap();
+    await refetch();
+  };
+
+  /* ----- lokali filtravimo būsena ----- */
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "visi" | "patvirtinta" | "laukiama" | "atšaukta"
+  >("visi");
+
+  const filtered = reservations.filter((r: any) => {
+    const target = `${getClientName(r.kliento_id)} ${getCarName(
+      r.automobilio_id
+    )}`.toLowerCase();
+    const matchSearch = target.includes(search.toLowerCase());
+
+    const busena = (r.busena ?? "").toLowerCase();
+    const matchStatus = statusFilter === "visi" || statusFilter === busena;
+
+    return matchSearch && matchStatus;
+  });
+
+  /* ----- laukų konfigas modalui ----- */
+  const reservationFields = [
     { name: "rezervacijos_pradzia", label: "Pradžia", type: "text" },
     { name: "rezervacijos_pabaiga", label: "Pabaiga", type: "text" },
     {
@@ -53,7 +97,6 @@ export function useReservationData() {
       label: "Būsena",
       type: "select",
       options: [
-        { value: "aktyvi", label: "Aktyvi" },
         { value: "patvirtinta", label: "Patvirtinta" },
         { value: "laukiama", label: "Laukiama" },
         { value: "atšaukta", label: "Atšaukta" },
@@ -61,44 +104,27 @@ export function useReservationData() {
     },
   ];
 
-  // --- delete --------------------------------------------------------------
-  const handleDelete = async (id: number) => {
-    if (confirm("Ar tikrai norite atšaukti rezervaciją?")) {
-      try {
-        await deleteReservation({ rezervacijosId: id }).unwrap();
-        alert("Rezervacija atšaukta sėkmingai");
-      } catch (error) {
-        console.error("Klaida trinant rezervaciją", error);
-        alert("Nepavyko atšaukti rezervacijos");
-      }
-    }
-  };
-
-  // --- filtravimas ---------------------------------------------------------
-  const filtered = reservations.filter((r) => {
-    const klientas = getClientName(r.kliento_id).toLowerCase();
-    const automobilis = getCarName(r.automobilio_id).toLowerCase();
-    const searchMatch = `${klientas} ${automobilis}`.includes(
-      search.toLowerCase()
-    );
-    const statusMatch =
-      statusFilter === "visi" || r.busena.toLowerCase() === statusFilter;
-    return searchMatch && statusMatch;
-  });
-
   return {
+    /* duomenys */
     reservations,
-    clients,
-    cars,
+    filtered,
+    isLoading: isLoading || updating || deleting,
+
+    /* paieška / filtras */
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
+
+    /* helpers */
     getClientName,
     getCarName,
+
+    /* CRUD */
+    saveReservation,
     handleDelete,
-    filtered,
-    isLoading,
-    reservationFields, // ⬅️ naudosi ReservationsPage + EntityModal
+
+    /* modal fields */
+    reservationFields,
   };
-}
+};

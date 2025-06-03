@@ -1,4 +1,5 @@
-import { useGetAllCarsQuery, useUpdateCarMutation } from "@/store/carRentalApi";
+import { useUpdateCarMutation } from "@/store/carRentalApi";
+import { useGetAllCarsQuery } from "@/store/enhanceEndpoints";
 import { useState } from "react";
 import EntityModal, { FieldConfig } from "@/app/components/modals/EntityModal";
 
@@ -66,7 +67,11 @@ export function useCarsData() {
     },
   ];
 
-  const { data: automobiliai = [], isLoading } = useGetAllCarsQuery();
+  const {
+    data: automobiliai = [],
+    isLoading,
+    refetch: refetchCars,
+  } = useGetAllCarsQuery();
 
   const [statusFilter, setStatusFilter] = useState("visi");
   const [search, setSearch] = useState("");
@@ -94,5 +99,6 @@ export function useCarsData() {
     isModalOpen,
     setModalOpen,
     carFields,
+    refetchCars,
   };
 }

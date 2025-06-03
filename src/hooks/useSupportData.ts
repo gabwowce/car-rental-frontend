@@ -1,19 +1,21 @@
-// hooks/useSupportData.ts
 import {
   useGetAllSupportsQuery,
   useAnswerToSupportMutation,
-} from "@/store/carRentalApi";
+} from "@/store/enhanceEndpoints";
 
-/** Susičiaupiame visą API logiką vienoje vietoje */
+/** Viena vieta visai pagalbos užklausų logikai */
 export const useSupportData = () => {
+  /* Užklausų sąrašas */
   const { data: supports = [], isLoading, refetch } = useGetAllSupportsQuery();
 
+  /* Atsakymo mutacija */
   const [answerToSupport, { isLoading: isAnswering }] =
     useAnswerToSupportMutation();
 
+  /** Atsakyti į konkrečią užklausą ir refetch’inti lentelę */
   const answer = async (id: number, atsakymas: string) => {
     await answerToSupport({ id, atsakymas }).unwrap();
-    refetch(); // iškart atnaujiname lentelę
+    await refetch();
   };
 
   return {

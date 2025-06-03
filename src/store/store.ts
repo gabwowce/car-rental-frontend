@@ -1,13 +1,13 @@
 // src/store/store.ts
 import { configureStore } from "@reduxjs/toolkit";
-import { carRentalApi } from "./carRentalApi"; // <- pataisyk kelią jei kitoks
+import { extendedCarRentalApi } from "./enhanceEndpoints";
 
 export const store = configureStore({
   reducer: {
-    [carRentalApi.reducerPath]: carRentalApi.reducer,
+    [extendedCarRentalApi.reducerPath]: extendedCarRentalApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(carRentalApi.middleware),
+    getDefaultMiddleware().concat(extendedCarRentalApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

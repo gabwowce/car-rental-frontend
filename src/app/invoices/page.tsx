@@ -5,8 +5,8 @@ import { useInvoiceModals } from "@/hooks/useInvoiceModals";
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
 import InvoiceViewModal from "@/app/components/modals/InvoiceViewModal";
-import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
 import StatusBadge from "@/app/components/StatusBadge";
+
 type Saskaita = NonNullable<
   ReturnType<typeof useInvoicesData>["invoices"]
 >[number];
@@ -24,6 +24,19 @@ export default function InvoicesPage() {
 
   const { selected, mode, openView, openPdf, openDelete, close } =
     useInvoiceModals();
+
+  const handlePdfDownload = () => {
+    if (selected) {
+      const confirmed = window.confirm(
+        `Ar tikrai norite atsisiųsti PDF sąskaitai nr. ${selected.invoice_id}?`
+      );
+      if (confirmed) {
+        console.log("Atsisiųsti PDF:", selected.invoice_id);
+        // Čia galima įdėti tikrą failo atsisiuntimo logiką
+      }
+      close();
+    }
+  };
 
   const columns = [
     { label: "Sąskaitos nr.", accessor: "invoice_id" },
@@ -44,7 +57,6 @@ export default function InvoicesPage() {
       label: "Būsena",
       accessor: (s: Saskaita) => <StatusBadge status={s.status} />,
     },
-
     {
       label: "Veiksmai",
       accessor: (s: Saskaita) => (
@@ -110,17 +122,12 @@ export default function InvoicesPage() {
         <InvoiceViewModal invoice={selected} isOpen={true} onClose={close} />
       )}
 
-      {selected && mode === "pdf" && (
-        <ConfirmDeleteModal
-          isOpen={true}
-          title="Atsisiųsti PDF?"
-          onClose={close}
-          onConfirm={() => {
-            console.log("Atsisiųsti PDF:", selected.invoice_id);
-            close();
-          }}
-        />
-      )}
+      {selected &&
+        mode === "pdf" &&
+        (() => {
+          handlePdfDownload();
+          return null;
+        })()}
     </div>
   );
 }

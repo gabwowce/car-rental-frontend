@@ -4,65 +4,74 @@ import { useState } from "react";
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
 import EntityModal from "@/app/components/modals/EntityModal";
-import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
-import { useOrdersData } from "@/hooks/useOrdersData";
-import { useOrderModals } from "@/hooks/useOrderModals";
-import { OrderOut } from "@/store/carRentalApi";
-import React from "react";
 import StatusBadge from "@/app/components/StatusBadge";
+import LoadingScreen from "@/app/components/loadingScreen";
+import { useOrdersData } from "@/hooks/useOrdersData";
+import type { OrderOut } from "@/store/carRentalApi";
+
 export default function OrdersPage() {
+  const [selected, setSelected] = useState<OrderOut | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
   const {
+    filtered,
+    isLoading,
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
     getClientName,
     getCarName,
-    filtered,
-    isLoading,
+    saveOrder,
+    handleDelete,
     orderFields,
   } = useOrdersData();
 
-  const { selectedOrder, mode, openView, openEdit, openDelete, close } =
-    useOrderModals();
-
-  const handleSave = (updated: OrderOut) => {
-    console.log("Atnaujinta:", updated);
-    close();
-  };
-
-  const handleDelete = () => {
-    console.log("Ištrintas:", selectedOrder?.uzsakymo_id);
-    close();
-  };
-
+  /* --- lentelė --- */
   const columns = [
     {
       label: "Klientas",
-      accessor: (r: OrderOut) => getClientName(r.kliento_id),
+      accessor: (o: OrderOut) => getClientName(o.kliento_id),
     },
     {
       label: "Automobilis",
-      accessor: (r: OrderOut) => getCarName(r.automobilio_id),
+      accessor: (o: OrderOut) => getCarName(o.automobilio_id),
     },
     { label: "Pradžia", accessor: "nuomos_data" },
     { label: "Pabaiga", accessor: "grazinimo_data" },
     {
       label: "Būsena",
-      accessor: (r: OrderOut) => (
-        <StatusBadge status={r.uzsakymo_busena || ""} />
+      accessor: (o: OrderOut) => (
+        <StatusBadge status={o.uzsakymo_busena || ""} />
       ),
     },
     {
       label: "Veiksmai",
-      accessor: (r: OrderOut) => (
+      accessor: (o: OrderOut) => (
         <ActionButtons
-          onEdit={() => openEdit(r)}
-          onDelete={() => openDelete(r)}
+          onEdit={() => {
+            setSelected(o);
+            setModalOpen(true);
+          }}
+          onDelete={() => handleDelete(o.uzsakymo_id)}
         />
       ),
     },
   ];
+
+  /* --- modal SAVE --- */
+  const onSave = async (updated: OrderOut) => {
+    await saveOrder(selected!.uzsakymo_id, {
+      nuomos_data: updated.nuomos_data,
+      grazinimo_data: updated.grazinimo_data,
+      uzsakymo_busena: updated.uzsakymo_busena,
+    });
+    setModalOpen(false);
+    setSelected(null);
+  };
+
+  /* --- UI --- */
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <div>
@@ -75,11 +84,10 @@ export default function OrdersPage() {
 
       <div className="flex flex-wrap gap-4 mb-6">
         <input
-          type="text"
+          className="border p-2 rounded w-64"
+          placeholder="Ieškoti pagal klientą ar automobilį"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Ieškoti pagal klientą ar automobilį"
-          className="border p-2 rounded w-64"
         />
         <select
           className="border p-2 rounded"
@@ -93,34 +101,24 @@ export default function OrdersPage() {
         </select>
       </div>
 
-      {isLoading ? (
-        <p>Įkeliama...</p>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={filtered}
-          rowKey={(r) => r.uzsakymo_id}
-        />
-      )}
+      <DataTable
+        columns={columns}
+        data={filtered}
+        rowKey={(r) => r.uzsakymo_id}
+      />
 
-      {selectedOrder && mode === "edit" && (
+      {selected && (
         <EntityModal
-          title={`Redaguoti užsakymą #${selectedOrder.uzsakymo_id}`}
-          entity={selectedOrder}
+          title={`Redaguoti užsakymą #${selected.uzsakymo_id}`}
+          entity={selected}
           fields={orderFields}
-          isOpen={true}
-          onClose={close}
-          onSave={handleSave}
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setSelected(null);
+          }}
+          onSave={onSave}
           startInEdit={false}
-        />
-      )}
-
-      {selectedOrder && mode === "delete" && (
-        <ConfirmDeleteModal
-          isOpen={true}
-          onClose={close}
-          onConfirm={handleDelete}
-          entityName="užsakymą"
         />
       )}
     </div>

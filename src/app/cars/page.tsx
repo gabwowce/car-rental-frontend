@@ -1,13 +1,16 @@
 "use client";
+
 import { useState } from "react";
 import DataTable from "../components/DataTable";
 import ActionButtons from "../components/ActionButtons";
 import MapComponent from "../components/MapComponent";
 import EntityModal from "../components/modals/EntityModal";
-import ConfirmDeleteModal from "../components/modals/ConfirmDeleteModal";
 import { useCarsData } from "@/hooks/useCarsData";
 import LoadingScreen from "@/app/components/loadingScreen";
-import { useUpdateCarMutation } from "@/store/carRentalApi";
+import {
+  useUpdateCarMutation,
+  useDeleteCarMutation,
+} from "@/store/enhanceEndpoints";
 
 // Tipas vienam automobiliui
 type Automobilis = NonNullable<
@@ -32,8 +35,8 @@ export default function CarsPage() {
   } = useCarsData();
 
   const [editMode, setEditMode] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [updateCar] = useUpdateCarMutation();
+  const [deleteCar] = useDeleteCarMutation();
 
   const columns = [
     {
@@ -56,9 +59,18 @@ export default function CarsPage() {
             setEditMode(true);
             setModalOpen(true);
           }}
-          onDelete={() => {
-            setSelectedCar(a);
-            setDeleteConfirmOpen(true);
+          onDelete={async () => {
+            const confirmed = window.confirm(
+              `Ar tikrai norite ištrinti automobilį "${a.marke} ${a.modelis}"?`
+            );
+            if (!confirmed) return;
+
+            try {
+              await deleteCar({ carId: a.automobilio_id }).unwrap();
+              setSelectedCar(null);
+            } catch (e) {
+              console.error("Klaida trinant automobilį:", e);
+            }
           }}
         />
       ),
@@ -146,18 +158,6 @@ export default function CarsPage() {
             }
           }}
           startInEdit={false}
-        />
-      )}
-
-      {selectedCar && (
-        <ConfirmDeleteModal
-          isOpen={deleteConfirmOpen}
-          onClose={() => setDeleteConfirmOpen(false)}
-          onConfirm={() => {
-            console.log("Ištrinta:", selectedCar.automobilio_id);
-            setDeleteConfirmOpen(false);
-          }}
-          entityName="automobilį"
         />
       )}
     </div>

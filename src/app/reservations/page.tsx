@@ -4,7 +4,6 @@ import { useState } from "react";
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
 import EntityModal from "@/app/components/modals/EntityModal";
-import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
 import LoadingScreen from "@/app/components/loadingScreen";
 import { useReservationData } from "@/hooks/useReservationData";
 import StatusBadge from "@/app/components/StatusBadge";
@@ -14,13 +13,12 @@ type Rezervacija = NonNullable<
 >[number];
 
 export default function ReservationsPage() {
-  const [selectedReservation, setSelectedReservation] =
-    useState<Rezervacija | null>(null);
+  const [selected, setSelected] = useState<Rezervacija | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const {
-    reservations,
+    filtered,
+    isLoading,
     search,
     setSearch,
     statusFilter,
@@ -28,17 +26,11 @@ export default function ReservationsPage() {
     getClientName,
     getCarName,
     handleDelete,
-    filtered,
-    isLoading,
     reservationFields,
+    saveReservation,
   } = useReservationData();
 
-  const handleSave = (updated: Rezervacija) => {
-    console.log("Išsaugota (implementuok API):", updated);
-    setModalOpen(false);
-    setSelectedReservation(null);
-  };
-
+  /* ——— lentelės stulpeliai ——— */
   const columns = [
     {
       label: "Klientas",
@@ -59,18 +51,31 @@ export default function ReservationsPage() {
       accessor: (r: Rezervacija) => (
         <ActionButtons
           onEdit={() => {
-            setSelectedReservation(r);
+            setSelected(r);
             setModalOpen(true);
           }}
           onDelete={() => {
-            setSelectedReservation(r);
-            setDeleteConfirmOpen(true);
+            if (window.confirm("Ar tikrai norite atšaukti rezervaciją?")) {
+              handleDelete(r.rezervacijos_id);
+            }
           }}
         />
       ),
     },
   ];
 
+  /* ——— modalo save ——— */
+  const onSave = async (updated: Rezervacija) => {
+    await saveReservation(selected!.rezervacijos_id, {
+      rezervacijos_pradzia: updated.rezervacijos_pradzia,
+      rezervacijos_pabaiga: updated.rezervacijos_pabaiga,
+      busena: updated.busena,
+    });
+    setModalOpen(false);
+    setSelected(null);
+  };
+
+  /* ——— UI ——— */
   if (isLoading) return <LoadingScreen />;
 
   return (
@@ -85,15 +90,19 @@ export default function ReservationsPage() {
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           type="text"
+          className="border p-2 rounded w-64"
+          placeholder="Ieškoti pagal klientą ar automobilį"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Ieškoti pagal klientą ar automobilį"
-          className="border p-2 rounded w-64"
         />
         <select
           className="border p-2 rounded"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) =>
+            setStatusFilter(
+              e.target.value as "visi" | "patvirtinta" | "laukiama" | "atšaukta"
+            )
+          }
         >
           <option value="visi">Visos</option>
           <option value="patvirtinta">Patvirtintos</option>
@@ -108,32 +117,18 @@ export default function ReservationsPage() {
         rowKey={(r) => r.rezervacijos_id}
       />
 
-      {/* Redagavimo/peržiūros modalas */}
-      {selectedReservation && (
+      {selected && (
         <EntityModal
-          title={`Rezervacija #${selectedReservation.rezervacijos_id}`}
-          entity={selectedReservation}
+          title={`Rezervacija #${selected.rezervacijos_id}`}
+          entity={selected}
           fields={reservationFields}
           isOpen={modalOpen}
           onClose={() => {
             setModalOpen(false);
-            setSelectedReservation(null);
+            setSelected(null);
           }}
-          onSave={handleSave}
+          onSave={onSave}
           startInEdit={false}
-        />
-      )}
-
-      {/* Ištrynimo patvirtinimo modalas */}
-      {selectedReservation && deleteConfirmOpen && (
-        <ConfirmDeleteModal
-          isOpen={deleteConfirmOpen}
-          onClose={() => setDeleteConfirmOpen(false)}
-          onConfirm={() => {
-            handleDelete(selectedReservation.rezervacijos_id);
-            setSelectedReservation(null);
-          }}
-          entityName="rezervaciją"
         />
       )}
     </div>
