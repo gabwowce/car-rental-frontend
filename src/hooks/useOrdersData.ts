@@ -72,16 +72,63 @@ export function useOrdersData() {
 
   /* ----- laukų konfigas modalui ----- */
   const orderFields: FieldConfig<OrderOut>[] = [
-    { name: "nuomos_data", label: "Nuomos data", type: "text" },
-    { name: "grazinimo_data", label: "Grąžinimo data", type: "text" },
+    { name: "kliento_id", label: "Kliento ID", type: "number", required: true },
+    {
+      name: "automobilio_id",
+      label: "Automobilio ID",
+      type: "number",
+      required: true,
+    },
+    {
+      name: "darbuotojo_id",
+      label: "Darbuotojo ID",
+      type: "number",
+      required: true,
+    },
+    { name: "nuomos_data", label: "Nuomos data", type: "date", required: true },
+    {
+      name: "grazinimo_data",
+      label: "Grąžinimo data",
+      type: "date",
+      required: true,
+    },
+    {
+      name: "paemimo_vietos_id",
+      label: "Paėmimo vietos ID",
+      type: "number",
+      required: true,
+    },
+    {
+      name: "grazinimo_vietos_id",
+      label: "Grąžinimo vietos ID",
+      type: "number",
+      required: true,
+    },
+    {
+      name: "bendra_kaina",
+      label: "Bendra kaina (€)",
+      type: "number",
+      required: true,
+    },
     {
       name: "uzsakymo_busena",
       label: "Būsena",
       type: "select",
+      required: true,
       options: [
         { value: "vykdomas", label: "Vykdomas" },
         { value: "užbaigtas", label: "Užbaigtas" },
         { value: "atšauktas", label: "Atšauktas" },
+      ],
+    },
+    {
+      name: "turi_papildomas_paslaugas",
+      label: "Papildomos paslaugos?",
+      type: "select",
+      required: true,
+      options: [
+        { value: true, label: "Taip" },
+        { value: false, label: "Ne" },
       ],
     },
   ];

@@ -8,7 +8,8 @@ import LoadingScreen from "@/app/components/loadingScreen";
 import { useReservationData } from "@/hooks/useReservationData";
 import StatusBadge from "@/app/components/StatusBadge";
 import CreateEntityButton from "@/app/components/CreateEntityButton";
-
+import { SiUpptime } from "react-icons/si";
+import type { ReservationUpdate } from "@/store/carRentalApi";
 type Rezervacija = NonNullable<
   ReturnType<typeof useReservationData>["reservations"]
 >[number];
@@ -66,14 +67,16 @@ export default function ReservationsPage() {
   ];
 
   /* ——— modalo save ——— */
-  const onSave = async (updated: Rezervacija) => {
-    await saveReservation(selected!.rezervacijos_id, {
-      rezervacijos_pradzia: updated.rezervacijos_pradzia,
-      rezervacijos_pabaiga: updated.rezervacijos_pabaiga,
-      busena: updated.busena,
-    });
-    setModalOpen(false);
-    setSelected(null);
+  const onSave = async (updated: ReservationUpdate) => {
+    const cleaned = {
+      ...updated,
+      rezervacijos_pradzia: updated.rezervacijos_pradzia ?? undefined,
+      rezervacijos_pabaiga: updated.rezervacijos_pabaiga ?? undefined,
+      busena: updated.busena ?? undefined,
+      kliento_id: updated.kliento_id ?? undefined,
+      automobilio_id: updated.automobilio_id ?? undefined,
+    };
+    await saveReservation(selected!.rezervacijos_id, cleaned);
   };
 
   /* ——— UI ——— */

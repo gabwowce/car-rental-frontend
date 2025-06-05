@@ -3,6 +3,8 @@ import {
   useGetAllReservationsQuery,
   useUpdateReservationMutation,
   useDeleteReservationMutation,
+  ReservationCreate,
+  ReservationUpdate,
 } from "@/store/carRentalApi";
 
 import { useClientsData } from "./useClientsData";
@@ -50,18 +52,24 @@ export const useReservationData = () => {
 
   /** Atnaujinti rezervaciją */
   const saveReservation = async (
-    rezervacijos_id: number,
-    data: {
-      rezervacijos_pradzia?: string;
-      rezervacijos_pabaiga?: string;
-      busena?: string;
-    }
+    id: number | null,
+    data: ReservationCreate | ReservationUpdate
   ) => {
-    await updateReservation({
-      rezervacijosId: rezervacijos_id, // <-- sugeneruoto hook’o param.
-      reservationUpdate: data,
-    }).unwrap();
-    await refetch();
+    if (id === null) {
+      // nauja rezervacija
+      await fetch("/api/v1/reservations/", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      });
+    } else {
+      // redaguojama rezervacija
+      await fetch(`/api/v1/reservations/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      });
+    }
   };
 
   /** Ištrinti rezervaciją */
@@ -90,8 +98,38 @@ export const useReservationData = () => {
 
   /* ----- laukų konfigas modalui ----- */
   const reservationFields = [
-    { name: "rezervacijos_pradzia", label: "Pradžia", type: "text" },
-    { name: "rezervacijos_pabaiga", label: "Pabaiga", type: "text" },
+    {
+      name: "kliento_id",
+      label: "Klientas",
+      type: "autocomplete",
+      options: clients.map((c: any) => ({
+        value: c.kliento_id,
+        label: `${c.vardas} ${c.pavarde}`,
+      })),
+      required: true,
+    },
+    {
+      name: "automobilio_id",
+      label: "Automobilis",
+      type: "autocomplete",
+      options: automobiliai.map((a: any) => ({
+        value: a.automobilio_id,
+        label: `${a.marke} ${a.modelis}`,
+      })),
+      required: true,
+    },
+    {
+      name: "rezervacijos_pradzia",
+      label: "Pradžia",
+      type: "date",
+      required: true,
+    },
+    {
+      name: "rezervacijos_pabaiga",
+      label: "Pabaiga",
+      type: "date",
+      required: true,
+    },
     {
       name: "busena",
       label: "Būsena",
@@ -101,6 +139,7 @@ export const useReservationData = () => {
         { value: "laukiama", label: "Laukiama" },
         { value: "atšaukta", label: "Atšaukta" },
       ],
+      required: true,
     },
   ];
 

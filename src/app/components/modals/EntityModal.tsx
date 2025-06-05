@@ -1,35 +1,25 @@
+"use client";
 import { useEffect, useState } from "react";
 import BaseModal from "@/app/components/BaseModal";
 
-/**
- * Universal, type‑safe modal for viewing & editing any entity.
- * Pass a `fields` array that describes what should be rendered.
- */
 export interface FieldConfig<T extends Record<string, any>> {
-  /** Property name on the entity */
   name: keyof T & string;
-  /** Visible label */
   label: string;
-  /** Form input type */
-  type?: "text" | "number" | "select" | "textarea";
-  /** Select options, if `type` is "select" */
+  type?: "text" | "number" | "select" | "textarea" | "autocomplete" | "date";
   options?: { value: any; label: string }[];
-  /** Optional formatter for read‑only view */
   format?: (value: any, entity: T) => string;
+  required?: boolean;
 }
 
 export interface EntityModalProps<T extends Record<string, any>> {
   title: string;
-  /** The entity object we display/edit. */
   entity: T;
   isOpen: boolean;
   onClose: () => void;
-  /** onSave is optional; omit it for read‑only modals. */
   onSave?: (updated: T) => void;
-  /** Field configuration */
   fields: FieldConfig<T>[];
-  /** Start modal in edit mode */
   startInEdit?: boolean;
+  noCancel?: boolean;
 }
 
 export default function EntityModal<T extends Record<string, any>>({
@@ -39,6 +29,7 @@ export default function EntityModal<T extends Record<string, any>>({
   onClose,
   onSave,
   fields,
+  noCancel,
   startInEdit = false,
 }: EntityModalProps<T>) {
   const [form, setForm] = useState<T>(entity);
@@ -49,24 +40,36 @@ export default function EntityModal<T extends Record<string, any>>({
     setIsEditing(startInEdit);
   }, [entity, startInEdit]);
 
-  // ----- helpers -----
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const field = fields.find((f) => f.name === name);
+
+    // autocomplete: iš label rasti value
+    if (field?.type === "autocomplete" && field.options) {
+      const match = field.options.find((opt) => opt.label === value);
+      setForm((prev) => ({ ...prev, [name]: match?.value ?? value }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const commit = async () => {
-    if (onSave) {
-      await onSave(form); // 👈 laukiam kol `CarsPage` atnaujins DB
+    for (const f of fields) {
+      if (f.required && !form[f.name]) {
+        alert(`Laukas „${f.label}“ yra privalomas`);
+        return;
+      }
     }
-    setIsEditing(false); // grįžtam į view mode
-    onClose(); // uždarom modalą
+
+    if (onSave) await onSave(form);
+    setIsEditing(false);
+    onClose();
   };
-  // ----- renderers -----
+
   const renderFieldView = (cfg: FieldConfig<T>) => {
     const raw = entity[cfg.name];
     const display = cfg.format ? cfg.format(raw, entity) : String(raw ?? "—");
@@ -101,8 +104,21 @@ export default function EntityModal<T extends Record<string, any>>({
               ))}
             </select>
           );
+        case "autocomplete":
+          return (
+            <>
+              <input type="text" list={`${cfg.name}-list`} {...common} />
+              <datalist id={`${cfg.name}-list`}>
+                {cfg.options?.map((opt) => (
+                  <option key={opt.value} value={opt.label} />
+                ))}
+              </datalist>
+            </>
+          );
         case "number":
           return <input type="number" {...common} />;
+        case "date":
+          return <input type="date" {...common} />;
         default:
           return <input type="text" {...common} />;
       }
@@ -112,6 +128,7 @@ export default function EntityModal<T extends Record<string, any>>({
       <div key={cfg.name} className="flex flex-col gap-1">
         <label htmlFor={cfg.name} className="text-xs font-medium text-gray-600">
           {cfg.label}
+          {cfg.required && <span className="text-red-500 ml-1">*</span>}
         </label>
         {inputField}
       </div>
@@ -128,15 +145,17 @@ export default function EntityModal<T extends Record<string, any>>({
 
   const actions = isEditing ? (
     <>
-      <button
-        onClick={() => {
-          setIsEditing(false);
-          setForm(entity); // reset changes
-        }}
-        className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
-      >
-        Atšaukti
-      </button>
+      {noCancel || (
+        <button
+          onClick={() => {
+            setIsEditing(false);
+            setForm(entity);
+          }}
+          className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+        >
+          Atšaukti
+        </button>
+      )}
       {onSave && (
         <button
           onClick={commit}

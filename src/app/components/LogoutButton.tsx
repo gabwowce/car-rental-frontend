@@ -2,7 +2,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { logout } from "@/store/authSlice";
+import { logout, setToken } from "@/store/authSlice";
 
 export default function LogoutButton() {
   const dispatch = useAppDispatch();
@@ -13,6 +13,7 @@ export default function LogoutButton() {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(setToken(null));
     router.replace("/login");
   };
 

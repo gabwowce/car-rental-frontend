@@ -31,12 +31,12 @@ export default function ProfilePage() {
           naujas_slaptazodis: newPassword,
         },
       }).unwrap();
-      setMessage("Slaptažodis pakeistas sėkmingai.");
+      alert("Slaptažodis pakeistas sėkmingai");
       setOldPassword("");
       setNewPassword("");
       setRepeatPassword("");
     } catch {
-      setMessage("Klaida keičiant slaptažodį.");
+      alert("Klaida keičiant slaptažodį");
     }
   };
 

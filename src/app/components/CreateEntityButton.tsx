@@ -49,6 +49,7 @@ export default function CreateEntityButton<T extends Record<string, any>>({
 
       {open && (
         <EntityModal
+          noCancel={true}
           title={modalTitle}
           entity={initial as T}
           fields={fields}

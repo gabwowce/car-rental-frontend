@@ -8,10 +8,10 @@ type Automobilis = NonNullable<
 >[number];
 export function useCarsData() {
   const carFields: FieldConfig<Automobilis>[] = [
-    { name: "marke", label: "Markė" },
-    { name: "modelis", label: "Modelis" },
-    { name: "metai", label: "Metai", type: "number" },
-    { name: "numeris", label: "Valst. numeris" },
+    { name: "marke", label: "Markė", required: true },
+    { name: "modelis", label: "Modelis", required: true },
+    { name: "metai", label: "Metai", type: "number", required: true },
+    { name: "numeris", label: "Valst. numeris", required: true },
     { name: "vin_kodas", label: "VIN kodas" },
     { name: "spalva", label: "Spalva" },
     { name: "kebulo_tipas", label: "Kėbulo tipas" },
@@ -39,7 +39,12 @@ export function useCarsData() {
         { value: false, label: "Ne" },
       ],
     },
-    { name: "kaina_parai", label: "Kaina parai (€)", type: "number" },
+    {
+      name: "kaina_parai",
+      label: "Kaina parai (€)",
+      type: "number",
+      required: true,
+    },
     {
       name: "automobilio_statusas",
       label: "Būsena",
@@ -49,11 +54,12 @@ export function useCarsData() {
         { value: "isnuomotas", label: "Išnuomotas" },
         { value: "servise", label: "Servise" },
       ],
+      required: true,
     },
     {
       name: "technikines_galiojimas",
       label: "Technikinės galiojimas",
-      type: "text", // arba "date" jei naudojamas datepicker
+      type: "date", // pakeista iš text
     },
     {
       name: "dabartine_vieta_id",

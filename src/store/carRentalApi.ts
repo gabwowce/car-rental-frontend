@@ -751,6 +751,8 @@ export type ReservationCreate = {
   busena: string;
 };
 export type ReservationUpdate = {
+  kliento_id?: number | null;
+  automobilio_id?: number | null;
   rezervacijos_pradzia?: string | null;
   rezervacijos_pabaiga?: string | null;
   busena?: string | null;

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLoginMutation } from "@/store/carRentalApi";
 import { useAppDispatch } from "@/store/hooks";
-import { setCredentials } from "@/store/authSlice";
+import { setToken } from "@/store/authSlice";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,12 +15,14 @@ export default function LoginPage() {
   const [login, { isLoading, isError }] = useLoginMutation();
 
   const handleLogin = async () => {
+    // gausi { access_token: string, ... }
     const res = await login({
       loginRequest: { el_pastas: email, slaptazodis: password },
-    }).unwrap(); // <-- gauname `data` tiesiai
-    console.log("ACCESS TOKEN >>>", res);
-    // išsaugom tokeną Redux'e + localStorage
-    dispatch(setCredentials({ token: res.access_token }));
+    }).unwrap();
+
+    // išsaugom tokeną
+    dispatch(setToken(res.access_token));
+    localStorage.setItem("token", res.access_token); // kad išliktų po refresh
 
     router.push("/");
   };

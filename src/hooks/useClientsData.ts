@@ -30,11 +30,28 @@ export function useClientsData() {
 
   /* --- laukai EntityModal'ui --- */
   const clientFields: FieldConfig<ClientOut>[] = [
-    { name: "vardas", label: "Vardas", type: "text" },
-    { name: "pavarde", label: "Pavardė", type: "text" },
-    { name: "el_pastas", label: "El. paštas", type: "text" },
-    { name: "telefono_nr", label: "Telefono nr.", type: "text" },
-    { name: "bonus_taskai", label: "Bonus taškai", type: "number" },
+    { name: "vardas", label: "Vardas", type: "text", required: true },
+    { name: "pavarde", label: "Pavardė", type: "text", required: true },
+    { name: "el_pastas", label: "El. paštas", type: "text", required: true },
+    {
+      name: "telefono_nr",
+      label: "Telefono nr.",
+      type: "text",
+      required: true,
+    },
+    { name: "gimimo_data", label: "Gimimo data", type: "date", required: true },
+    {
+      name: "registracijos_data",
+      label: "Registracijos data",
+      type: "datetime-local", // gali būti "text", jei nenaudoji date picker
+      required: true,
+    },
+    {
+      name: "bonus_taskai",
+      label: "Bonus taškai",
+      type: "number",
+      required: true,
+    },
   ];
 
   /* --- helperiai --- */
