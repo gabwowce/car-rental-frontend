@@ -7,6 +7,7 @@ import EntityModal from "@/app/components/modals/EntityModal";
 import LoadingScreen from "@/app/components/loadingScreen";
 import { useReservationData } from "@/hooks/useReservationData";
 import StatusBadge from "@/app/components/StatusBadge";
+import CreateEntityButton from "@/app/components/CreateEntityButton";
 
 type Rezervacija = NonNullable<
   ReturnType<typeof useReservationData>["reservations"]
@@ -82,9 +83,14 @@ export default function ReservationsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Rezervacijos</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          + Nauja rezervacija
-        </button>
+        <CreateEntityButton
+          buttonLabel="+ Nauja rezervacija"
+          modalTitle="Nauja rezervacija"
+          fields={reservationFields}
+          onCreate={async (data) => {
+            await saveReservation(null, data); // null = kurti naują
+          }}
+        />
       </div>
 
       <div className="flex flex-wrap gap-4 mb-6">

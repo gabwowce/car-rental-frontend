@@ -791,7 +791,7 @@ export type OrderUpdate = {
 export type ClientOut = {
   vardas?: string;
   pavarde?: string;
-  el_pastas?: string;
+  el_pastas: string;
   telefono_nr?: string;
   gimimo_data?: string;
   registracijos_data?: string;
@@ -804,7 +804,7 @@ export type ClientOut = {
 export type ClientCreate = {
   vardas?: string;
   pavarde?: string;
-  el_pastas?: string;
+  el_pastas: string;
   telefono_nr?: string;
   gimimo_data?: string;
   registracijos_data?: string;
@@ -813,7 +813,7 @@ export type ClientCreate = {
 export type ClientUpdate = {
   vardas?: string;
   pavarde?: string;
-  el_pastas?: string;
+  el_pastas: string;
   telefono_nr?: string;
   gimimo_data?: string;
   registracijos_data?: string;

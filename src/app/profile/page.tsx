@@ -1,17 +1,18 @@
 "use client";
-
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import {
   useMeApiV1MeGetQuery,
   useChangePasswordMutation,
-} from "@/store/carRentalApi"; // <-- pritaikyk path
-import type { FormEvent } from "react";
+} from "@/store/carRentalApi";
 
 export default function ProfilePage() {
-  const { data: user, isLoading } = useMeApiV1MeGetQuery();
+  /** ===== Užklausos ===== */
+  const { data: user, isLoading, isError, error } = useMeApiV1MeGetQuery();
+
   const [changePassword, { isLoading: isChanging }] =
     useChangePasswordMutation();
 
+  /** ===== Formos būsena ===== */
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -34,20 +35,20 @@ export default function ProfilePage() {
       setOldPassword("");
       setNewPassword("");
       setRepeatPassword("");
-    } catch (err: any) {
+    } catch {
       setMessage("Klaida keičiant slaptažodį.");
     }
   };
 
+  /** ===== UI ===== */
   if (isLoading) return <p>Įkeliama...</p>;
+  if (isError) return <p>Klaida: {(error as any)?.status}</p>;
   if (!user) return <p>Nerasta vartotojo duomenų</p>;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Profilis</h1>
-
-      {/* Informacija apie naudotoją */}
-      <div className="bg-white p-6 rounded shadow mb-8">
+    <div className="max-w-3xl mx-auto space-y-8">
+      {/* Darbuotojo informacija */}
+      <section className="bg-white p-6 rounded shadow">
         <h2 className="text-lg font-semibold mb-4">Darbuotojo informacija</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <p>
@@ -63,10 +64,10 @@ export default function ProfilePage() {
             <span className="font-medium">Rolė:</span> {user.pareigos}
           </p>
         </div>
-      </div>
+      </section>
 
       {/* Slaptažodžio keitimas */}
-      <div className="bg-white p-6 rounded shadow">
+      <section className="bg-white p-6 rounded shadow">
         <h2 className="text-lg font-semibold mb-4">Keisti slaptažodį</h2>
         <form
           onSubmit={handleSubmit}
@@ -95,14 +96,14 @@ export default function ProfilePage() {
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-60"
             disabled={isChanging}
           >
             {isChanging ? "Keičiama..." : "Išsaugoti pakeitimus"}
           </button>
           {message && <p className="text-sm text-red-500">{message}</p>}
         </form>
-      </div>
+      </section>
     </div>
   );
 }

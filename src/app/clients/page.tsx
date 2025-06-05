@@ -6,6 +6,7 @@ import ActionButtons from "@/app/components/ActionButtons";
 import EntityModal from "@/app/components/modals/EntityModal";
 import LoadingScreen from "@/app/components/loadingScreen";
 import { useClientsData } from "@/hooks/useClientsData";
+import CreateEntityButton from "@/app/components/CreateEntityButton";
 
 type Klientas = NonNullable<
   ReturnType<typeof useClientsData>["clients"]
@@ -51,7 +52,7 @@ export default function ClientsPage() {
           }}
           onDelete={async () => {
             const ok = window.confirm(
-              `Ar tikrai norite ištrinti klientą ${k.vardas} ${k.pavarde}?`,
+              `Ar tikrai norite ištrinti klientą ${k.vardas} ${k.pavarde}?`
             );
             if (ok) await removeClient(k.kliento_id);
           }}
@@ -67,10 +68,15 @@ export default function ClientsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Klientai</h1>
-        {/* mygtukas „+ Naujas“ - nepridėtas logikos čia */}
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          + Naujas klientas
-        </button>
+        {/* Naujas klientas */}
+        <CreateEntityButton
+          buttonLabel="+ Naujas klientas"
+          modalTitle="Naujas klientas"
+          fields={clientFields}
+          onCreate={async (data) => {
+            await saveClient(null, data); // null -> create
+          }}
+        />
       </div>
 
       {/* paieška */}
@@ -81,7 +87,11 @@ export default function ClientsPage() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <DataTable columns={columns} data={filtered} rowKey={(k) => k.kliento_id} />
+      <DataTable
+        columns={columns}
+        data={filtered}
+        rowKey={(k) => k.kliento_id}
+      />
 
       {/* modalas */}
       {selected && (

@@ -61,9 +61,14 @@ export default function InvoicesPage() {
       label: "Veiksmai",
       accessor: (s: Saskaita) => (
         <ActionButtons
-          onView={() => openView(s)}
-          onEdit={() => openPdf(s)}
-          show={{ delete: false }}
+          onExtra={() =>
+            window.open(
+              `mailto:buhaltere@autorent.lt?subject=Sąskaita%20nr.%20${s.invoice_id}&body=Gerbiama buhaltere,%0A%0APrašome peržiūrėti sąskaitą nr. ${s.invoice_id}.`,
+              "_blank"
+            )
+          }
+          show={{ delete: false, extra: true }}
+          extraLabel="Rašyti buhalterei"
         />
       ),
     },
@@ -73,9 +78,6 @@ export default function InvoicesPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Sąskaitos</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          + Nauja sąskaita
-        </button>
       </div>
 
       <div className="flex flex-wrap gap-4 mb-6">

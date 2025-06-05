@@ -8,6 +8,7 @@ import StatusBadge from "@/app/components/StatusBadge";
 import LoadingScreen from "@/app/components/loadingScreen";
 import { useOrdersData } from "@/hooks/useOrdersData";
 import type { OrderOut } from "@/store/carRentalApi";
+import CreateEntityButton from "@/app/components/CreateEntityButton";
 
 export default function OrdersPage() {
   const [selected, setSelected] = useState<OrderOut | null>(null);
@@ -77,9 +78,14 @@ export default function OrdersPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Užsakymai</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          + Naujas užsakymas
-        </button>
+        <CreateEntityButton
+          buttonLabel="+ Naujas užsakymas"
+          modalTitle="Naujas užsakymas"
+          fields={orderFields}
+          onCreate={async (data) => {
+            await saveOrder(null, data);
+          }}
+        />
       </div>
 
       <div className="flex flex-wrap gap-4 mb-6">

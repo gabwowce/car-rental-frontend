@@ -1,40 +1,29 @@
+// LoginPage.tsx
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLoginMutation } from "../../store/carRentalApi"; // <- svarbu: pataisyk kelią pagal save
+import { useLoginMutation } from "@/store/carRentalApi";
+import { useAppDispatch } from "@/store/hooks";
+import { setCredentials } from "@/store/authSlice";
 
 export default function LoginPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [login, { isLoading, isError }] = useLoginMutation();
 
   const handleLogin = async () => {
-    try {
-      const result = await login({
-        loginRequest: {
-          el_pastas: email,
-          slaptazodis: password,
-        },
-      });
+    const res = await login({
+      loginRequest: { el_pastas: email, slaptazodis: password },
+    }).unwrap(); // <-- gauname `data` tiesiai
+    console.log("ACCESS TOKEN >>>", res);
+    // išsaugom tokeną Redux'e + localStorage
+    dispatch(setCredentials({ token: res.access_token }));
 
-      console.log("RTK result >>>", result);
-
-      if ("data" in result) {
-        document.cookie = `token=${result.data?.access_token}; path=/`;
-        router.push("/profile");
-      } else {
-        console.error("Login error:", result.error);
-        alert("Neteisingi prisijungimo duomenys");
-      }
-    } catch (err) {
-      console.error("Catch klaida:", err);
-      alert("Įvyko klaida prisijungiant");
-    }
+    router.push("/");
   };
-
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white rounded shadow">

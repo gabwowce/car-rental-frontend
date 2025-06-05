@@ -10,8 +10,9 @@ import LoadingScreen from "@/app/components/loadingScreen";
 import {
   useUpdateCarMutation,
   useDeleteCarMutation,
+  useCreateCarMutation,
 } from "@/store/enhanceEndpoints";
-
+import CreateEntityButton from "@/app/components/CreateEntityButton";
 // Tipas vienam automobiliui
 type Automobilis = NonNullable<
   ReturnType<typeof useCarsData>["automobiliai"]
@@ -37,6 +38,7 @@ export default function CarsPage() {
   const [editMode, setEditMode] = useState(false);
   const [updateCar] = useUpdateCarMutation();
   const [deleteCar] = useDeleteCarMutation();
+  const [createCar] = useCreateCarMutation();
 
   const columns = [
     {
@@ -83,9 +85,20 @@ export default function CarsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Automobiliai</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          + Pridėti naują automobilį
-        </button>
+        {/* 🆕 Naujas automobilis */}
+        <CreateEntityButton
+          buttonLabel="+ Pridėti naują automobilį"
+          modalTitle="Naujas automobilis"
+          fields={carFields}
+          onCreate={async (data) => {
+            try {
+              await createCar({ carCreate: data }).unwrap();
+              await refetchCars();
+            } catch (e) {
+              console.error("Nepavyko sukurti automobilio:", e);
+            }
+          }}
+        />
       </div>
 
       <div className="flex flex-wrap gap-4 mb-6">
