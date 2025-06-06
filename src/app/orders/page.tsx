@@ -54,7 +54,21 @@ export default function OrdersPage() {
             setSelected(o);
             setModalOpen(true);
           }}
-          onDelete={() => handleDelete(o.uzsakymo_id)}
+          onDelete={async () => {
+  const confirmed = window.confirm(
+    `Ar tikrai norite ištrinti užsakymą #${o.uzsakymo_id}?`
+  );
+  if (!confirmed) return;
+
+  try {
+    await handleDelete(o.uzsakymo_id);
+  } catch (e) {
+    console.error("Klaida trinant užsakymą:", e);
+    alert(
+      "Nepavyko ištrinti užsakymo. Gali būti, kad jis susijęs su kitais duomenimis (pvz. sąskaitomis ar mokėjimais)."
+    );
+  }
+}}
         />
       ),
     },

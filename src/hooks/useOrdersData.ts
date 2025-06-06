@@ -49,7 +49,6 @@ export function useOrdersData() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm(`Ar tikrai norite ištrinti užsakymą #${id}?`)) return;
     await deleteOrder({ uzsakymoId: id }).unwrap();
     await refetchOrders();
   };

@@ -54,7 +54,7 @@ export default function DashboardPage() {
       type: "select",
       options: [
         { value: "patvirtinta", label: "Patvirtinta" },
-        { value: "laukiama", label: "Laukiama" },
+        { value: "laukia", label: "Laukia" },
         { value: "atšaukta", label: "Atšaukta" },
       ],
     },

@@ -15,14 +15,14 @@ export default function LoginPage() {
   const [login, { isLoading, isError }] = useLoginMutation();
 
   const handleLogin = async () => {
-    // gausi { access_token: string, ... }
     const res = await login({
       loginRequest: { el_pastas: email, slaptazodis: password },
     }).unwrap();
 
-    // išsaugom tokeną
     dispatch(setToken(res.access_token));
-    localStorage.setItem("token", res.access_token); // kad išliktų po refresh
+
+    // 🔵 Nustatyk token kaip cookie
+    document.cookie = `token=${res.access_token}; path=/;`;
 
     router.push("/");
   };

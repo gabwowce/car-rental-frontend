@@ -54,7 +54,17 @@ export default function ClientsPage() {
             const ok = window.confirm(
               `Ar tikrai norite ištrinti klientą ${k.vardas} ${k.pavarde}?`
             );
-            if (ok) await removeClient(k.kliento_id);
+            if (!ok) return;
+
+            try {
+              await removeClient(k.kliento_id);
+            } catch (e: any) {
+              console.error("Klaida trinant klientą:", e);
+
+              alert(
+                "Negalima ištrinti šio kliento, nes jis susijęs su užsakymais ar kitais įrašais."
+              );
+            }
           }}
         />
       ),

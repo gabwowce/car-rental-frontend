@@ -70,8 +70,12 @@ export default function CarsPage() {
             try {
               await deleteCar({ carId: a.automobilio_id }).unwrap();
               setSelectedCar(null);
-            } catch (e) {
+            } catch (e: any) {
               console.error("Klaida trinant automobilį:", e);
+
+              alert(
+                "Negalima ištrinti šio automobilio, nes jis susijęs su užsakymais arba kitais įrašais."
+              );
             }
           }}
         />
