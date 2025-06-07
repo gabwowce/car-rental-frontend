@@ -56,8 +56,6 @@ npm install    # or npm i / yarn
 # 3. dev server
 npm dev        # open http://localhost:3000
 
-# 4. production build
-npm build && pnpm start
 ```
 
 ### GitHub Pages deployment
