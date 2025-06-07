@@ -1,4 +1,4 @@
-# 🚗 Car‑Rental Frontend (Next.js 15 + RTK Query)
+# Car‑Rental Frontend (Next.js 15 + RTK Query)
 
 Interactive admin UI for the **Car‑Rental System API**.
 Built with **Next 13/14/15 App Router**, **TypeScript**, **Tailwind CSS**, **Redux Toolkit + RTK‑Query**, **Leaflet** & **Recharts**.
@@ -6,7 +6,7 @@ Open demo: https://car-rental-frontend-v2.vercel.app/
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 | Feature                 | Details                                                                         |
 | ----------------------- | ------------------------------------------------------------------------------- |
@@ -21,7 +21,7 @@ Open demo: https://car-rental-frontend-v2.vercel.app/
 
 ---
 
-## 🖇️ Repository layout (partial)
+## Repository layout (partial)
 
 ```
 src/
@@ -41,7 +41,7 @@ src/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 > **Prerequisites:** Node ≥ 20, pnpm / npm / yarn.
 
@@ -66,7 +66,7 @@ npm dev        # open http://localhost:3000
 
 ---
 
-## 🛠️ Generated RTK‑Query hooks
+## Generated RTK‑Query hooks
 
 ```ts
 import {
@@ -121,7 +121,7 @@ _Hooks are auto‑regenerated via_ **`rtk-query-codegen-openapi`** (see `npm run
 
 ---
 
-## 🌍 Maps & Geocoding
+## Maps & Geocoding
 
 - `MapComponent` renders Leaflet map.
 - Coordinates:
@@ -133,14 +133,14 @@ _Hooks are auto‑regenerated via_ **`rtk-query-codegen-openapi`** (see `npm run
 
 ---
 
-## 📊 Charts
+## Charts
 
 - `BarChartBox` – Recharts `<BarChart>` for order status counts.
 - `PieChartBox` – Recharts `<PieChart>` for car availability breakdown.
 
 ---
 
-## 🔐 Auth Flow (frontend)
+## Auth Flow (frontend)
 
 1. `login` page calls `useLoginMutation`
 2. token saved to `localStorage` (`useAuthToken`)
@@ -149,7 +149,7 @@ _Hooks are auto‑regenerated via_ **`rtk-query-codegen-openapi`** (see `npm run
 
 ---
 
-## 🏷️ Tailwind & Design System
+## Tailwind & Design System
 
 - Tailwind 4 – utility classes + `global.css` reset.
 - Headless UI + React‑Icons for primitives.
@@ -157,7 +157,7 @@ _Hooks are auto‑regenerated via_ **`rtk-query-codegen-openapi`** (see `npm run
 
 ---
 
-## 📦 Project Scripts
+## Project Scripts
 
 | Command             | What it does                            |
 | ------------------- | --------------------------------------- |
@@ -169,7 +169,7 @@ _Hooks are auto‑regenerated via_ **`rtk-query-codegen-openapi`** (see `npm run
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork → `git clone`
 2. `git checkout -b feature/<name>`
@@ -177,7 +177,3 @@ _Hooks are auto‑regenerated via_ **`rtk-query-codegen-openapi`** (see `npm run
 4. PR → squash & merge
 
 ---
-
-## 📄 License
-
-MIT
