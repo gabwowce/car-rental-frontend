@@ -6,6 +6,9 @@ Open demo: https://car-rental-frontend-v2.vercel.app/
 
 ---
 
+[![Docs](https://img.shields.io/badge/Docs-AutoRent-blue?logo=githubpages)](https://gabwowce.github.io/car-rental-frontend/)  
+Interactive admin UI for the **AutoRent** (car-rental) back-end API.
+
 ## Key Features
 
 | Feature                 | Details                                                                         |
