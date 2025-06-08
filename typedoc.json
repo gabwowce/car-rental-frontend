@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["src/app/components"],
+  "out": "docs",
+  "tsconfig": "tsconfig.json",
+  "entryPointStrategy": "expand",
+  "skipErrorChecking": true
+}

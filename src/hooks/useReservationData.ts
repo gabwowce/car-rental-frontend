@@ -1,6 +1,8 @@
 // hooks/useReservationData.ts
+
 import {
   useGetAllReservationsQuery,
+  useCreateReservationMutation,
   useUpdateReservationMutation,
   useDeleteReservationMutation,
   ReservationCreate,
@@ -12,6 +14,14 @@ import { useCarsData } from "./useCarsData";
 import { useState, useMemo } from "react";
 
 export const useReservationData = () => {
+  /* ----- API mutation’ai ----- */
+  const [createReservation, { isLoading: creating }] =
+    useCreateReservationMutation();
+  const [updateReservation, { isLoading: updating }] =
+    useUpdateReservationMutation();
+  const [deleteReservation, { isLoading: deleting }] =
+    useDeleteReservationMutation();
+
   /* ----- API sąrašas ----- */
   const {
     data: reservations = [],
@@ -30,6 +40,7 @@ export const useReservationData = () => {
       ),
     [clients]
   );
+
   const carMap = useMemo(
     () =>
       new Map(
@@ -44,35 +55,23 @@ export const useReservationData = () => {
   const getClientName = (id: number) => clientMap.get(id) ?? `#${id}`;
   const getCarName = (id: number) => carMap.get(id) ?? `#${id}`;
 
-  /* ----- mutation’ai ----- */
-  const [updateReservation, { isLoading: updating }] =
-    useUpdateReservationMutation();
-  const [deleteReservation, { isLoading: deleting }] =
-    useDeleteReservationMutation();
-
-  /** Atnaujinti rezervaciją */
+  /** ✅ Kurti arba atnaujinti rezervaciją */
   const saveReservation = async (
     id: number | null,
     data: ReservationCreate | ReservationUpdate
   ) => {
     if (id === null) {
-      // nauja rezervacija
-      await fetch("/api/v1/reservations/", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      await createReservation({ reservationCreate: data }).unwrap();
     } else {
-      // redaguojama rezervacija
-      await fetch(`/api/v1/reservations/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      await updateReservation({
+        rezervacijosId: id,
+        reservationUpdate: data,
+      }).unwrap();
     }
+    await refetch();
   };
 
-  /** Ištrinti rezervaciją */
+  /** 🗑️ Ištrinti rezervaciją */
   const handleDelete = async (rezervacijos_id: number) => {
     await deleteReservation({ rezervacijosId: rezervacijos_id }).unwrap();
     await refetch();
@@ -85,9 +84,8 @@ export const useReservationData = () => {
   >("visi");
 
   const filtered = reservations.filter((r: any) => {
-    const target = `${getClientName(r.kliento_id)} ${getCarName(
-      r.automobilio_id
-    )}`.toLowerCase();
+    const target =
+      `${getClientName(r.kliento_id)} ${getCarName(r.automobilio_id)}`.toLowerCase();
     const matchSearch = target.includes(search.toLowerCase());
 
     const busena = (r.busena ?? "").toLowerCase();
@@ -144,26 +142,17 @@ export const useReservationData = () => {
   ];
 
   return {
-    /* duomenys */
     reservations,
     filtered,
-    isLoading: isLoading || updating || deleting,
-
-    /* paieška / filtras */
+    isLoading: isLoading || creating || updating || deleting,
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
-
-    /* helpers */
     getClientName,
     getCarName,
-
-    /* CRUD */
     saveReservation,
     handleDelete,
-
-    /* modal fields */
     reservationFields,
   };
 };

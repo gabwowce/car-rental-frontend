@@ -81,6 +81,20 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.carCreate,
       }),
     }),
+    searchCars: build.query<SearchCarsApiResponse, SearchCarsApiArg>({
+      query: (queryArg) => ({
+        url: `/api/v1/cars/search`,
+        params: {
+          marke: queryArg.marke,
+          modelis: queryArg.modelis,
+          spalva: queryArg.spalva,
+          status: queryArg.status,
+          kuro_tipas: queryArg.kuroTipas,
+          metai: queryArg.metai,
+          sedimos_vietos: queryArg.sedimosVietos,
+        },
+      }),
+    }),
     getCarById: build.query<GetCarByIdApiResponse, GetCarByIdApiArg>({
       query: (queryArg) => ({ url: `/api/v1/cars/${queryArg.carId}` }),
     }),
@@ -105,20 +119,6 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v1/cars/${queryArg.carId}/status`,
         method: "PATCH",
         body: queryArg.carStatusUpdate,
-      }),
-    }),
-    searchCars: build.query<SearchCarsApiResponse, SearchCarsApiArg>({
-      query: (queryArg) => ({
-        url: `/api/v1/cars/search`,
-        params: {
-          marke: queryArg.marke,
-          modelis: queryArg.modelis,
-          spalva: queryArg.spalva,
-          status: queryArg.status,
-          kuro_tipas: queryArg.kuroTipas,
-          metai: queryArg.metai,
-          sedimos_vietos: queryArg.sedimosVietos,
-        },
       }),
     }),
     getLatestReservations: build.query<
@@ -324,6 +324,12 @@ const injectedRtkApi = api.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    getInvoiceById: build.query<
+      GetInvoiceByIdApiResponse,
+      GetInvoiceByIdApiArg
+    >({
+      query: (queryArg) => ({ url: `/api/v1/invoices/${queryArg.invoiceId}` }),
+    }),
     updateStatus: build.mutation<UpdateStatusApiResponse, UpdateStatusApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/invoices/${queryArg.invoiceId}/status`,
@@ -392,6 +398,17 @@ export type CreateCarApiResponse = /** status 200 Successful Response */ CarOut;
 export type CreateCarApiArg = {
   carCreate: CarCreate;
 };
+export type SearchCarsApiResponse =
+  /** status 200 Successful Response */ CarOut[];
+export type SearchCarsApiArg = {
+  marke?: string | null;
+  modelis?: string | null;
+  spalva?: string | null;
+  status?: string | null;
+  kuroTipas?: string | null;
+  metai?: number | null;
+  sedimosVietos?: number | null;
+};
 export type GetCarByIdApiResponse =
   /** status 200 Successful Response */ CarOut;
 export type GetCarByIdApiArg = {
@@ -411,17 +428,6 @@ export type UpdateCarStatusApiResponse =
 export type UpdateCarStatusApiArg = {
   carId: number;
   carStatusUpdate: CarStatusUpdate;
-};
-export type SearchCarsApiResponse =
-  /** status 200 Successful Response */ CarOut[];
-export type SearchCarsApiArg = {
-  marke?: string | null;
-  modelis?: string | null;
-  spalva?: string | null;
-  status?: string | null;
-  kuroTipas?: string | null;
-  metai?: number | null;
-  sedimosVietos?: number | null;
 };
 export type GetLatestReservationsApiResponse =
   /** status 200 Successful Response */ ReservationSummary[];
@@ -553,6 +559,11 @@ export type CreateInvoiceApiArg = {
 export type DeleteInvoiceApiResponse =
   /** status 200 Successful Response */ any;
 export type DeleteInvoiceApiArg = {
+  invoiceId: number;
+};
+export type GetInvoiceByIdApiResponse =
+  /** status 200 Successful Response */ InvoiceOut;
+export type GetInvoiceByIdApiArg = {
   invoiceId: number;
 };
 export type UpdateStatusApiResponse =
@@ -889,11 +900,11 @@ export const {
   useDeleteEmployeeMutation,
   useGetAllCarsQuery,
   useCreateCarMutation,
+  useSearchCarsQuery,
   useGetCarByIdQuery,
   useUpdateCarMutation,
   useDeleteCarMutation,
   useUpdateCarStatusMutation,
-  useSearchCarsQuery,
   useGetLatestReservationsQuery,
   useGetAllReservationsQuery,
   useCreateReservationMutation,
@@ -922,6 +933,7 @@ export const {
   useGetAllInvoicesQuery,
   useCreateInvoiceMutation,
   useDeleteInvoiceMutation,
+  useGetInvoiceByIdQuery,
   useUpdateStatusMutation,
   useGeoCodeMutation,
 } = injectedRtkApi;
