@@ -5,12 +5,31 @@ import DataTable from "@/app/components/DataTable";
 import { useSupportData } from "@/hooks/useSupportData";
 import { useClientsData } from "@/hooks/useClientsData";
 
+/**
+ * SupportPage – interface for managing client support messages.
+ *
+ * This page displays support inquiries from clients and allows administrators
+ * to search, filter, and respond directly via an inline reply form.
+ *
+ * 🔹 Integrates:
+ * - `useSupportData()` to fetch support entries and send replies
+ * - `useClientsData()` to resolve client names by their IDs
+ *
+ * 🔹 UI includes:
+ * - Search input (by client name or topic)
+ * - Filter select (by reply status)
+ * - Dynamic table with inline reply capability
+ *
+ * @returns {JSX.Element} Rendered support management page
+ */
 export default function SupportPage() {
-  /* --- duomenys iš API --- */
   const { supports, isLoading, answer } = useSupportData();
   const { clients } = useClientsData();
 
-  /* --- Greitas kliento vardo lookupʼas --- */
+  /**
+   * Memoized map: client ID → "First Last".
+   * Used to quickly resolve client names without recalculating.
+   */
   const clientMap = useMemo(
     () =>
       new Map(
@@ -18,19 +37,34 @@ export default function SupportPage() {
       ),
     [clients]
   );
+
+  /**
+   * Utility function to return a client’s full name or fallback to ID.
+   * @param id - client ID
+   * @returns name string or fallback ID string
+   */
   const getClientName = (id: number) => clientMap.get(id) ?? `#${id}`;
 
-  /* --- React state --- */
+  /** Current search query (matches name and topic) */
   const [search, setSearch] = useState("");
+
+  /** Filter by response status: all, unanswered, or answered */
   const [statusFilter, setStatusFilter] = useState<
     "visi" | "neatsakyta" | "atsakyta"
   >("visi");
 
+  /** Tracks which support request is currently being replied to */
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+
+  /** Stores the draft responses for each support request */
   const [responses, setResponses] = useState<Record<number, string>>({});
+
+  /** Tracks which message is currently being sent */
   const [sendingId, setSendingId] = useState<number | null>(null);
 
-  /* --- Filtravimas pagal paiešką ir būseną --- */
+  /**
+   * Filter support requests by search term and reply status.
+   */
   const filtered = supports.filter((u: any) => {
     const target = `${getClientName(u.kliento_id)} ${u.tema}`.toLowerCase();
     const matchSearch = target.includes(search.toLowerCase());
@@ -41,7 +75,9 @@ export default function SupportPage() {
     return matchSearch && matchStatus;
   });
 
-  /* --- Lentelės stulpeliai --- */
+  /**
+   * Columns definition for DataTable component.
+   */
   const columns = [
     { label: "Klientas", accessor: (u: any) => getClientName(u.kliento_id) },
     { label: "Tema", accessor: "tema" },
@@ -53,10 +89,10 @@ export default function SupportPage() {
     {
       label: "Atsakymas",
       accessor: (u: any) => {
-        /* Jei jau atsakyta – rodom tekstą */
+        // Display static response text if answered
         if (u.atsakymas) return u.atsakymas;
 
-        /* Mygtukas „Atsakyti“ */
+        // Show reply button if not yet replying
         if (activeReplyId !== u.uzklausos_id) {
           return (
             <button
@@ -68,7 +104,7 @@ export default function SupportPage() {
           );
         }
 
-        /* Atsakymo forma */
+        // Inline reply form with send/cancel options
         return (
           <div className="flex flex-col gap-2">
             <textarea
@@ -125,7 +161,12 @@ export default function SupportPage() {
     },
   ];
 
-  /* --- UI --- */
+  /**
+   * Render the support management UI, including:
+   * - Header
+   * - Filter/search controls
+   * - Data table or loading state
+   */
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -144,7 +185,9 @@ export default function SupportPage() {
           className="border p-2 rounded"
           value={statusFilter}
           onChange={(e) =>
-            setStatusFilter(e.target.value as "visi" | "neatsakyta" | "atsakyta")
+            setStatusFilter(
+              e.target.value as "visi" | "neatsakyta" | "atsakyta"
+            )
           }
         >
           <option value="visi">Visos</option>

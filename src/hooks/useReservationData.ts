@@ -1,4 +1,57 @@
-// hooks/useReservationData.ts
+/**
+ * useReservationData
+ *
+ * Custom React hook for managing reservation data in the AutoRent system.
+ * Handles CRUD operations, status filtering, client/car name lookup, and form field generation
+ * for use in modals.
+ *
+ * ---
+ * ## Features:
+ * - Fetches all reservations via `useGetAllReservationsQuery`
+ * - Supports creation, update, and deletion of reservations via RTK-Query mutations
+ * - Includes client and car name resolution via `useClientsData` and `useCarsData`
+ * - Provides search and status filtering logic
+ * - Exposes form configuration for UI modals
+ *
+ * ---
+ * ## Returns:
+ * ```ts
+ * {
+ *   reservations: ReservationOut[];                    // Raw reservation list
+ *   filtered: ReservationOut[];                        // Filtered by search & status
+ *   isLoading: boolean;                                // Global loading state
+ *   search: string;                                    // Current search string
+ *   setSearch: (s: string) => void;                    // Search setter
+ *   statusFilter: "visi" | "patvirtinta" | "laukiama" | "atšaukta";
+ *   setStatusFilter: (s: string) => void;              // Status filter setter
+ *   getClientName: (id: number) => string;             // Resolve client full name by ID
+ *   getCarName: (id: number) => string;                // Resolve car name by ID
+ *   saveReservation: (
+ *     id: number | null,
+ *     data: ReservationCreate | ReservationUpdate
+ *   ) => Promise<void>;                                // Create or update reservation
+ *   handleDelete: (id: number) => Promise<void>;       // Delete reservation
+ *   reservationFields: FieldConfig[];                  // Modal field definitions
+ * }
+ * ```
+ *
+ * ---
+ * ## Example Usage:
+ * ```tsx
+ * const {
+ *   filtered,
+ *   saveReservation,
+ *   handleDelete,
+ *   reservationFields,
+ * } = useReservationData();
+ *
+ * <DataTable data={filtered} />
+ * <EntityModal
+ *   fields={reservationFields}
+ *   onSave={(data) => saveReservation(null, data)}
+ * />
+ * ```
+ */
 
 import {
   useGetAllReservationsQuery,

@@ -4,13 +4,26 @@ import { useInvoicesData } from "@/hooks/useInvoicesData";
 import { useInvoiceModals } from "@/hooks/useInvoiceModals";
 import DataTable from "@/app/components/DataTable";
 import ActionButtons from "@/app/components/ActionButtons";
-import InvoiceViewModal from "@/app/components/modals/InvoiceViewModal";
 import StatusBadge from "@/app/components/StatusBadge";
 
 type Saskaita = NonNullable<
   ReturnType<typeof useInvoicesData>["invoices"]
 >[number];
 
+/**
+ * InvoicesPage – admin view for managing invoices.
+ *
+ * Features:
+ * - Loads invoice data from the API using `useInvoicesData`
+ * - Enables filtering invoices by status or search term
+ * - Integrates modal system (`useInvoiceModals`) for:
+ *   - Viewing an invoice
+ *   - Triggering PDF download
+ * - Uses a reusable `DataTable` with formatted columns
+ * - Optional email shortcut to accounting via `mailto` link
+ *
+ * @returns {JSX.Element} Invoice management table with modals
+ */
 export default function InvoicesPage() {
   const {
     invoices,
@@ -25,19 +38,24 @@ export default function InvoicesPage() {
   const { selected, mode, openView, openPdf, openDelete, close } =
     useInvoiceModals();
 
+  /**
+   * Handles fake PDF download prompt for selected invoice.
+   * In a real scenario, replace with file generation + download logic.
+   */
   const handlePdfDownload = () => {
     if (selected) {
       const confirmed = window.confirm(
         `Ar tikrai norite atsisiųsti PDF sąskaitai nr. ${selected.invoice_id}?`
       );
       if (confirmed) {
-        console.log("Atsisiųsti PDF:", selected.invoice_id);
-        // Čia galima įdėti tikrą failo atsisiuntimo logiką
+        console.log("Download PDF:", selected.invoice_id);
+        // TODO: implement actual PDF file download logic
       }
       close();
     }
   };
 
+  /** DataTable column configuration */
   const columns = [
     { label: "Sąskaitos nr.", accessor: "invoice_id" },
     {
@@ -80,6 +98,7 @@ export default function InvoicesPage() {
         <h1 className="text-2xl font-bold">Sąskaitos</h1>
       </div>
 
+      {/* Search and filter controls */}
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           type="text"
@@ -100,6 +119,7 @@ export default function InvoicesPage() {
         </select>
       </div>
 
+      {/* Table or loading state */}
       {isLoading ? (
         <p>Įkeliama...</p>
       ) : (
@@ -120,10 +140,7 @@ export default function InvoicesPage() {
         />
       )}
 
-      {selected && mode === "view" && (
-        <InvoiceViewModal invoice={selected} isOpen={true} onClose={close} />
-      )}
-
+      {/* PDF download handler */}
       {selected &&
         mode === "pdf" &&
         (() => {

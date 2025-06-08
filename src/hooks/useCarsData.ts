@@ -6,6 +6,30 @@ import EntityModal, { FieldConfig } from "@/app/components/modals/EntityModal";
 type Automobilis = NonNullable<
   ReturnType<typeof useGetAllCarsQuery>["data"]
 >[number];
+
+/**
+ * Custom React hook `useCarsData` for managing and interacting with car data in the AutoRent system.
+ *
+ * This hook fetches all cars from the API and provides filtering, search, modal handling,
+ * and a preconfigured set of field definitions (`carFields`) for forms (e.g., in `EntityModal`).
+ *
+ * ## Features:
+ * - Fetches all cars using RTK Query
+ * - Provides filtering by car status and text search (brand, model, plate)
+ * - Handles modal open/close and selected car state
+ * - Supplies dynamic form field configuration for create/edit modals
+ *
+ * ## Returns:
+ * - `automobiliai` - raw car list from API
+ * - `isLoading` - whether cars are being fetched
+ * - `filtered` - filtered and searched cars for display
+ * - `statusFilter`, `setStatusFilter` - current status filter and setter
+ * - `search`, `setSearch` - current search term and setter
+ * - `selectedCar`, `setSelectedCar` - currently selected car for modal editing
+ * - `isModalOpen`, `setModalOpen` - modal visibility controls
+ * - `carFields` - field configuration array for modals
+ * - `refetchCars` - function to manually refetch the cars list
+ */
 export function useCarsData() {
   const carFields: FieldConfig<Automobilis>[] = [
     { name: "marke", label: "Markė", required: true },
@@ -59,7 +83,7 @@ export function useCarsData() {
     {
       name: "technikines_galiojimas",
       label: "Technikinės galiojimas",
-      type: "date", // pakeista iš text
+      type: "date",
     },
     {
       name: "dabartine_vieta_id",
@@ -92,6 +116,7 @@ export function useCarsData() {
       .includes(search.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+
   return {
     automobiliai,
     isLoading,

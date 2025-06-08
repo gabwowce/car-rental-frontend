@@ -13,11 +13,28 @@ import {
   useCreateCarMutation,
 } from "@/store/enhanceEndpoints";
 import CreateEntityButton from "@/app/components/CreateEntityButton";
-// Tipas vienam automobiliui
+
 type Automobilis = NonNullable<
   ReturnType<typeof useCarsData>["automobiliai"]
 >[number];
 
+/**
+ * CarsPage – admin interface for managing vehicles in the AutoRent system.
+ *
+ * Features:
+ * - Displays a searchable/filterable table of all cars in the system
+ * - Allows CRUD operations: create, update, delete
+ * - Integrated Leaflet map to show car locations
+ * - Responsive UI using reusable generic components (modal, buttons, table)
+ *
+ * Hooks & Mutations:
+ * - `useCarsData()` fetches car list and handles search/filter state
+ * - `useCreateCarMutation()` adds a new car
+ * - `useUpdateCarMutation()` modifies car details
+ * - `useDeleteCarMutation()` removes a car (if not linked to orders/invoices)
+ *
+ * @returns {JSX.Element} The car management page with map and editing functionality
+ */
 export default function CarsPage() {
   const {
     automobiliai,
@@ -40,20 +57,21 @@ export default function CarsPage() {
   const [deleteCar] = useDeleteCarMutation();
   const [createCar] = useCreateCarMutation();
 
+  /** Table column definitions for each car row */
   const columns = [
     {
-      label: "Modelis",
+      label: "Model",
       accessor: (a: Automobilis) => `${a.marke} ${a.modelis}`,
     },
-    { label: "Numeris", accessor: "numeris" },
-    { label: "Būsena", accessor: "automobilio_statusas" },
-    { label: "Vietos", accessor: "sedimos_vietos" },
+    { label: "Plate Number", accessor: "numeris" },
+    { label: "Status", accessor: "automobilio_statusas" },
+    { label: "Seats", accessor: "sedimos_vietos" },
     {
-      label: "Kaina parai",
+      label: "Price/Day",
       accessor: (a: Automobilis) => `${a.kaina_parai} €`,
     },
     {
-      label: "Veiksmai",
+      label: "Actions",
       accessor: (a: Automobilis) => (
         <ActionButtons
           onEdit={() => {
@@ -63,7 +81,7 @@ export default function CarsPage() {
           }}
           onDelete={async () => {
             const confirmed = window.confirm(
-              `Ar tikrai norite ištrinti automobilį "${a.marke} ${a.modelis}"?`
+              `Are you sure you want to delete car "${a.marke} ${a.modelis}"?`
             );
             if (!confirmed) return;
 
@@ -71,10 +89,9 @@ export default function CarsPage() {
               await deleteCar({ carId: a.automobilio_id }).unwrap();
               setSelectedCar(null);
             } catch (e: any) {
-              console.error("Klaida trinant automobilį:", e);
-
+              console.error("Error deleting car:", e);
               alert(
-                "Negalima ištrinti šio automobilio, nes jis susijęs su užsakymais arba kitais įrašais."
+                "This car cannot be deleted because it is associated with orders or other data."
               );
             }
           }}
@@ -83,34 +100,36 @@ export default function CarsPage() {
     },
   ];
 
+  /** Show loading spinner while fetching data */
   if (isLoading) return <LoadingScreen />;
 
   return (
     <div>
+      {/* Title and New Car button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Automobiliai</h1>
-        {/* 🆕 Naujas automobilis */}
+        <h1 className="text-2xl font-bold">Cars</h1>
         <CreateEntityButton
-          buttonLabel="+ Pridėti naują automobilį"
-          modalTitle="Naujas automobilis"
+          buttonLabel="+ Add New Car"
+          modalTitle="New Car"
           fields={carFields}
           onCreate={async (data) => {
             try {
               await createCar({ carCreate: data }).unwrap();
               await refetchCars();
             } catch (e) {
-              console.error("Nepavyko sukurti automobilio:", e);
+              console.error("Failed to create car:", e);
             }
           }}
         />
       </div>
 
+      {/* Search and status filter */}
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Ieškoti pagal modelį ar numerį"
+          placeholder="Search by model or plate number"
           className="border p-2 rounded w-64"
         />
         <select
@@ -118,13 +137,14 @@ export default function CarsPage() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
-          <option value="visi">Visi</option>
-          <option value="laisvas">Laisvi</option>
-          <option value="isnuomotas">Išnuomoti</option>
-          <option value="servise">Servise</option>
+          <option value="visi">All</option>
+          <option value="laisvas">Available</option>
+          <option value="isnuomotas">Rented</option>
+          <option value="servise">In Service</option>
         </select>
       </div>
 
+      {/* Table view */}
       <DataTable
         columns={columns}
         data={filtered}
@@ -132,11 +152,13 @@ export default function CarsPage() {
         itemsPerPage={5}
       />
 
+      {/* Map showing car locations */}
       <MapComponent cars={filtered} />
 
+      {/* Edit/Create Modal */}
       {selectedCar && (
         <EntityModal
-          title={`Automobilis: ${selectedCar.marke} ${selectedCar.modelis}`}
+          title={`Car: ${selectedCar.marke} ${selectedCar.modelis}`}
           entity={selectedCar}
           fields={carFields}
           isOpen={isModalOpen}
@@ -171,7 +193,7 @@ export default function CarsPage() {
               await refetchCars();
               setModalOpen(false);
             } catch (e) {
-              console.error("Nepavyko atnaujinti automobilio:", e);
+              console.error("Failed to update car:", e);
             }
           }}
           startInEdit={false}

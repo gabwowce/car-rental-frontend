@@ -10,10 +10,38 @@ import { useOrdersData } from "@/hooks/useOrdersData";
 import type { OrderOut } from "@/store/carRentalApi";
 import CreateEntityButton from "@/app/components/CreateEntityButton";
 
+/**
+ * OrdersPage – UI for managing rental orders in the AutoRent system.
+ *
+ * Features:
+ * - Displays a searchable, filterable list of orders
+ * - Allows creating, editing, and deleting rental orders
+ * - Integrates with modal form for inline editing
+ * - Uses `useOrdersData()` to fetch and manage order-related data
+ *
+ * Columns displayed:
+ * - Client
+ * - Car
+ * - Rental Start & End Dates
+ * - Status
+ * - Action buttons (edit/delete)
+ *
+ * @returns {JSX.Element} Orders page view with data table and modals
+ */
 export default function OrdersPage() {
+  /** Selected order for editing */
   const [selected, setSelected] = useState<OrderOut | null>(null);
+
+  /** Controls visibility of modal form */
   const [modalOpen, setModalOpen] = useState(false);
 
+  /**
+   * Custom hook that provides:
+   * - filtered order data
+   * - search & filter states
+   * - helper methods for displaying names
+   * - form field configs and CRUD actions
+   */
   const {
     filtered,
     isLoading,
@@ -28,26 +56,29 @@ export default function OrdersPage() {
     orderFields,
   } = useOrdersData();
 
-  /* --- lentelė --- */
+  /**
+   * Table column configuration for DataTable component.
+   * Includes custom renderers for status and action buttons.
+   */
   const columns = [
     {
-      label: "Klientas",
+      label: "Client",
       accessor: (o: OrderOut) => getClientName(o.kliento_id),
     },
     {
-      label: "Automobilis",
+      label: "Car",
       accessor: (o: OrderOut) => getCarName(o.automobilio_id),
     },
-    { label: "Pradžia", accessor: "nuomos_data" },
-    { label: "Pabaiga", accessor: "grazinimo_data" },
+    { label: "Start", accessor: "nuomos_data" },
+    { label: "End", accessor: "grazinimo_data" },
     {
-      label: "Būsena",
+      label: "Status",
       accessor: (o: OrderOut) => (
         <StatusBadge status={o.uzsakymo_busena || ""} />
       ),
     },
     {
-      label: "Veiksmai",
+      label: "Actions",
       accessor: (o: OrderOut) => (
         <ActionButtons
           onEdit={() => {
@@ -56,15 +87,14 @@ export default function OrdersPage() {
           }}
           onDelete={async () => {
             const confirmed = window.confirm(
-              `Ar tikrai norite ištrinti užsakymą #${o.uzsakymo_id}?`
+              `Are you sure you want to delete order #${o.uzsakymo_id}?`
             );
             if (!confirmed) return;
-
             try {
               await handleDelete(o.uzsakymo_id);
             } catch (e) {
               alert(
-                "Nepavyko ištrinti užsakymo. Gali būti, kad jis susijęs su kitais duomenimis (pvz. sąskaitomis ar mokėjimais)."
+                "Failed to delete the order. It may be linked to other records (e.g. invoices or payments)."
               );
             }
           }}
@@ -73,7 +103,11 @@ export default function OrdersPage() {
     },
   ];
 
-  /* --- modal SAVE --- */
+  /**
+   * Handles saving changes from the modal form.
+   *
+   * @param updated - The updated order object from the form
+   */
   const onSave = async (updated: OrderOut) => {
     await saveOrder(selected!.uzsakymo_id, {
       nuomos_data: updated.nuomos_data,
@@ -84,16 +118,18 @@ export default function OrdersPage() {
     setSelected(null);
   };
 
-  /* --- UI --- */
+  /** Loading state UI */
   if (isLoading) return <LoadingScreen />;
 
+  /** Main rendered UI */
   return (
     <div>
+      {/* Header with create button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Užsakymai</h1>
+        <h1 className="text-2xl font-bold">Orders</h1>
         <CreateEntityButton
-          buttonLabel="+ Naujas užsakymas"
-          modalTitle="Naujas užsakymas"
+          buttonLabel="+ New Order"
+          modalTitle="New Order"
           fields={orderFields}
           onCreate={async (data) => {
             await saveOrder(null, data);
@@ -101,10 +137,11 @@ export default function OrdersPage() {
         />
       </div>
 
+      {/* Filter controls */}
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           className="border p-2 rounded w-64"
-          placeholder="Ieškoti pagal klientą ar automobilį"
+          placeholder="Search by client or car"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -113,22 +150,24 @@ export default function OrdersPage() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
-          <option value="visi">Visi</option>
-          <option value="vykdomas">Vykdomi</option>
-          <option value="užbaigtas">Užbaigti</option>
-          <option value="atšauktas">Atšaukti</option>
+          <option value="visi">All</option>
+          <option value="vykdomas">Active</option>
+          <option value="užbaigtas">Completed</option>
+          <option value="atšauktas">Cancelled</option>
         </select>
       </div>
 
+      {/* Order table */}
       <DataTable
         columns={columns}
         data={filtered}
         rowKey={(r) => r.uzsakymo_id}
       />
 
+      {/* Modal form for editing */}
       {selected && (
         <EntityModal
-          title={`Redaguoti užsakymą #${selected.uzsakymo_id}`}
+          title={`Edit Order #${selected.uzsakymo_id}`}
           entity={selected}
           fields={orderFields}
           isOpen={modalOpen}

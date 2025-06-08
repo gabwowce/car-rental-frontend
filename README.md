@@ -28,18 +28,28 @@ Interactive admin UI for the **AutoRent** (car-rental) back-end API.
 
 ```
 src/
-├── app/                # Next pages (App Router)
-│   ├── layout.tsx      # global fonts + ClientProvider (Redux)
-│   ├── login/          # auth UI
-│   ├── dashboard/      # charts & stats
-│   ├── cars/           # car CRUD + Leaflet map
-│   └── ...
-├── components/         # reusable UI (Table, Modals, Stats cards …)
-├── hooks/              # typed selector hooks (e.g. useCarsData.ts)
-├── store/              # Redux store + RTK‑Query slices
-│   ├── baseApi.js      # fetchBaseQuery with auth header
-│   └── carRentalApi.ts # **AUTO‑GENERATED** from OpenAPI
-└── globals.css / tailwind.config.js
+├── app/                    # Next.js App Router pages
+│   ├── cars/              # Car CRUD (create, edit, list)
+│   ├── clients/           # Client CRUD & orders
+│   ├── components/        # Shared UI components (modals, tables, etc.)
+│   │   └── modals/        # Reusable modal components
+│   ├── guards/            # Route protection (if any)
+│   ├── invoices/          # Invoice list / management
+│   ├── login/             # Login screen
+│   ├── orders/            # Orders dashboard
+│   ├── profile/           # User profile
+│   ├── providers/         # Providers (e.g. Redux, themes)
+│   ├── reservations/      # Reservation handling
+│   ├── support/           # Client support & messages
+│   ├── layout.tsx         # App shell: sidebar, fonts, Redux <Provider/>
+│   ├── page.tsx           # Dashboard (main landing page)
+│   └── globals.css        # Tailwind reset & base styles
+├── hooks/                 # Custom hooks (e.g. useClientsData)
+├── store/                 # Redux Toolkit store + RTK Query API
+│   └── carRentalApi.ts    # **AUTO‑GENERATED** RTK hooks from OpenAPI
+├── fakeData.tsx           # Static demo/test data
+├── middleware.ts          # Route auth middleware (Next.js)
+└── tailwind.config.js     # Tailwind CSS config
 ```
 
 ---
@@ -57,17 +67,9 @@ cd car‑rental‑frontend
 npm install    # or npm i / yarn
 
 # 3. dev server
-npm dev        # open http://localhost:3000
+npx next dev        # open http://localhost:3000
 
 ```
-
-### GitHub Pages deployment
-
-1. `homepage` is set in **package.json**.
-2. `next build` → `next export` not needed (static pages + client JS).
-3. Push to `gh-pages` branch via GitHub Action (see `.github/workflows/deploy.yml`).
-
----
 
 ## Generated RTK‑Query hooks
 
@@ -157,18 +159,6 @@ _Hooks are auto‑regenerated via_ **`rtk-query-codegen-openapi`** (see `npm run
 - Tailwind 4 – utility classes + `global.css` reset.
 - Headless UI + React‑Icons for primitives.
 - Custom `StatCard`, `ActionButtons`, `DataTable`, `Modal` components ensure consistent look.
-
----
-
-## Project Scripts
-
-| Command             | What it does                            |
-| ------------------- | --------------------------------------- |
-| `pnpm dev`          | Start dev server on **localhost:3000**  |
-| `pnpm build`        | Production build (`.next/`)             |
-| `pnpm start`        | Start built app (`NODE_ENV=production`) |
-| `pnpm lint`         | ESLint (Next preset)                    |
-| `pnpm api:generate` | Regenerate RTK‑Query hooks from OpenAPI |
 
 ---
 

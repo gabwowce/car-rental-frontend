@@ -20,10 +20,29 @@ import { useUpdateReservationMutation } from "@/store/carRentalApi";
 import StatusBadge from "@/app/components/StatusBadge";
 import React, { useState } from "react";
 
+/**
+ * Type representing a single reservation entry,
+ * derived from the `useDashboardStats` hook response.
+ */
 type Reservation = ReturnType<
   typeof useDashboardStats
 >["latestReservations"][number];
 
+/**
+ * DashboardPage – main admin dashboard view.
+ *
+ * Displays:
+ * - Key statistics (cards)
+ * - Analytics charts (bar + pie)
+ * - Latest reservations with inline editing
+ *
+ * Integrates multiple hooks and components:
+ * - `useDashboardStats` for data aggregation
+ * - `StatCard`, `BarChartBox`, `PieChartBox`, and `DataTable` for visualization
+ * - `EntityModal` for editing a selected reservation
+ *
+ * @returns {JSX.Element} Full dashboard page layout
+ */
 export default function DashboardPage() {
   const {
     latestReservations,
@@ -44,7 +63,9 @@ export default function DashboardPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [updateReservation] = useUpdateReservationMutation();
 
-  /* --- laukų konfigas modalui --- */
+  /**
+   * Field configuration used by the EntityModal to edit a reservation.
+   */
   const reservationFields: FieldConfig<Reservation>[] = [
     { name: "rezervacijos_pradzia", label: "Pradžia", type: "text" },
     { name: "rezervacijos_pabaiga", label: "Pabaiga", type: "text" },
@@ -60,7 +81,9 @@ export default function DashboardPage() {
     },
   ];
 
-  /* --- Lentelės stulpeliai --- */
+  /**
+   * Columns for the DataTable showing latest reservations.
+   */
   const columns = [
     {
       label: "Automobilis",
@@ -90,6 +113,13 @@ export default function DashboardPage() {
     },
   ];
 
+  /**
+   * Handles saving an updated reservation via mutation.
+   * Closes the modal and triggers data refetch.
+   *
+   * @param updated - Updated reservation values from the modal
+   */
+
   const handleSave = async (updated: Reservation) => {
     await updateReservation({
       rezervacijosId: selected!.rezervacijos_id,
@@ -111,7 +141,6 @@ export default function DashboardPage() {
     <div>
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
-      {/* Stat kortelės */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
         <StatCard
           color="bg-blue-100"

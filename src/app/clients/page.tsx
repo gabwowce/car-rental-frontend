@@ -12,8 +12,22 @@ type Klientas = NonNullable<
   ReturnType<typeof useClientsData>["clients"]
 >[number];
 
+/**
+ * ClientsPage – administrative view for managing system clients.
+ *
+ * Features:
+ * - Fetches client data from the backend
+ * - Supports inline search filtering by name/email
+ * - Allows creating, editing, and deleting clients via modals
+ * - Uses generic UI components: DataTable, EntityModal, ActionButtons
+ *
+ * Editing/deleting is handled through modal windows and confirmation dialogs.
+ * Deleting a client that is associated with other records will show an error.
+ *
+ * @returns {JSX.Element} Full client management page
+ */
 export default function ClientsPage() {
-  /* --- hook'as --- */
+  /** --- Load client data and helpers --- */
   const {
     filtered,
     isLoading,
@@ -24,26 +38,26 @@ export default function ClientsPage() {
     removeClient,
   } = useClientsData();
 
-  /* --- modal state --- */
+  /** --- Modal state --- */
   const [selected, setSelected] = useState<Klientas | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  /* --- lentelės stulpeliai --- */
+  /** --- Table columns configuration --- */
   const columns = [
     {
-      label: "Vardas",
+      label: "Name",
       accessor: (k: Klientas) => `${k.vardas} ${k.pavarde}`,
     },
-    { label: "El. paštas", accessor: "el_pastas" },
-    { label: "Tel. nr.", accessor: "telefono_nr" },
+    { label: "Email", accessor: "el_pastas" },
+    { label: "Phone", accessor: "telefono_nr" },
     {
-      label: "Registracijos data",
+      label: "Registration Date",
       accessor: (k: Klientas) =>
         new Date(k.registracijos_data).toLocaleDateString("lt-LT"),
     },
-    { label: "Bonus taškai", accessor: "bonus_taskai" },
+    { label: "Bonus Points", accessor: "bonus_taskai" },
     {
-      label: "Veiksmai",
+      label: "Actions",
       accessor: (k: Klientas) => (
         <ActionButtons
           onEdit={() => {
@@ -52,17 +66,16 @@ export default function ClientsPage() {
           }}
           onDelete={async () => {
             const ok = window.confirm(
-              `Ar tikrai norite ištrinti klientą ${k.vardas} ${k.pavarde}?`
+              `Are you sure you want to delete client ${k.vardas} ${k.pavarde}?`
             );
             if (!ok) return;
 
             try {
               await removeClient(k.kliento_id);
             } catch (e: any) {
-              console.error("Klaida trinant klientą:", e);
-
+              console.error("Failed to delete client:", e);
               alert(
-                "Negalima ištrinti šio kliento, nes jis susijęs su užsakymais ar kitais įrašais."
+                "This client cannot be deleted because they are associated with orders or other records."
               );
             }
           }}
@@ -71,42 +84,43 @@ export default function ClientsPage() {
     },
   ];
 
-  /* --- UI --- */
+  /** --- UI layout --- */
   if (isLoading) return <LoadingScreen />;
 
   return (
     <div>
+      {/* Header & Create Button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Klientai</h1>
-        {/* Naujas klientas */}
+        <h1 className="text-2xl font-bold">Clients</h1>
         <CreateEntityButton
-          buttonLabel="+ Naujas klientas"
-          modalTitle="Naujas klientas"
+          buttonLabel="+ New Client"
+          modalTitle="New Client"
           fields={clientFields}
           onCreate={async (data) => {
-            await saveClient(null, data); // null -> create
+            await saveClient(null, data); // null → create
           }}
         />
       </div>
 
-      {/* paieška */}
+      {/* Search bar */}
       <input
         className="border p-2 rounded mb-6 w-full max-w-md"
-        placeholder="Ieškoti pagal vardą, pavardę ar el. paštą"
+        placeholder="Search by name or email"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
+      {/* Client table */}
       <DataTable
         columns={columns}
         data={filtered}
         rowKey={(k) => k.kliento_id}
       />
 
-      {/* modalas */}
+      {/* Edit modal */}
       {selected && (
         <EntityModal
-          title={`Redaguoti klientą #${selected.kliento_id}`}
+          title={`Edit Client #${selected.kliento_id}`}
           entity={selected}
           fields={clientFields}
           isOpen={modalOpen}

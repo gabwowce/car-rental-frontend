@@ -8,12 +8,26 @@ import LoadingScreen from "@/app/components/loadingScreen";
 import { useReservationData } from "@/hooks/useReservationData";
 import StatusBadge from "@/app/components/StatusBadge";
 import CreateEntityButton from "@/app/components/CreateEntityButton";
-import { SiUpptime } from "react-icons/si";
 import type { ReservationUpdate } from "@/store/carRentalApi";
+
+/**
+ * Type representing a single reservation, derived from `useReservationData`.
+ */
 type Rezervacija = NonNullable<
   ReturnType<typeof useReservationData>["reservations"]
 >[number];
 
+/**
+ * ReservationsPage – page for managing client car reservations.
+ *
+ * Features:
+ * - Displays a searchable & filterable list of reservations
+ * - Allows creating, editing, and deleting reservations
+ * - Uses `EntityModal` for inline editing
+ * - Integrates with `useReservationData()` hook for business logic
+ *
+ * @returns {JSX.Element} Rendered reservations admin UI
+ */
 export default function ReservationsPage() {
   const [selected, setSelected] = useState<Rezervacija | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -32,7 +46,10 @@ export default function ReservationsPage() {
     saveReservation,
   } = useReservationData();
 
-  /* ——— lentelės stulpeliai ——— */
+  /**
+   * Column definitions for the DataTable component.
+   * Includes dynamic client and car name resolution.
+   */
   const columns = [
     {
       label: "Klientas",
@@ -66,7 +83,12 @@ export default function ReservationsPage() {
     },
   ];
 
-  /* ——— modalo save ——— */
+  /**
+   * Handles saving the updated reservation data from the modal.
+   * Cleans up optional fields before calling the mutation.
+   *
+   * @param updated - Modified reservation values
+   */
   const onSave = async (updated: ReservationUpdate) => {
     const cleaned = {
       ...updated,
@@ -79,9 +101,13 @@ export default function ReservationsPage() {
     await saveReservation(selected!.rezervacijos_id, cleaned);
   };
 
-  /* ——— UI ——— */
+  // Loading state
   if (isLoading) return <LoadingScreen />;
 
+  /**
+   * Rendered reservation management UI.
+   * Includes header, search/filter controls, table, and modal.
+   */
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -91,7 +117,7 @@ export default function ReservationsPage() {
           modalTitle="Nauja rezervacija"
           fields={reservationFields}
           onCreate={async (data) => {
-            await saveReservation(null, data); // null = kurti naują
+            await saveReservation(null, data); // null = new reservation
           }}
         />
       </div>

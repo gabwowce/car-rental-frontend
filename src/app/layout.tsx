@@ -1,4 +1,3 @@
-// app/layout.tsx
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Layout from "@/app/components/Layout";
@@ -13,6 +12,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/**
+ * RootLayout – global layout for the entire application.
+ *
+ * Responsibilities:
+ * - Loads global fonts (Geist Sans & Mono via Google Fonts)
+ * - Applies base CSS styles (Tailwind, Leaflet, custom)
+ * - Wraps all pages with:
+ *   - `<ClientProvider>` – Redux & other context providers
+ *   - `<AuthHydrate>` – Restores auth token on hydration
+ *   - `<AuthGuard>` – Protects routes from unauthenticated access
+ *   - `<Layout>` – Provides app shell (e.g., sidebar)
+ *
+ * @param children - Nested React page components
+ * @returns HTML structure including <html> and <body>
+ */
 export default function RootLayout({
   children,
 }: {

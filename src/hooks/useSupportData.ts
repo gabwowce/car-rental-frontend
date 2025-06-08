@@ -1,3 +1,36 @@
+/**
+ * useSupportData
+ *
+ * Custom React hook to manage client support request data for the AutoRent system.
+ * Provides the ability to fetch all support queries and reply to them via mutation.
+ *
+ * ---
+ * ## Features:
+ * - Retrieves all support tickets using `useGetAllSupportsQuery`
+ * - Allows submitting an answer to a support request with `useAnswerToSupportMutation`
+ * - Automatically refreshes data after replying
+ *
+ * ---
+ * ## Returns:
+ * ```ts
+ * {
+ *   supports: SupportOut[];                     // List of support queries
+ *   isLoading: boolean;                         // Combined loading state
+ *   answer: (id: number, atsakymas: string) => Promise<void>; // Reply to a support query
+ * }
+ * ```
+ *
+ * ---
+ * ## Example Usage:
+ * ```tsx
+ * const { supports, isLoading, answer } = useSupportData();
+ *
+ * <button onClick={() => answer(5, "Thank you, your issue is resolved.")}>
+ *   Reply
+ * </button>
+ * ```
+ */
+
 import {
   useGetAllSupportsQuery,
   useAnswerToSupportMutation,

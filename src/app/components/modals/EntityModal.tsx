@@ -1,3 +1,100 @@
+/**
+ * EntityModal.tsx
+ *
+ * Reusable modal component for displaying and editing any generic entity.
+ * Uses a dynamic form layout driven by a `FieldConfig` array.
+ *
+ * ---
+ * ## Props:
+ *
+ * ### `title: string`
+ * Modal title displayed at the top.
+ *
+ * ### `entity: T`
+ * The object to display/edit. Initial values come from this object.
+ *
+ * ### `isOpen: boolean`
+ * Controls whether the modal is visible.
+ *
+ * ### `onClose: () => void`
+ * Called when the modal is closed (e.g., after saving or canceling).
+ *
+ * ### `onSave?: (updated: T) => void`
+ * Optional callback for when "Save" is clicked. Passes updated entity.
+ *
+ * ### `fields: FieldConfig<T>[]`
+ * Describes each form field (label, type, validation, etc.).
+ *
+ * ### `startInEdit?: boolean`
+ * If `true`, modal starts in editing mode. Default is `false`.
+ *
+ * ### `noCancel?: boolean`
+ * If `true`, hides the cancel button in edit mode.
+ *
+ * ---
+ * ## FieldConfig<T>:
+ *
+ * Defines a single field in the form.
+ *
+ * ```ts
+ * type FieldConfig<T> = {
+ *   name: keyof T & string;         // property key
+ *   label: string;                  // field label
+ *   type?: "text" | "number" | "select" | "textarea" | "autocomplete" | "date";
+ *   options?: { value: any, label: string }[]; // used for select/autocomplete
+ *   format?: (value: any, entity: T) => string; // custom formatter for view mode
+ *   required?: boolean;             // shows red asterisk & validates presence
+ * };
+ * ```
+ *
+ * ---
+ * ## Features:
+ * - Supports view & edit modes (toggleable).
+ * - Displays fields in a 2-column layout on larger screens.
+ * - Field types supported:
+ *   - Text input
+ *   - Textarea
+ *   - Number input
+ *   - Date input
+ *   - Select dropdown
+ *   - Autocomplete (`<datalist>`)
+ * - Optional formatting for read-only view mode.
+ * - Validation for required fields before saving.
+ * - Integrated with a generic `BaseModal`.
+ *
+ * ---
+ * ## Example usage:
+ *
+ * ```tsx
+ * <EntityModal
+ *   title="Edit Car"
+ *   entity={car}
+ *   isOpen={isOpen}
+ *   onClose={handleClose}
+ *   onSave={(updated) => updateCar(updated)}
+ *   fields={[
+ *     { name: "make", label: "Make", required: true },
+ *     { name: "model", label: "Model", required: true },
+ *     { name: "year", label: "Year", type: "number" },
+ *     { name: "available", label: "Available", type: "select", options: [
+ *        { value: true, label: "Yes" },
+ *        { value: false, label: "No" }
+ *     ]}
+ *   ]}
+ * />
+ * ```
+ *
+ * ---
+ * ## Accessibility:
+ * - Inputs use associated `<label>` tags.
+ * - Focus ring and accessible states applied.
+ *
+ * ---
+ * ## Notes:
+ * - Input state is reset when switching between view/edit or closing modal.
+ * - Date and number types are supported natively by HTML inputs.
+ */
+
 "use client";
 import { useEffect, useState } from "react";
 import BaseModal from "@/app/components/BaseModal";
