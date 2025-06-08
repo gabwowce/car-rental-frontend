@@ -3,7 +3,7 @@
 import { useInvoicesData } from "@/hooks/useInvoicesData";
 import { useInvoiceModals } from "@/hooks/useInvoiceModals";
 import DataTable from "@/app/components/DataTable";
-import ActionButtons from "@/app/components/ActionButtons";
+import { ActionButtons } from "@/app/components/ActionButtons";
 import StatusBadge from "@/app/components/StatusBadge";
 
 type Saskaita = NonNullable<

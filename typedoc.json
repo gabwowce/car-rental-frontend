@@ -21,5 +21,5 @@
   "entryPointStrategy": "expand",
   "skipErrorChecking": true,
   "name": "AutoRent Frontend",
-  "readme": "README.md"
+  "readme": "README.md",
 }

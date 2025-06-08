@@ -9,7 +9,7 @@ import {
   FiCornerDownLeft,
 } from "react-icons/fi";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
-import ActionButtons from "@/app/components/ActionButtons";
+import { ActionButtons } from "@/app/components/ActionButtons";
 import DataTable from "@/app/components/DataTable";
 import StatCard from "./components/StatCard";
 import BarChartBox from "./components/BarChartBox";

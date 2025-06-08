@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import DataTable from "@/app/components/DataTable";
-import ActionButtons from "@/app/components/ActionButtons";
+import { ActionButtons } from "@/app/components/ActionButtons";
 import EntityModal from "@/app/components/modals/EntityModal";
 import LoadingScreen from "@/app/components/loadingScreen";
 import { useReservationData } from "@/hooks/useReservationData";

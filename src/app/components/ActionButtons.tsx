@@ -71,7 +71,7 @@ type ActionButtonsProps = {
   extraLabel?: string;
 };
 
-export default function ActionButtons({
+export function ActionButtons({
   onView,
   onEdit,
   onDelete,

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import DataTable from "../components/DataTable";
-import ActionButtons from "../components/ActionButtons";
+import { ActionButtons } from "../components/ActionButtons";
 import MapComponent from "../components/MapComponent";
 import EntityModal from "../components/modals/EntityModal";
 import { useCarsData } from "@/hooks/useCarsData";
