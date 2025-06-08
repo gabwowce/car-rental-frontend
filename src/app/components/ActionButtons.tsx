@@ -71,6 +71,19 @@ type ActionButtonsProps = {
   extraLabel?: string;
 };
 
+/**
+ * Renders action buttons (Edit, Delete, View, etc.) for tables.
+ *
+ * @param {ActionButtonsProps} props - Callback handlers and button config
+ * @returns {JSX.Element} Interactive button group
+ *
+ * @example
+ * <ActionButtons
+ *   onEdit={() => ...}
+ *   onDelete={() => ...}
+ *   show={{ edit: true, delete: true }}
+ * />
+ */
 export function ActionButtons({
   onView,
   onEdit,
