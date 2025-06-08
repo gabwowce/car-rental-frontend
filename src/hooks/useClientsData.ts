@@ -10,60 +10,25 @@ import { FieldConfig } from "@/app/components/modals/EntityModal";
 /**
  * `useClientsData` – A custom hook for managing client data and operations.
  *
- * This hook provides a complete data layer for client-related functionality in
- * your application, including:
- * - Fetching all clients via RTK Query
- * - Performing update and delete operations via mutations
- * - Real-time search and filtering logic
- * - Providing `FieldConfig` definitions for modal-based form generation
- *
- * ## Features:
- * - Automatically fetches all client data using `useGetAllClientsQuery`
- * - Provides mutation handlers to `updateClient` and `deleteClient`
- * - Filters clients by name, surname, or email based on a `search` term
- * - Supplies a fully typed array of input fields for use with `<EntityModal />`
- *
- * ## Returns:
- * ```ts
- * {
- *   clients: ClientOut[];                // Raw list of all clients
- *   filtered: ClientOut[];              // Filtered list based on search term
- *   isLoading: boolean;                 // Loading state for fetch/mutations
- *   search: string;                     // Current search string
- *   setSearch: (value: string) => void; // Update search string
- *   clientFields: FieldConfig<ClientOut>[]; // Modal input definitions
- *   saveClient: (id: number, data: Partial<ClientOut>) => Promise<void>; // Update
- *   removeClient: (id: number) => Promise<void>; // Delete
- * }
- * ```
- *
- * ## Example:
- * ```tsx
- * const {
- *   filtered,
- *   isLoading,
- *   clientFields,
- *   saveClient,
- *   removeClient,
- *   search,
- *   setSearch
- * } = useClientsData();
- *
- * return (
- *   <DataTable data={filtered} />
- * );
- * ```
+ * Provides:
+ * - Client list fetching via RTK Query
+ * - Client updates and deletions
+ * - Search filtering
+ * - Field definitions for modals
  */
 export function useClientsData() {
-  // Fetch all clients
+  /** All clients fetched from the API */
   const { data: clients = [], isLoading, refetch } = useGetAllClientsQuery();
 
-  // Mutations
+  /** Mutation: update client */
   const [updateClient, { isLoading: saving }] = useUpdateClientMutation();
+  /** Mutation: delete client */
   const [deleteClient, { isLoading: removing }] = useDeleteClientMutation();
 
-  // Search state and live filter
+  /** Search term for filtering client list */
   const [search, setSearch] = useState("");
+
+  /** Filtered clients based on search input (name, surname, email) */
   const filtered = useMemo(
     () =>
       clients.filter((k) =>
@@ -74,7 +39,7 @@ export function useClientsData() {
     [clients, search]
   );
 
-  // Field configs for EntityModal
+  /** Fields config for <EntityModal />, used in create/edit client modal */
   const clientFields: FieldConfig<ClientOut>[] = [
     { name: "vardas", label: "Vardas", type: "text", required: true },
     { name: "pavarde", label: "Pavardė", type: "text", required: true },
@@ -89,7 +54,7 @@ export function useClientsData() {
     {
       name: "registracijos_data",
       label: "Registracijos data",
-      type: "datetime-local",
+      type: "date",
       required: true,
     },
     {
@@ -101,9 +66,9 @@ export function useClientsData() {
   ];
 
   /**
-   * Update (PATCH) a client by ID.
-   * @param id - Client ID
-   * @param data - Partial client fields to update
+   * Updates a client by ID.
+   * @param id - The client ID
+   * @param data - The fields to update
    */
   const saveClient = async (id: number, data: Partial<ClientOut>) => {
     await updateClient({ klientoId: id, clientUpdate: data }).unwrap();
@@ -111,8 +76,8 @@ export function useClientsData() {
   };
 
   /**
-   * Delete a client by ID.
-   * @param id - Client ID to delete
+   * Deletes a client by ID.
+   * @param id - The client ID to remove
    */
   const removeClient = async (id: number) => {
     await deleteClient({ klientoId: id }).unwrap();
@@ -120,13 +85,21 @@ export function useClientsData() {
   };
 
   return {
+    /** Full list of clients */
     clients,
+    /** Clients filtered by search input */
     filtered,
+    /** Loading status for any active fetch or mutation */
     isLoading: isLoading || saving || removing,
+    /** Current search string */
     search,
+    /** Updates search string */
     setSearch,
+    /** Input fields for client modals */
     clientFields,
+    /** Save/Update client handler */
     saveClient,
+    /** Delete client handler */
     removeClient,
   };
 }

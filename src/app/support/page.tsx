@@ -176,7 +176,7 @@ export default function SupportPage() {
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           type="text"
-          placeholder="Ieškoti pagal klientą ar temą"
+          placeholder="Ieškoti..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="border p-2 rounded w-64"

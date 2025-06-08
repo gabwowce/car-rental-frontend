@@ -1,19 +1,37 @@
-// components/LogoutButton.tsx
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout, setToken } from "@/store/authSlice";
 
+/**
+ * LogoutButton component
+ *
+ * Renders a logout button only if the user is authenticated (token exists).
+ * On click, it:
+ * - Dispatches `logout()` to clear token from Redux and localStorage
+ * - Navigates user to the `/login` page
+ *
+ * @returns JSX.Element | null
+ */
 export default function LogoutButton() {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
+  // Get token from Redux store
   const token = useAppSelector((state) => state.auth.token);
-  if (!token) return null; // neprisijungęs – mygtuko nerodome
 
+  // Don't render the button if not authenticated
+  if (!token) return null;
+
+  /**
+   * Handles logout logic:
+   * - Clears auth state
+   * - Redirects to /login
+   */
   const handleLogout = () => {
     dispatch(logout());
-    dispatch(setToken(null));
+    dispatch(setToken(null)); // Redundant, but ensures token is null in both places
     router.replace("/login");
   };
 

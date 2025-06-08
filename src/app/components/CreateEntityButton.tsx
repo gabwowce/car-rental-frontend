@@ -1,9 +1,11 @@
-// src/app/components/CreateEntityButton.tsx
 "use client";
 
 import { useState } from "react";
 import EntityModal from "./modals/EntityModal";
 
+/**
+ * Configuration for a single input field in the `EntityModal` form.
+ */
 export type FieldConfig<T extends Record<string, any>> = {
   name: keyof T & string;
   label: string;
@@ -13,22 +15,51 @@ export type FieldConfig<T extends Record<string, any>> = {
 };
 
 /**
- * Universalus mygtukas, kuris atidaro EntityModal
- * naujo įrašo sukūrimui.
+ * Props for the `CreateEntityButton` component.
  */
 type Props<T extends Record<string, any>> = {
-  /** Mygtuko tekstas („+ Naujas …“) */
+  /**
+   * Label shown on the button (e.g., "+ New Client").
+   */
   buttonLabel: string;
-  /** Modal’o antraštė, pvz. „Naujas klientas“ */
+
+  /**
+   * Title shown in the modal (e.g., "New Client").
+   */
   modalTitle: string;
-  /** Formos laukai */
+
+  /**
+   * Configuration for the modal fields.
+   */
   fields: FieldConfig<T>[];
-  /** Išsaugojimo callback’as, grąžina `await onCreate(entity)` */
+
+  /**
+   * Callback fired when the user submits the form.
+   * Receives form data (excluding `id` or `${string}_id`).
+   */
   onCreate: (newData: Omit<T, "id" | `${string}_id`>) => Promise<void>;
-  /** Pradinės reikšmės (nebūtina) */
+
+  /**
+   * Optional initial values for the form.
+   */
   initial?: Partial<T>;
 };
 
+/**
+ * `CreateEntityButton` – A reusable button that opens a modal to create a new entity.
+ *
+ * @typeParam T - Entity shape (form data structure)
+ *
+ * @example
+ * ```tsx
+ * <CreateEntityButton
+ *   buttonLabel="+ New Client"
+ *   modalTitle="Create Client"
+ *   fields={[{ name: "email", label: "Email", type: "text" }]}
+ *   onCreate={async (data) => await api.addClient(data)}
+ * />
+ * ```
+ */
 export default function CreateEntityButton<T extends Record<string, any>>({
   buttonLabel,
   modalTitle,

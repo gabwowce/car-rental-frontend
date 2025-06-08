@@ -126,7 +126,7 @@ export default function ReservationsPage() {
         <input
           type="text"
           className="border p-2 rounded w-64"
-          placeholder="Ieškoti pagal klientą ar automobilį"
+          placeholder="Ieškoti..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

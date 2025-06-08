@@ -1,59 +1,40 @@
-/**
- * useSupportData
- *
- * Custom React hook to manage client support request data for the AutoRent system.
- * Provides the ability to fetch all support queries and reply to them via mutation.
- *
- * ---
- * ## Features:
- * - Retrieves all support tickets using `useGetAllSupportsQuery`
- * - Allows submitting an answer to a support request with `useAnswerToSupportMutation`
- * - Automatically refreshes data after replying
- *
- * ---
- * ## Returns:
- * ```ts
- * {
- *   supports: SupportOut[];                     // List of support queries
- *   isLoading: boolean;                         // Combined loading state
- *   answer: (id: number, atsakymas: string) => Promise<void>; // Reply to a support query
- * }
- * ```
- *
- * ---
- * ## Example Usage:
- * ```tsx
- * const { supports, isLoading, answer } = useSupportData();
- *
- * <button onClick={() => answer(5, "Thank you, your issue is resolved.")}>
- *   Reply
- * </button>
- * ```
- */
-
 import {
   useGetAllSupportsQuery,
   useAnswerToSupportMutation,
 } from "@/store/enhanceEndpoints";
 
-/** Viena vieta visai pagalbos užklausų logikai */
+/**
+ * Custom hook for managing client support request data in the AutoRent system.
+ *
+ * Fetches all support requests and allows replying to them with automatic refresh.
+ */
 export const useSupportData = () => {
-  /* Užklausų sąrašas */
+  /**
+   * Fetches the list of all support queries.
+   * Defaults to empty array if data is undefined.
+   */
   const { data: supports = [], isLoading, refetch } = useGetAllSupportsQuery();
 
-  /* Atsakymo mutacija */
+  /**
+   * Mutation hook to answer a support query.
+   */
   const [answerToSupport, { isLoading: isAnswering }] =
     useAnswerToSupportMutation();
 
-  /** Atsakyti į konkrečią užklausą ir refetch’inti lentelę */
+  /**
+   * Submits a reply to a specific support ticket and triggers a refetch.
+   *
+   * @param id - The ID of the support query to answer
+   * @param atsakymas - The response text to send
+   */
   const answer = async (id: number, atsakymas: string) => {
     await answerToSupport({ id, atsakymas }).unwrap();
     await refetch();
   };
 
   return {
-    supports,
-    isLoading: isLoading || isAnswering,
-    answer,
+    supports, // All support queries
+    isLoading: isLoading || isAnswering, // Combined loading state
+    answer, // Function to send a response
   };
 };

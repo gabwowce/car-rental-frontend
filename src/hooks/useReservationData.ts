@@ -1,58 +1,3 @@
-/**
- * useReservationData
- *
- * Custom React hook for managing reservation data in the AutoRent system.
- * Handles CRUD operations, status filtering, client/car name lookup, and form field generation
- * for use in modals.
- *
- * ---
- * ## Features:
- * - Fetches all reservations via `useGetAllReservationsQuery`
- * - Supports creation, update, and deletion of reservations via RTK-Query mutations
- * - Includes client and car name resolution via `useClientsData` and `useCarsData`
- * - Provides search and status filtering logic
- * - Exposes form configuration for UI modals
- *
- * ---
- * ## Returns:
- * ```ts
- * {
- *   reservations: ReservationOut[];                    // Raw reservation list
- *   filtered: ReservationOut[];                        // Filtered by search & status
- *   isLoading: boolean;                                // Global loading state
- *   search: string;                                    // Current search string
- *   setSearch: (s: string) => void;                    // Search setter
- *   statusFilter: "visi" | "patvirtinta" | "laukiama" | "atšaukta";
- *   setStatusFilter: (s: string) => void;              // Status filter setter
- *   getClientName: (id: number) => string;             // Resolve client full name by ID
- *   getCarName: (id: number) => string;                // Resolve car name by ID
- *   saveReservation: (
- *     id: number | null,
- *     data: ReservationCreate | ReservationUpdate
- *   ) => Promise<void>;                                // Create or update reservation
- *   handleDelete: (id: number) => Promise<void>;       // Delete reservation
- *   reservationFields: FieldConfig[];                  // Modal field definitions
- * }
- * ```
- *
- * ---
- * ## Example Usage:
- * ```tsx
- * const {
- *   filtered,
- *   saveReservation,
- *   handleDelete,
- *   reservationFields,
- * } = useReservationData();
- *
- * <DataTable data={filtered} />
- * <EntityModal
- *   fields={reservationFields}
- *   onSave={(data) => saveReservation(null, data)}
- * />
- * ```
- */
-
 import {
   useGetAllReservationsQuery,
   useCreateReservationMutation,
@@ -66,8 +11,14 @@ import { useClientsData } from "./useClientsData";
 import { useCarsData } from "./useCarsData";
 import { useState, useMemo } from "react";
 
+/**
+ * Custom hook to manage reservation data in the AutoRent system.
+ *
+ * Provides full CRUD functionality, search and status filtering, and
+ * dynamic field definitions for reservation forms/modals.
+ */
 export const useReservationData = () => {
-  /* ----- API mutation’ai ----- */
+  // === RTK Query mutation hooks ===
   const [createReservation, { isLoading: creating }] =
     useCreateReservationMutation();
   const [updateReservation, { isLoading: updating }] =
@@ -75,17 +26,20 @@ export const useReservationData = () => {
   const [deleteReservation, { isLoading: deleting }] =
     useDeleteReservationMutation();
 
-  /* ----- API sąrašas ----- */
+  // === Fetch all reservations ===
   const {
     data: reservations = [],
     isLoading,
     refetch,
   } = useGetAllReservationsQuery();
 
-  /* ----- lookup’ai ----- */
+  // === Fetch clients and cars for lookup ===
   const { clients } = useClientsData();
   const { automobiliai } = useCarsData();
 
+  /**
+   * Maps client IDs to their full names.
+   */
   const clientMap = useMemo(
     () =>
       new Map(
@@ -94,6 +48,9 @@ export const useReservationData = () => {
     [clients]
   );
 
+  /**
+   * Maps car IDs to their brand + model.
+   */
   const carMap = useMemo(
     () =>
       new Map(
@@ -105,10 +62,23 @@ export const useReservationData = () => {
     [automobiliai]
   );
 
+  /**
+   * Resolve client full name by ID.
+   * @param id - Client ID
+   */
   const getClientName = (id: number) => clientMap.get(id) ?? `#${id}`;
+
+  /**
+   * Resolve car brand + model by ID.
+   * @param id - Car ID
+   */
   const getCarName = (id: number) => carMap.get(id) ?? `#${id}`;
 
-  /** ✅ Kurti arba atnaujinti rezervaciją */
+  /**
+   * Create a new reservation or update existing one.
+   * @param id - Reservation ID (null for create)
+   * @param data - Form data
+   */
   const saveReservation = async (
     id: number | null,
     data: ReservationCreate | ReservationUpdate
@@ -124,18 +94,24 @@ export const useReservationData = () => {
     await refetch();
   };
 
-  /** 🗑️ Ištrinti rezervaciją */
+  /**
+   * Delete a reservation by ID.
+   * @param rezervacijos_id - Reservation ID
+   */
   const handleDelete = async (rezervacijos_id: number) => {
     await deleteReservation({ rezervacijosId: rezervacijos_id }).unwrap();
     await refetch();
   };
 
-  /* ----- lokali filtravimo būsena ----- */
+  // === Filtering logic ===
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "visi" | "patvirtinta" | "laukiama" | "atšaukta"
   >("visi");
 
+  /**
+   * Filtered list based on search and status.
+   */
   const filtered = reservations.filter((r: any) => {
     const target =
       `${getClientName(r.kliento_id)} ${getCarName(r.automobilio_id)}`.toLowerCase();
@@ -147,7 +123,9 @@ export const useReservationData = () => {
     return matchSearch && matchStatus;
   });
 
-  /* ----- laukų konfigas modalui ----- */
+  /**
+   * Reservation modal field configuration.
+   */
   const reservationFields = [
     {
       name: "kliento_id",
@@ -195,17 +173,17 @@ export const useReservationData = () => {
   ];
 
   return {
-    reservations,
-    filtered,
-    isLoading: isLoading || creating || updating || deleting,
-    search,
-    setSearch,
-    statusFilter,
-    setStatusFilter,
-    getClientName,
-    getCarName,
-    saveReservation,
-    handleDelete,
-    reservationFields,
+    reservations, // Full reservation list
+    filtered, // Filtered reservation list
+    isLoading: isLoading || creating || updating || deleting, // Combined loading state
+    search, // Search value
+    setSearch, // Update search value
+    statusFilter, // Status filter
+    setStatusFilter, // Update status filter
+    getClientName, // Resolve client name
+    getCarName, // Resolve car name
+    saveReservation, // Create/update action
+    handleDelete, // Delete action
+    reservationFields, // Modal form fields
   };
 };

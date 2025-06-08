@@ -1,4 +1,16 @@
-"use client"
+"use client";
+
+/**
+ * `LoadingScreen` – Full-screen loading overlay with animated ring.
+ *
+ * This component displays a centered spinner on a white background.
+ * Intended for use during full-page loads or async transitions.
+ *
+ * @returns JSX.Element – A fixed full-screen loading indicator
+ *
+ * @example
+ * return isLoading ? <LoadingScreen /> : <MainContent />
+ */
 export default function LoadingScreen() {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-white z-20">
@@ -11,6 +23,7 @@ export default function LoadingScreen() {
         </div>
       </div>
 
+      {/* Inline CSS for spinner animation */}
       <style>{`
         .lds-ring {
           display: inline-block;

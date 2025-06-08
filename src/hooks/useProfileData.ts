@@ -1,85 +1,62 @@
-/**
- * useProfileData
- *
- * Custom React hook for managing employee profile data and password updates
- * within the AutoRent system. This hook handles retrieving the current user,
- * managing form state for password change, and performing the update mutation.
- *
- * ---
- * ## Features:
- * - Fetches the currently authenticated employee using `useMeApiV1MeGetQuery`
- * - Manages local state for old, new, and repeat password fields
- * - Provides a `handleSubmit` function to validate and update the password
- * - Returns a status message for user feedback
- *
- * ---
- * ## Returns:
- * ```ts
- * {
- *   user: UserInfo | undefined;                // Current logged-in user info
- *   isLoading: boolean;                        // Loading state for user fetch
- *   oldPassword: string;                       // Current form value for old password
- *   newPassword: string;                       // New password value
- *   repeatPassword: string;                    // Repeated new password value
- *   setOldPassword: (val: string) => void;     // Update old password
- *   setNewPassword: (val: string) => void;     // Update new password
- *   setRepeatPassword: (val: string) => void;  // Update repeat password
- *   handleSubmit: (e: FormEvent) => void;      // Submit handler for form
- *   message: string;                           // Feedback message for user
- * }
- * ```
- *
- * ---
- * ## Example Usage:
- * ```tsx
- * const {
- *   user,
- *   isLoading,
- *   oldPassword,
- *   newPassword,
- *   repeatPassword,
- *   setOldPassword,
- *   setNewPassword,
- *   setRepeatPassword,
- *   handleSubmit,
- *   message,
- * } = useProfileData();
- *
- * return (
- *   <form onSubmit={handleSubmit}>
- *     <input value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
- *     ...
- *     <button type="submit">Change Password</button>
- *     {message && <p>{message}</p>}
- *   </form>
- * );
- * ```
- */
-
 import { useState } from "react";
 import {
   useMeApiV1MeGetQuery,
   useChangePasswordMutation,
 } from "@/store/carRentalApi";
 
+/**
+ * React hook for managing employee profile and password update functionality.
+ *
+ * Handles the current user info retrieval and local state for password change form.
+ * Provides password validation and handles mutation errors gracefully.
+ */
 export function useProfileData() {
+  /**
+   * Fetched user data of the currently authenticated employee.
+   */
   const { data: user, isLoading } = useMeApiV1MeGetQuery();
+
+  /**
+   * Mutation function to change the password via API.
+   */
   const [changePassword] = useChangePasswordMutation();
 
+  /**
+   * Old password input value.
+   */
   const [oldPassword, setOldPassword] = useState("");
+
+  /**
+   * New password input value.
+   */
   const [newPassword, setNewPassword] = useState("");
+
+  /**
+   * Confirmation field for new password.
+   */
   const [repeatPassword, setRepeatPassword] = useState("");
+
+  /**
+   * Feedback message to display to the user.
+   */
   const [message, setMessage] = useState("");
 
+  /**
+   * Handles password change form submission.
+   *
+   * @param e - React form event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Ensure new password and confirmation match
     if (newPassword !== repeatPassword) {
       setMessage("Slaptažodžiai nesutampa");
       return;
     }
 
     try {
+      // Attempt to change password via API mutation
       await changePassword({
         changePasswordRequest: {
           senas_slaptazodis: oldPassword,
@@ -87,6 +64,7 @@ export function useProfileData() {
         },
       }).unwrap();
 
+      // Reset form and show success message
       setMessage("Slaptažodis pakeistas sėkmingai");
       setOldPassword("");
       setNewPassword("");
@@ -98,15 +76,15 @@ export function useProfileData() {
   };
 
   return {
-    user,
-    isLoading,
-    oldPassword,
-    newPassword,
-    repeatPassword,
-    setOldPassword,
-    setNewPassword,
-    setRepeatPassword,
-    handleSubmit,
-    message,
+    user, // Currently authenticated user
+    isLoading, // Is user data loading
+    oldPassword, // Current value of old password
+    newPassword, // New password input
+    repeatPassword, // Repeated new password input
+    setOldPassword, // Setter for old password
+    setNewPassword, // Setter for new password
+    setRepeatPassword, // Setter for repeat password
+    handleSubmit, // Form submit handler
+    message, // User-facing feedback message
   };
 }

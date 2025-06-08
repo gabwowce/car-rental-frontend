@@ -7,9 +7,15 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useGeoCodeMutation } from "@/store/carRentalApi";
 
-/* ---------- GLOBALUS (modulio lygio) cache ---------- */
+// ===== GLOBAL CACHE =====
+
+/**
+ * Global cache for geocoded coordinates.
+ * Prevents re-geocoding the same address multiple times.
+ */
 const coordCache = new Map<string, LatLngExpression>();
 
+// Fix missing marker icons (required by Leaflet when used in frameworks like Next.js)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -18,6 +24,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+// ===== Types =====
+
+/**
+ * Car data including location object.
+ */
 type Automobilis = {
   automobilio_id: number;
   marke: string;
@@ -32,9 +43,24 @@ type Automobilis = {
   } | null;
 };
 
+/**
+ * Extended car object that includes resolved coordinates.
+ */
 type AutoWithCoords = Automobilis & { coords: LatLngExpression | null };
+
+/**
+ * Props for MapComponent, expects a list of cars.
+ */
 type MapComponentProps = { cars: Automobilis[] };
 
+/**
+ * Displays a Leaflet map with car markers using geolocation.
+ * - Automatically uses `latitude`/`longitude` if available.
+ * - Falls back to geocoding `adresas` via backend mutation.
+ * - Caches resolved coordinates globally per address.
+ *
+ * @param {MapComponentProps} props - List of cars to show on the map
+ */
 export default function MapComponent({ cars }: MapComponentProps) {
   const [carsWithCoords, setCarsWithCoords] = useState<AutoWithCoords[]>([]);
   const [geoCode] = useGeoCodeMutation();
@@ -48,6 +74,7 @@ export default function MapComponent({ cars }: MapComponentProps) {
     const needGeocode: Automobilis[] = [];
     const withCoords: AutoWithCoords[] = [];
 
+    // Split cars into those with direct coordinates and those needing geocoding
     cars.forEach((car) => {
       const loc = car.lokacija;
       if (loc?.latitude && loc?.longitude) {
@@ -65,10 +92,12 @@ export default function MapComponent({ cars }: MapComponentProps) {
       return;
     }
 
+    /**
+     * Geocode unresolved addresses and merge them into state.
+     */
     const fetchCoords = async () => {
       const geocoded: AutoWithCoords[] = [];
 
-      // geokoduojam TIK adresus, kurių dar nėra globaliame cache
       for (const car of needGeocode) {
         const adresas = car.lokacija!.adresas;
         try {
@@ -77,13 +106,14 @@ export default function MapComponent({ cars }: MapComponentProps) {
           }).unwrap();
           const coords: LatLngExpression | null =
             lat && lng ? [lat, lng] : null;
-          if (coords) coordCache.set(adresas, coords); // ⬅️  įsirašo globaliai
+          if (coords) coordCache.set(adresas, coords); // Cache result globally
           geocoded.push({ ...car, coords });
         } catch (e) {
           console.warn("Geocode failed:", adresas, e);
           geocoded.push({ ...car, coords: null });
         }
       }
+
       setCarsWithCoords([...withCoords, ...geocoded]);
     };
 
@@ -93,7 +123,7 @@ export default function MapComponent({ cars }: MapComponentProps) {
   return (
     <div className="relative z-0 border border-gray-300 rounded p-4 mt-6 h-[500px]">
       <MapContainer
-        center={[55.1694, 23.8813]}
+        center={[55.1694, 23.8813]} // Centered over Lithuania
         zoom={7}
         className="h-full w-full"
         scrollWheelZoom
@@ -102,6 +132,7 @@ export default function MapComponent({ cars }: MapComponentProps) {
           attribution="© OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
         {carsWithCoords
           .filter((c) => c.coords)
           .map((c) => (
@@ -117,7 +148,6 @@ export default function MapComponent({ cars }: MapComponentProps) {
                 <br />
                 {c.lokacija?.miestas && (
                   <>
-                    {" "}
                     <b>Miestas:</b> {c.lokacija.miestas}
                     <br />
                   </>

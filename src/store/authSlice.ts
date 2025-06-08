@@ -1,67 +1,36 @@
-/**
- * authSlice.ts
- *
- * Manages authentication state, specifically the user's access token.
- * This slice is responsible for setting, storing, and clearing the JWT token.
- *
- * ---
- * ## State Structure:
- * ```ts
- * interface AuthState {
- *   token: string | null;
- * }
- * ```
- * - `token`: The JWT token used to authorize API requests. Stored in both
- *   Redux state and `localStorage` for persistence across sessions.
- *
- * ---
- * ## Initial State:
- * ```ts
- * const initialState: AuthState = {
- *   token: null,
- * };
- * ```
- *
- * ---
- * ## Reducers:
- *
- * ### `setToken(token: string | null)`
- * - Updates the Redux state with the new token.
- * - Also synchronizes it with `localStorage`.
- * - If `null` is passed, it removes the token from `localStorage`.
- * - Used during login or token refresh.
- *
- * ### `logout()`
- * - Clears the token from both Redux state and `localStorage`.
- * - Typically used when a user logs out or the token expires.
- *
- * ---
- * ## Example Usage:
- * ```ts
- * dispatch(setToken("your.jwt.token")); // login
- * dispatch(logout()); // logout
- * ```
- *
- * ---
- * ## Integration:
- * - This slice should be added to your root reducer.
- * - Components can access the token with `useSelector((state) => state.auth.token)`
- */
-
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+/**
+ * Represents the authentication state structure.
+ */
 interface AuthState {
+  /** The JWT token for authenticated API access. Null if not logged in. */
   token: string | null;
 }
 
+/**
+ * Initial state with no token.
+ */
 const initialState: AuthState = {
   token: null,
 };
 
+/**
+ * Authentication slice managing JWT token storage and removal.
+ */
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    /**
+     * Sets or clears the authentication token.
+     *
+     * @param state - Current auth state
+     * @param action - Token string or null
+     *
+     * - Saves token to localStorage for persistence
+     * - Removes token from localStorage if null
+     */
     setToken(state, action: PayloadAction<string | null>) {
       state.token = action.payload;
       if (action.payload) {
@@ -70,6 +39,12 @@ const authSlice = createSlice({
         localStorage.removeItem("token");
       }
     },
+
+    /**
+     * Logs out the user by clearing the token.
+     *
+     * - Removes token from Redux state and localStorage
+     */
     logout(state) {
       state.token = null;
       localStorage.removeItem("token");
@@ -77,5 +52,10 @@ const authSlice = createSlice({
   },
 });
 
+// Export reducer actions
 export const { setToken, logout } = authSlice.actions;
+
+/**
+ * Reducer for authentication slice.
+ */
 export default authSlice.reducer;

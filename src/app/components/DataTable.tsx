@@ -1,38 +1,75 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo } from "react";
 
-type Column<T> = {
-  label: string
-  accessor: keyof T | ((row: T) => React.ReactNode)
-  className?: string
-}
+/**
+ * Represents a column in the DataTable.
+ *
+ * @template T
+ * @property {string} label - Column heading.
+ * @property {keyof T | ((row: T) => React.ReactNode)} accessor - Field key or custom cell renderer.
+ * @property {string} [className] - Optional class name for custom styling.
+ */
+export type Column<T> = {
+  label: string;
+  accessor: keyof T | ((row: T) => React.ReactNode);
+  className?: string;
+};
 
-type DataTableProps<T> = {
-  columns: Column<T>[]
-  data: T[]
-  rowKey: (row: T) => string | number
-  itemsPerPage?: number // 👈 naujas props
-}
+/**
+ * Props for the generic DataTable component.
+ *
+ * @template T
+ * @property {Column<T>[]} columns - Column definitions.
+ * @property {T[]} data - Row data.
+ * @property {(row: T) => string | number} rowKey - Function to get a unique row key.
+ * @property {number} [itemsPerPage=10] - Number of rows per page.
+ */
+export type DataTableProps<T> = {
+  columns: Column<T>[];
+  data: T[];
+  rowKey: (row: T) => string | number;
+  itemsPerPage?: number;
+};
 
+/**
+ * `DataTable` is a reusable, paginated table component.
+ *
+ * @template T - The shape of each data row.
+ *
+ * @param {DataTableProps<T>} props - The table configuration and data.
+ *
+ * @example
+ * ```tsx
+ * <DataTable<User>
+ *   columns={[
+ *     { label: "Name", accessor: "name" },
+ *     { label: "Email", accessor: "email" },
+ *     {
+ *       label: "Actions",
+ *       accessor: (user) => <button>Edit</button>,
+ *     },
+ *   ]}
+ *   data={userList}
+ *   rowKey={(u) => u.id}
+ * />
+ * ```
+ */
 export default function DataTable<T>({
   columns,
   data,
   rowKey,
-  itemsPerPage = 10, // 👈 default reikšmė
+  itemsPerPage = 10,
 }: DataTableProps<T>) {
-  const [currentPage, setCurrentPage] = useState(1)
-
-  const totalPages = Math.ceil(data.length / itemsPerPage)
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(data.length / itemsPerPage);
 
   const paginatedData = useMemo(() => {
-    const startIdx = (currentPage - 1) * itemsPerPage
-    return data.slice(startIdx, startIdx + itemsPerPage)
-  }, [currentPage, data, itemsPerPage])
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    return data.slice(startIdx, startIdx + itemsPerPage);
+  }, [currentPage, data, itemsPerPage]);
 
   const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
-    }
-  }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -45,7 +82,7 @@ export default function DataTable<T>({
                   <th
                     key={idx}
                     scope="col"
-                    className={`px-6 py-3 text-left text-sm font-semibold text-gray-600 ${col.className ?? ''}`}
+                    className={`px-6 py-3 text-left text-sm font-semibold text-gray-600 ${col.className ?? ""}`}
                   >
                     {col.label}
                   </th>
@@ -58,9 +95,9 @@ export default function DataTable<T>({
                   {columns.map((col, idx) => (
                     <td
                       key={idx}
-                      className={`px-6 py-4 whitespace-nowrap align-middle ${col.className ?? ''}`}
+                      className={`px-6 py-4 whitespace-nowrap align-middle ${col.className ?? ""}`}
                     >
-                      {typeof col.accessor === 'function'
+                      {typeof col.accessor === "function"
                         ? col.accessor(row)
                         : (row[col.accessor] as React.ReactNode)}
                     </td>
@@ -71,7 +108,6 @@ export default function DataTable<T>({
           </table>
         </div>
 
-        {/* 🔢 Pagination controls */}
         <div className="flex items-center justify-between px-6 py-4 text-sm text-gray-700">
           <button
             onClick={() => goToPage(currentPage - 1)}
@@ -87,7 +123,7 @@ export default function DataTable<T>({
                 key={idx}
                 onClick={() => goToPage(idx + 1)}
                 className={`px-3 py-1 rounded border ${
-                  currentPage === idx + 1 ? 'bg-gray-200 font-bold' : ''
+                  currentPage === idx + 1 ? "bg-gray-200 font-bold" : ""
                 }`}
               >
                 {idx + 1}
@@ -105,5 +141,5 @@ export default function DataTable<T>({
         </div>
       </div>
     </div>
-  )
+  );
 }

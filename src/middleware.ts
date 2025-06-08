@@ -1,54 +1,35 @@
-/**
- * middleware.ts
- *
- * This middleware enforces authentication for all routes in the application,
- * except for public assets and the login page.
- *
- * ---
- * ## Behavior:
- * - Reads the `token` cookie from the incoming request.
- * - If the request is for `/login`, it allows access without checks.
- * - If no token is found and the user is accessing a protected route,
- *   they are redirected to `/login`.
- * - Otherwise, the request is allowed to continue.
- *
- * ---
- * ## Matcher Configuration:
- * ```ts
- * matcher: ["/((?!_next|favicon.ico|api).*)"]
- * ```
- * This pattern:
- * - Applies the middleware to all routes **except**:
- *   - Next.js internal assets (`/_next/...`)
- *   - Static files like `favicon.ico`
- *   - API routes (`/api/...`)
- *
- * ---
- * ## Example:
- * - `/dashboard` → requires token
- * - `/cars` → requires token
- * - `/login` → always allowed
- * - `/_next/static/...` → always allowed
- *
- * ---
- * ## Related:
- * Make sure the token is set via cookie in the login handler:
- * ```ts
- * document.cookie = `token=${token}; path=/;`;
- * ```
- */
-
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * Global middleware for route-based authentication in a Next.js app.
+ *
+ * Controls access to protected routes by checking for a valid `token` cookie.
+ *
+ * @param request - The incoming HTTP request from Next.js
+ * @returns NextResponse - A response that either allows access or redirects to login
+ */
 export function middleware(request: NextRequest) {
+  // Attempt to retrieve the `token` cookie from the request
   const token = request.cookies.get("token")?.value;
 
+  // Allow access to the login page without authentication
   if (request.nextUrl.pathname.startsWith("/login")) return NextResponse.next();
+
+  // If no token is present, redirect to the login page
   if (!token) return NextResponse.redirect(new URL("/login", request.url));
 
+  // Otherwise, continue to the requested route
   return NextResponse.next();
 }
 
+/**
+ * Matcher configuration to apply this middleware selectively.
+ *
+ * Applies to all routes except:
+ * - Next.js internals (`/_next/...`)
+ * - Static assets like `favicon.ico`
+ * - API routes (`/api/...`)
+ */
 export const config = {
-  matcher: ["/((?!_next|favicon.ico|api).*)"], // viskas, išskyrus public
+  matcher: ["/((?!_next|favicon.ico|api).*)"],
 };

@@ -1,62 +1,43 @@
-/**
- * `useInvoicesData` – A custom React hook for managing and filtering invoice data.
- *
- * This hook fetches all invoices via RTK Query and provides built-in support for:
- * - Search filtering (by client name or invoice ID)
- * - Status filtering (e.g., all, paid, overdue, issued)
- * - Memoized filtered result for performance
- *
- * ## Features:
- * - Fetches all invoices from the API (`useGetAllInvoicesQuery`)
- * - Provides `search` and `statusFilter` state
- * - Returns filtered list based on current filters
- * - Keeps original and filtered data separate
- *
- * ## Filters:
- * - **Search**: filters by client first name or invoice ID
- * - **Status**: filters by invoice status (e.g., `"apmokėta"`, `"vėluojanti"`, etc.)
- *
- * ## Returns:
- * ```ts
- * {
- *   invoices: InvoiceOut[];             // All fetched invoices
- *   search: string;                     // Current search value
- *   setSearch: (val: string) => void;   // Update search input
- *   statusFilter: string;               // Selected status filter
- *   setStatusFilter: (val: string) => void; // Update status filter
- *   filtered: InvoiceOut[];             // Filtered result based on search + status
- *   isLoading: boolean;                 // Loading state
- * }
- * ```
- *
- * ## Example usage:
- * ```tsx
- * const {
- *   filtered,
- *   search,
- *   setSearch,
- *   statusFilter,
- *   setStatusFilter,
- *   isLoading,
- * } = useInvoicesData();
- * ```
- */
-
 import { useGetAllInvoicesQuery } from "@/store/carRentalApi";
 import { useState, useMemo } from "react";
 
+/**
+ * Custom hook for managing and filtering invoices.
+ *
+ * Fetches all invoices and provides search + status-based filtering logic.
+ *
+ * @returns Object containing invoice data, filters, and filtered results.
+ */
 export function useInvoicesData() {
+  /**
+   * Fetch all invoices using RTK Query.
+   * Defaults to an empty array if no data is returned yet.
+   */
   const { data: invoices = [], isLoading } = useGetAllInvoicesQuery();
 
+  /**
+   * Search input value (used to match client name or invoice ID).
+   */
   const [search, setSearch] = useState("");
+
+  /**
+   * Currently selected invoice status filter.
+   * Example values: "visi", "apmokėta", "vėluojanti", etc.
+   */
   const [statusFilter, setStatusFilter] = useState("visi");
 
+  /**
+   * Memoized list of filtered invoices based on search + status.
+   * Improves performance by avoiding unnecessary recalculations.
+   */
   const filtered = useMemo(() => {
     return invoices.filter((s) => {
+      // Match if either client's name or invoice ID contains the search value
       const matchSearch = `${s.client_first_name} ${s.invoice_id}`
         .toLowerCase()
         .includes(search.toLowerCase());
 
+      // Match if status is "visi" (all) or exactly matches the invoice's status
       const matchStatus = statusFilter === "visi" || s.status === statusFilter;
 
       return matchSearch && matchStatus;
@@ -64,12 +45,12 @@ export function useInvoicesData() {
   }, [invoices, search, statusFilter]);
 
   return {
-    invoices,
-    search,
-    setSearch,
-    statusFilter,
-    setStatusFilter,
-    filtered,
-    isLoading,
+    invoices, // All raw invoice data
+    search, // Current search string
+    setSearch, // Function to update search string
+    statusFilter, // Current selected status filter
+    setStatusFilter, // Function to update status filter
+    filtered, // Invoices matching current search and status
+    isLoading, // True while data is being fetched
   };
 }

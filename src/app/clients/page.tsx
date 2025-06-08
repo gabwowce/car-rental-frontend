@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import DataTable from "@/app/components/DataTable";
-import {ActionButtons} from "@/app/components/ActionButtons";
+import { ActionButtons } from "@/app/components/ActionButtons";
 import EntityModal from "@/app/components/modals/EntityModal";
 import LoadingScreen from "@/app/components/loadingScreen";
 import { useClientsData } from "@/hooks/useClientsData";
@@ -45,19 +45,19 @@ export default function ClientsPage() {
   /** --- Table columns configuration --- */
   const columns = [
     {
-      label: "Name",
+      label: "Vardas ir Pavardė",
       accessor: (k: Klientas) => `${k.vardas} ${k.pavarde}`,
     },
-    { label: "Email", accessor: "el_pastas" },
-    { label: "Phone", accessor: "telefono_nr" },
+    { label: "El. paštas", accessor: "el_pastas" },
+    { label: "Telefonas", accessor: "telefono_nr" },
     {
-      label: "Registration Date",
+      label: "Registracijos data",
       accessor: (k: Klientas) =>
         new Date(k.registracijos_data).toLocaleDateString("lt-LT"),
     },
-    { label: "Bonus Points", accessor: "bonus_taskai" },
+    { label: "Bonus taškai", accessor: "bonus_taskai" },
     {
-      label: "Actions",
+      label: "Veiksmai",
       accessor: (k: Klientas) => (
         <ActionButtons
           onEdit={() => {
@@ -66,16 +66,16 @@ export default function ClientsPage() {
           }}
           onDelete={async () => {
             const ok = window.confirm(
-              `Are you sure you want to delete client ${k.vardas} ${k.pavarde}?`
+              `Ar tikrai norite ištrinti klientą ${k.vardas} ${k.pavarde}?`
             );
             if (!ok) return;
 
             try {
               await removeClient(k.kliento_id);
             } catch (e: any) {
-              console.error("Failed to delete client:", e);
+              console.error("Nepavyko ištrinti kliento:", e);
               alert(
-                "This client cannot be deleted because they are associated with orders or other records."
+                "Šio kliento ištrinti negalima, nes jis susietas su užsakymais ar kitais įrašais."
               );
             }
           }}
@@ -91,10 +91,10 @@ export default function ClientsPage() {
     <div>
       {/* Header & Create Button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Clients</h1>
+        <h1 className="text-2xl font-bold">Klientai</h1>
         <CreateEntityButton
-          buttonLabel="+ New Client"
-          modalTitle="New Client"
+          buttonLabel="+ Naujas klientas"
+          modalTitle="Naujas klientas"
           fields={clientFields}
           onCreate={async (data) => {
             await saveClient(null, data); // null → create

@@ -1,110 +1,24 @@
-/**
- * EntityModal.tsx
- *
- * Reusable modal component for displaying and editing any generic entity.
- * Uses a dynamic form layout driven by a `FieldConfig` array.
- *
- * ---
- * ## Props:
- *
- * ### `title: string`
- * Modal title displayed at the top.
- *
- * ### `entity: T`
- * The object to display/edit. Initial values come from this object.
- *
- * ### `isOpen: boolean`
- * Controls whether the modal is visible.
- *
- * ### `onClose: () => void`
- * Called when the modal is closed (e.g., after saving or canceling).
- *
- * ### `onSave?: (updated: T) => void`
- * Optional callback for when "Save" is clicked. Passes updated entity.
- *
- * ### `fields: FieldConfig<T>[]`
- * Describes each form field (label, type, validation, etc.).
- *
- * ### `startInEdit?: boolean`
- * If `true`, modal starts in editing mode. Default is `false`.
- *
- * ### `noCancel?: boolean`
- * If `true`, hides the cancel button in edit mode.
- *
- * ---
- * ## FieldConfig<T>:
- *
- * Defines a single field in the form.
- *
- * ```ts
- * type FieldConfig<T> = {
- *   name: keyof T & string;         // property key
- *   label: string;                  // field label
- *   type?: "text" | "number" | "select" | "textarea" | "autocomplete" | "date";
- *   options?: { value: any, label: string }[]; // used for select/autocomplete
- *   format?: (value: any, entity: T) => string; // custom formatter for view mode
- *   required?: boolean;             // shows red asterisk & validates presence
- * };
- * ```
- *
- * ---
- * ## Features:
- * - Supports view & edit modes (toggleable).
- * - Displays fields in a 2-column layout on larger screens.
- * - Field types supported:
- *   - Text input
- *   - Textarea
- *   - Number input
- *   - Date input
- *   - Select dropdown
- *   - Autocomplete (`<datalist>`)
- * - Optional formatting for read-only view mode.
- * - Validation for required fields before saving.
- * - Integrated with a generic `BaseModal`.
- *
- * ---
- * ## Example usage:
- *
- * ```tsx
- * <EntityModal
- *   title="Edit Car"
- *   entity={car}
- *   isOpen={isOpen}
- *   onClose={handleClose}
- *   onSave={(updated) => updateCar(updated)}
- *   fields={[
- *     { name: "make", label: "Make", required: true },
- *     { name: "model", label: "Model", required: true },
- *     { name: "year", label: "Year", type: "number" },
- *     { name: "available", label: "Available", type: "select", options: [
- *        { value: true, label: "Yes" },
- *        { value: false, label: "No" }
- *     ]}
- *   ]}
- * />
- * ```
- *
- * ---
- * ## Accessibility:
- * - Inputs use associated `<label>` tags.
- * - Focus ring and accessible states applied.
- *
- * ---
- * ## Notes:
- * - Input state is reset when switching between view/edit or closing modal.
- * - Date and number types are supported natively by HTML inputs.
- */
-
 "use client";
 import { useEffect, useState } from "react";
 import BaseModal from "@/app/components/BaseModal";
 
 export interface FieldConfig<T extends Record<string, any>> {
+  /** Property name on the entity */
   name: keyof T & string;
+
+  /** Field label shown to the user */
   label: string;
+
+  /** Input type (default is "text") */
   type?: "text" | "number" | "select" | "textarea" | "autocomplete" | "date";
+
+  /** Options for select/autocomplete fields */
   options?: { value: any; label: string }[];
+
+  /** Optional formatter for read-only view */
   format?: (value: any, entity: T) => string;
+
+  /** Whether the field is required for saving */
   required?: boolean;
 }
 
@@ -119,6 +33,13 @@ export interface EntityModalProps<T extends Record<string, any>> {
   noCancel?: boolean;
 }
 
+/**
+ * Generic, reusable modal for viewing or editing entities.
+ *
+ * Supports two modes:
+ * - View mode (read-only with optional formatting)
+ * - Edit mode (form with validation)
+ */
 export default function EntityModal<T extends Record<string, any>>({
   title,
   entity,
@@ -132,11 +53,15 @@ export default function EntityModal<T extends Record<string, any>>({
   const [form, setForm] = useState<T>(entity);
   const [isEditing, setIsEditing] = useState(false);
 
+  // Reset form state on open or entity change
   useEffect(() => {
     setForm(entity);
     setIsEditing(startInEdit);
   }, [entity, startInEdit]);
 
+  /**
+   * Handles field changes for various input types.
+   */
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -145,7 +70,6 @@ export default function EntityModal<T extends Record<string, any>>({
     const { name, value } = e.target;
     const field = fields.find((f) => f.name === name);
 
-    // autocomplete: iš label rasti value
     if (field?.type === "autocomplete" && field.options) {
       const match = field.options.find((opt) => opt.label === value);
       setForm((prev) => ({ ...prev, [name]: match?.value ?? value }));
@@ -154,6 +78,9 @@ export default function EntityModal<T extends Record<string, any>>({
     }
   };
 
+  /**
+   * Validates required fields and triggers onSave.
+   */
   const commit = async () => {
     for (const f of fields) {
       if (f.required && !form[f.name]) {
@@ -167,9 +94,13 @@ export default function EntityModal<T extends Record<string, any>>({
     onClose();
   };
 
+  /**
+   * Renders a single field in read-only view mode.
+   */
   const renderFieldView = (cfg: FieldConfig<T>) => {
     const raw = entity[cfg.name];
     const display = cfg.format ? cfg.format(raw, entity) : String(raw ?? "—");
+
     return (
       <div key={String(cfg.name)} className="flex flex-col gap-1">
         <span className="text-xs font-medium text-gray-600">{cfg.label}</span>
@@ -178,6 +109,9 @@ export default function EntityModal<T extends Record<string, any>>({
     );
   };
 
+  /**
+   * Renders a field input based on its type for editing mode.
+   */
   const renderFieldEdit = (cfg: FieldConfig<T>) => {
     const common = {
       name: cfg.name,
@@ -232,6 +166,9 @@ export default function EntityModal<T extends Record<string, any>>({
     );
   };
 
+  /**
+   * Form body: grid layout of fields in either view or edit mode.
+   */
   const body = (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
       {fields?.map((cfg) =>
@@ -240,9 +177,12 @@ export default function EntityModal<T extends Record<string, any>>({
     </div>
   );
 
+  /**
+   * Modal action buttons depending on current mode.
+   */
   const actions = isEditing ? (
     <>
-      {noCancel || (
+      {!noCancel && (
         <button
           onClick={() => {
             setIsEditing(false);

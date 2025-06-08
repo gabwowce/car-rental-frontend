@@ -1,57 +1,3 @@
-/**
- * useOrdersData
- *
- * Custom React hook for managing order data (`Užsakymai`) in the AutoRent system.
- * Fetches all orders, clients, and cars, and provides utilities for CRUD operations,
- * filtering, and displaying data in modals or tables.
- *
- * ---
- * ## Features:
- * - Loads all orders, clients, and cars via RTK Query
- * - Provides real-time lookup helpers for displaying client and car names
- * - Handles search and filtering by order status
- * - Returns preconfigured field definitions for use in a generic `EntityModal`
- * - Supports updating and deleting orders
- *
- * ---
- * ## Returns:
- * ```ts
- * {
- *   filtered: OrderOut[];                  // Filtered list of orders for UI
- *   isLoading: boolean;                    // Whether any of the queries or mutations are loading
- *   search: string;                        // Current search string
- *   setSearch: (value: string) => void;    // Set search string
- *   statusFilter: string;                  // Current status filter
- *   setStatusFilter: (value: string) => void; // Set status filter
- *   getClientName: (id: number) => string; // Returns full name of client by ID
- *   getCarName: (id: number) => string;    // Returns car make + model by ID
- *   saveOrder: (id: number, data: Partial<OrderOut>) => Promise<void>; // Update order
- *   handleDelete: (id: number) => Promise<void>; // Delete order
- *   orderFields: FieldConfig<OrderOut>[];  // Fields for displaying/editing an order in EntityModal
- *   refetchOrders: () => void;             // Manual refetch if needed externally
- * }
- * ```
- *
- * ---
- * ## Example Usage:
- * ```tsx
- * const {
- *   filtered,
- *   isLoading,
- *   search,
- *   setSearch,
- *   statusFilter,
- *   setStatusFilter,
- *   getClientName,
- *   getCarName,
- *   saveOrder,
- *   handleDelete,
- *   orderFields,
- * } = useOrdersData();
- *
- * return <DataTable columns={...} data={filtered} />;
- * ```
- */
 import {
   useGetAllOrdersQuery,
   useUpdateOrderMutation,
@@ -63,19 +9,29 @@ import { useState, useMemo } from "react";
 import { FieldConfig } from "@/app/components/modals/EntityModal";
 import type { OrderOut } from "@/store/carRentalApi";
 
+/**
+ * Custom hook for managing order data in the AutoRent system.
+ *
+ * Loads all orders, clients, and cars, and provides utilities for:
+ * filtering, displaying, editing, deleting, and configuring modal fields.
+ */
 export function useOrdersData() {
-  /* ----- užsakymai + refetch ----- */
+  // === Fetch all orders ===
   const {
     data: orders = [],
     isLoading: loadingOrders,
     refetch: refetchOrders,
   } = useGetAllOrdersQuery();
 
-  /* ----- lookup’ai klientui / auto ----- */
+  // === Fetch clients and cars for lookup ===
   const { data: clients = [], isLoading: loadingClients } =
     useGetAllClientsQuery();
   const { data: cars = [], isLoading: loadingCars } = useGetAllCarsQuery();
 
+  /**
+   * Returns the full name of a client by their ID.
+   * @param id - Client ID
+   */
   const getClientName = (id: number) =>
     clients.find((c: any) => c.kliento_id === id)
       ? `${clients.find((c: any) => c.kliento_id === id)!.vardas} ${
@@ -83,38 +39,49 @@ export function useOrdersData() {
         }`
       : `Klientas #${id}`;
 
+  /**
+   * Returns the car brand and model by car ID.
+   * @param id - Car ID
+   */
   const getCarName = (id: number) => {
     const car = cars.find((c: any) => c.automobilio_id === id);
     return car ? `${car.marke} ${car.modelis}` : `Automobilis #${id}`;
   };
 
-  /* ----- mutation’ai ----- */
+  // === Mutations: update + delete ===
   const [updateOrder, { isLoading: updating }] = useUpdateOrderMutation();
   const [deleteOrder, { isLoading: deleting }] = useDeleteOrderMutation();
 
-  /* ----- CRUD helperiai ----- */
+  /**
+   * Updates a specific order by ID.
+   * @param id - Order ID
+   * @param data - Partial order data to update
+   */
   const saveOrder = async (id: number, data: Partial<OrderOut>) => {
-    await updateOrder({
-      uzsakymoId: id,
-      orderUpdate: data,
-    }).unwrap();
+    await updateOrder({ uzsakymoId: id, orderUpdate: data }).unwrap();
     await refetchOrders();
   };
 
+  /**
+   * Deletes a specific order by ID.
+   * @param id - Order ID
+   */
   const handleDelete = async (id: number) => {
     await deleteOrder({ uzsakymoId: id }).unwrap();
     await refetchOrders();
   };
 
-  /* ----- filtravimas ----- */
+  // === Filter states ===
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("visi");
 
+  /**
+   * Filtered list of orders based on search + status.
+   */
   const filtered = useMemo(() => {
     return orders.filter((o: any) => {
-      const target = `${getClientName(o.kliento_id)} ${getCarName(
-        o.automobilio_id
-      )}`.toLowerCase();
+      const target =
+        `${getClientName(o.kliento_id)} ${getCarName(o.automobilio_id)}`.toLowerCase();
       const matchSearch = target.includes(search.toLowerCase());
       const matchStatus =
         statusFilter === "visi" || o.uzsakymo_busena === statusFilter;
@@ -122,7 +89,9 @@ export function useOrdersData() {
     });
   }, [orders, clients, cars, search, statusFilter]);
 
-  /* ----- laukų konfigas modalui ----- */
+  /**
+   * Field configuration for rendering the order in a form modal.
+   */
   const orderFields: FieldConfig<OrderOut>[] = [
     { name: "kliento_id", label: "Kliento ID", type: "number", required: true },
     {
@@ -186,29 +155,31 @@ export function useOrdersData() {
   ];
 
   return {
-    /* duomenys */
+    // Filtered results for table/UI
     filtered,
+
+    // Loading state across all data operations
     isLoading:
       loadingOrders || loadingClients || loadingCars || updating || deleting,
 
-    /* filtravimas */
+    // Filtering
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
 
-    /* helpers */
+    // Name helpers
     getClientName,
     getCarName,
 
-    /* CRUD */
+    // Update + delete logic
     saveOrder,
     handleDelete,
 
-    /* modal fields */
+    // Modal field definitions
     orderFields,
 
-    /* refetch – jei norėtum kviesti iš išorės */
+    // Refetch orders externally
     refetchOrders,
   };
 }

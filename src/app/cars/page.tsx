@@ -60,18 +60,18 @@ export default function CarsPage() {
   /** Table column definitions for each car row */
   const columns = [
     {
-      label: "Model",
+      label: "Modelis",
       accessor: (a: Automobilis) => `${a.marke} ${a.modelis}`,
     },
-    { label: "Plate Number", accessor: "numeris" },
-    { label: "Status", accessor: "automobilio_statusas" },
-    { label: "Seats", accessor: "sedimos_vietos" },
+    { label: "Valstybinis numeris", accessor: "numeris" },
+    { label: "Būsena", accessor: "automobilio_statusas" },
+    { label: "Sėdimos vietos", accessor: "sedimos_vietos" },
     {
-      label: "Price/Day",
+      label: "Kaina",
       accessor: (a: Automobilis) => `${a.kaina_parai} €`,
     },
     {
-      label: "Actions",
+      label: "Veiksmai",
       accessor: (a: Automobilis) => (
         <ActionButtons
           onEdit={() => {
@@ -81,7 +81,7 @@ export default function CarsPage() {
           }}
           onDelete={async () => {
             const confirmed = window.confirm(
-              `Are you sure you want to delete car "${a.marke} ${a.modelis}"?`
+              `Ar tikrai norite ištrinti automobilį „${a.marke} ${a.modelis}“?`
             );
             if (!confirmed) return;
 
@@ -89,9 +89,9 @@ export default function CarsPage() {
               await deleteCar({ carId: a.automobilio_id }).unwrap();
               setSelectedCar(null);
             } catch (e: any) {
-              console.error("Error deleting car:", e);
+              console.error("Klaida trinant automobilį:", e);
               alert(
-                "This car cannot be deleted because it is associated with orders or other data."
+                "Šio automobilio ištrinti negalima, nes jis susijęs su užsakymais ar kita informacija."
               );
             }
           }}
@@ -107,10 +107,10 @@ export default function CarsPage() {
     <div>
       {/* Title and New Car button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Cars</h1>
+        <h1 className="text-2xl font-bold">Automobiliai</h1>
         <CreateEntityButton
-          buttonLabel="+ Add New Car"
-          modalTitle="New Car"
+          buttonLabel="+ Pridėti automobilį"
+          modalTitle="Naujas automobilis"
           fields={carFields}
           onCreate={async (data) => {
             try {
@@ -129,7 +129,7 @@ export default function CarsPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by model or plate number"
+          placeholder="Ieškoti..."
           className="border p-2 rounded w-64"
         />
         <select
@@ -137,10 +137,10 @@ export default function CarsPage() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
-          <option value="visi">All</option>
-          <option value="laisvas">Available</option>
-          <option value="isnuomotas">Rented</option>
-          <option value="servise">In Service</option>
+          <option value="visi">Visi</option>
+          <option value="laisvas">Laisvas</option>
+          <option value="isnuomotas">Išnuomotas</option>
+          <option value="servise">Servise</option>
         </select>
       </div>
 
@@ -193,7 +193,7 @@ export default function CarsPage() {
               await refetchCars();
               setModalOpen(false);
             } catch (e) {
-              console.error("Failed to update car:", e);
+              console.error("Nepavyko atnaujinti automobilio:", e);
             }
           }}
           startInEdit={false}

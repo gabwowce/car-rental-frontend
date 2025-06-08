@@ -62,23 +62,23 @@ export default function OrdersPage() {
    */
   const columns = [
     {
-      label: "Client",
+      label: "Klientas",
       accessor: (o: OrderOut) => getClientName(o.kliento_id),
     },
     {
-      label: "Car",
+      label: "Automobilis",
       accessor: (o: OrderOut) => getCarName(o.automobilio_id),
     },
-    { label: "Start", accessor: "nuomos_data" },
-    { label: "End", accessor: "grazinimo_data" },
+    { label: "Pradžia", accessor: "nuomos_data" },
+    { label: "Pabaiga", accessor: "grazinimo_data" },
     {
-      label: "Status",
+      label: "Būsena",
       accessor: (o: OrderOut) => (
         <StatusBadge status={o.uzsakymo_busena || ""} />
       ),
     },
     {
-      label: "Actions",
+      label: "Veiksmai",
       accessor: (o: OrderOut) => (
         <ActionButtons
           onEdit={() => {
@@ -87,14 +87,14 @@ export default function OrdersPage() {
           }}
           onDelete={async () => {
             const confirmed = window.confirm(
-              `Are you sure you want to delete order #${o.uzsakymo_id}?`
+              `Ar tikrai norite ištrinti užsakymą #${o.uzsakymo_id}?`
             );
             if (!confirmed) return;
             try {
               await handleDelete(o.uzsakymo_id);
             } catch (e) {
               alert(
-                "Failed to delete the order. It may be linked to other records (e.g. invoices or payments)."
+                "Nepavyko ištrinti užsakymo. Jis gali būti susietas su kitais įrašais (pvz., sąskaitomis ar mokėjimais)."
               );
             }
           }}
@@ -126,10 +126,10 @@ export default function OrdersPage() {
     <div>
       {/* Header with create button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Orders</h1>
+        <h1 className="text-2xl font-bold">Užsakymai</h1>
         <CreateEntityButton
-          buttonLabel="+ New Order"
-          modalTitle="New Order"
+          buttonLabel="+ Naujas užsakymas"
+          modalTitle="Naujas užsakymas"
           fields={orderFields}
           onCreate={async (data) => {
             await saveOrder(null, data);
@@ -141,7 +141,7 @@ export default function OrdersPage() {
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           className="border p-2 rounded w-64"
-          placeholder="Search by client or car"
+          placeholder="Ieškoti..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -150,10 +150,10 @@ export default function OrdersPage() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
-          <option value="visi">All</option>
-          <option value="vykdomas">Active</option>
-          <option value="užbaigtas">Completed</option>
-          <option value="atšauktas">Cancelled</option>
+          <option value="visi">Visi</option>
+          <option value="vykdomas">Vykdomas</option>
+          <option value="užbaigtas">Užbaigtas</option>
+          <option value="atšauktas">Atšauktas</option>
         </select>
       </div>
 

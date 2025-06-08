@@ -1,66 +1,58 @@
-/**
- * `useInvoiceModals` – Custom hook to manage invoice-related modal state
- *
- * This hook manages the selected invoice and modal mode for displaying, exporting, or deleting an invoice.
- * It provides utility functions to open or close specific modal types.
- *
- * ## Features:
- * - Stores the currently selected invoice (`InvoiceOut`)
- * - Tracks which modal mode is active: `"view"`, `"pdf"`, or `"delete"`
- * - Provides handler functions to open each mode
- * - Supports a `close()` function to reset the state
- *
- * ## Returns:
- * ```ts
- * {
- *   selected: InvoiceOut | null;              // Currently selected invoice
- *   mode: "view" | "pdf" | "delete" | null;   // Modal mode
- *   openView(invoice: InvoiceOut): void;      // Open view modal
- *   openPdf(invoice: InvoiceOut): void;       // Open PDF export modal
- *   openDelete(invoice: InvoiceOut): void;    // Open delete confirmation modal
- *   close(): void;                            // Close any open modal
- * }
- * ```
- *
- * ## Example:
- * ```tsx
- * const {
- *   selected,
- *   mode,
- *   openView,
- *   openPdf,
- *   openDelete,
- *   close,
- * } = useInvoiceModals();
- *
- * if (mode === "view" && selected) {
- *   return <InvoiceViewModal invoice={selected} onClose={close} />;
- * }
- * ```
- */
-
 import { useState } from "react";
 import { InvoiceOut } from "@/store/carRentalApi";
 
+/**
+ * Custom React hook to manage modal state for invoice operations.
+ *
+ * Manages modal visibility and stores the currently selected invoice.
+ * Useful for controlling UI interactions like viewing, exporting, or deleting invoices.
+ *
+ * @returns Object with current state and modal control functions.
+ */
 export function useInvoiceModals() {
+  /**
+   * The currently selected invoice. Set when a modal is opened.
+   */
   const [selected, setSelected] = useState<InvoiceOut | null>(null);
+
+  /**
+   * The current modal mode. Can be "view", "pdf", "delete", or null.
+   */
   const [mode, setMode] = useState<"view" | "pdf" | "delete" | null>(null);
 
+  /**
+   * Open the "view" modal for a specific invoice.
+   *
+   * @param invoice - The invoice to display.
+   */
   const openView = (invoice: InvoiceOut) => {
     setSelected(invoice);
     setMode("view");
   };
 
+  /**
+   * Open the "pdf" modal to export an invoice.
+   *
+   * @param invoice - The invoice to export.
+   */
   const openPdf = (invoice: InvoiceOut) => {
     setSelected(invoice);
     setMode("pdf");
   };
 
+  /**
+   * Open the "delete" modal for invoice deletion confirmation.
+   *
+   * @param invoice - The invoice to be deleted.
+   */
   const openDelete = (invoice: InvoiceOut) => {
     setSelected(invoice);
     setMode("delete");
   };
 
+  /**
+   * Close any open modal and reset selected invoice.
+   */
   const close = () => {
     setSelected(null);
     setMode(null);
