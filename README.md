@@ -1,4 +1,4 @@
-# Car‑Rental Frontend (Next.js 15 + RTK Query)
+# AutoRent Frontend (Next.js 15 + RTK Query)
 
 Interactive admin UI for the **Car‑Rental System API**.
 Built with **Next 13/14/15 App Router**, **TypeScript**, **Tailwind CSS**, **Redux Toolkit + RTK‑Query**, **Leaflet** & **Recharts**.
