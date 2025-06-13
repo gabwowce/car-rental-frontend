@@ -38,7 +38,7 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="bg-[#155DFC] hover:bg-[#0E44C3] text-white px-4 py-2 rounded mx-auto mt-8 block mb-10"
+      className="bg-[#0F597B] hover:bg-[#0C374D] text-[#F7F7F7]  px-4 py-2 rounded mx-auto mt-8 block mb-10"
     >
       Atsijungti
     </button>

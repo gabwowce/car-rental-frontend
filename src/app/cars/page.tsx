@@ -107,7 +107,7 @@ export default function CarsPage() {
     <div>
       {/* Title and New Car button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Automobiliai</h1>
+        <h1 className="text-2xl font-bold text-[#F7F7F7]">Automobiliai</h1>
         <CreateEntityButton
           buttonLabel="+ Pridėti automobilį"
           modalTitle="Naujas automobilis"
@@ -124,7 +124,7 @@ export default function CarsPage() {
       </div>
 
       {/* Search and status filter */}
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap gap-4 mb-6 text-[#707070]">
         <input
           type="text"
           value={search}
@@ -158,7 +158,7 @@ export default function CarsPage() {
       {/* Edit/Create Modal */}
       {selectedCar && (
         <EntityModal
-          title={`Car: ${selectedCar.marke} ${selectedCar.modelis}`}
+          title={`${selectedCar.marke} ${selectedCar.modelis}`}
           entity={selectedCar}
           fields={carFields}
           isOpen={isModalOpen}

@@ -121,16 +121,16 @@ export default function MapComponent({ cars }: MapComponentProps) {
   }, [cars, geoCode]);
 
   return (
-    <div className="relative z-0 border border-gray-300 rounded p-4 mt-6 h-[500px]">
+    <div className="relative z-0 p-4 mt-6 h-[500px]">
       <MapContainer
-        center={[55.1694, 23.8813]} // Centered over Lithuania
+        center={[55.1694, 23.8813]}
         zoom={7}
         className="h-full w-full"
         scrollWheelZoom
       >
         <TileLayer
-          attribution="© OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='© <a href="https://carto.com/">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
 
         {carsWithCoords

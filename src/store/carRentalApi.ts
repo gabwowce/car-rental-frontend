@@ -31,6 +31,13 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.changePasswordRequest,
       }),
     }),
+    swaggerLogin: build.mutation<SwaggerLoginApiResponse, SwaggerLoginApiArg>({
+      query: (queryArg) => ({
+        url: `/api/v1/token`,
+        method: "POST",
+        body: queryArg.bodySwaggerLogin,
+      }),
+    }),
     getAllEmployees: build.query<
       GetAllEmployeesApiResponse,
       GetAllEmployeesApiArg
@@ -367,6 +374,11 @@ export type ChangePasswordApiResponse =
 export type ChangePasswordApiArg = {
   changePasswordRequest: ChangePasswordRequest;
 };
+export type SwaggerLoginApiResponse =
+  /** status 200 Successful Response */ TokenResponse;
+export type SwaggerLoginApiArg = {
+  bodySwaggerLogin: BodySwaggerLogin;
+};
 export type GetAllEmployeesApiResponse =
   /** status 200 Successful Response */ EmployeeOut[];
 export type GetAllEmployeesApiArg = void;
@@ -604,6 +616,7 @@ export type RegisterRequest = {
   slaptazodis: string;
 };
 export type UserInfo = {
+  darbuotojo_id: number;
   vardas: string;
   pavarde: string;
   telefono_nr: string;
@@ -614,6 +627,10 @@ export type UserInfo = {
 export type ChangePasswordRequest = {
   senas_slaptazodis: string;
   naujas_slaptazodis: string;
+};
+export type BodySwaggerLogin = {
+  username: string;
+  password: string;
 };
 export type EmployeeOut = {
   vardas: string;
@@ -893,6 +910,7 @@ export const {
   useLogoutMutation,
   useMeApiV1MeGetQuery,
   useChangePasswordMutation,
+  useSwaggerLoginMutation,
   useGetAllEmployeesQuery,
   useCreateEmployeeMutation,
   useGetEmployeeQuery,

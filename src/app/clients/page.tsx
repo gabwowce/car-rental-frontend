@@ -88,9 +88,9 @@ export default function ClientsPage() {
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <div>
+    <div className="text-[#707070]">
       {/* Header & Create Button */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 text-[#F7F7F7]">
         <h1 className="text-2xl font-bold">Klientai</h1>
         <CreateEntityButton
           buttonLabel="+ Naujas klientas"
@@ -120,7 +120,7 @@ export default function ClientsPage() {
       {/* Edit modal */}
       {selected && (
         <EntityModal
-          title={`Edit Client #${selected.kliento_id}`}
+          title={`#${selected.kliento_id}`}
           entity={selected}
           fields={clientFields}
           isOpen={modalOpen}

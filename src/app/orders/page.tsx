@@ -54,6 +54,8 @@ export default function OrdersPage() {
     saveOrder,
     handleDelete,
     orderFields,
+    cars,
+    initialEmployeeId,
   } = useOrdersData();
 
   /**
@@ -109,13 +111,30 @@ export default function OrdersPage() {
    * @param updated - The updated order object from the form
    */
   const onSave = async (updated: OrderOut) => {
-    await saveOrder(selected!.uzsakymo_id, {
-      nuomos_data: updated.nuomos_data,
-      grazinimo_data: updated.grazinimo_data,
-      uzsakymo_busena: updated.uzsakymo_busena,
-    });
-    setModalOpen(false);
-    setSelected(null);
+    try {
+      await saveOrder(selected!.uzsakymo_id, {
+        kliento_id: updated.kliento_id,
+        automobilio_id: updated.automobilio_id,
+        darbuotojo_id: updated.darbuotojo_id,
+        nuomos_data: updated.nuomos_data,
+        grazinimo_data: updated.grazinimo_data,
+        grazinimo_vietos_id: updated.grazinimo_vietos_id,
+        uzsakymo_busena: updated.uzsakymo_busena,
+        turi_papildomas_paslaugas: updated.turi_papildomas_paslaugas,
+        bendra_kaina: updated.bendra_kaina,
+      });
+
+      setModalOpen(false);
+      setSelected(null);
+      alert("✅ Užsakymas sėkmingai išsaugotas!");
+    } catch (err: any) {
+      if (err?.status === 409 || err?.response?.status === 409) {
+        alert("🚫 Automobilis šiuo laikotarpiu jau užimtas.");
+      } else {
+        alert("⚠️ Nepavyko išsaugoti užsakymo.");
+        console.error("Klaida:", err);
+      }
+    }
   };
 
   /** Loading state UI */
@@ -123,16 +142,29 @@ export default function OrdersPage() {
 
   /** Main rendered UI */
   return (
-    <div>
+    <div className="text-[#707070]">
       {/* Header with create button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Užsakymai</h1>
+        <h1 className="text-2xl font-bold text-[#F7F7F7]">Užsakymai</h1>
         <CreateEntityButton
           buttonLabel="+ Naujas užsakymas"
           modalTitle="Naujas užsakymas"
+          extraData={{ cars }}
+          initial={{
+            darbuotojo_id: initialEmployeeId ?? undefined,
+          }}
           fields={orderFields}
           onCreate={async (data) => {
-            await saveOrder(null, data);
+            try {
+              await saveOrder(null, data);
+              alert("Užsakymas sėkmingai sukurtas!");
+            } catch (err: any) {
+              if (err?.status === 409 || err?.response?.status === 409) {
+                alert("Automobilis šiuo laikotarpiu jau užimtas.");
+              } else {
+                alert("Nepavyko sukurti užsakymo.");
+              }
+            }
           }}
         />
       </div>
@@ -167,7 +199,7 @@ export default function OrdersPage() {
       {/* Modal form for editing */}
       {selected && (
         <EntityModal
-          title={`Edit Order #${selected.uzsakymo_id}`}
+          title={`#${selected.uzsakymo_id}`}
           entity={selected}
           fields={orderFields}
           isOpen={modalOpen}
@@ -177,6 +209,7 @@ export default function OrdersPage() {
           }}
           onSave={onSave}
           startInEdit={false}
+          extraData={{ cars }}
         />
       )}
     </div>

@@ -5,6 +5,7 @@ import {
   useDeleteReservationMutation,
   ReservationCreate,
   ReservationUpdate,
+  useGetAllCarsQuery,
 } from "@/store/carRentalApi";
 
 import { useClientsData } from "./useClientsData";
@@ -123,6 +124,8 @@ export const useReservationData = () => {
     return matchSearch && matchStatus;
   });
 
+  const { data: cars = [], isLoading: loadingCars } = useGetAllCarsQuery();
+
   /**
    * Reservation modal field configuration.
    */
@@ -130,22 +133,22 @@ export const useReservationData = () => {
     {
       name: "kliento_id",
       label: "Klientas",
-      type: "autocomplete",
+      type: "select",
+      required: true,
       options: clients.map((c: any) => ({
         value: c.kliento_id,
         label: `${c.vardas} ${c.pavarde}`,
       })),
-      required: true,
     },
     {
       name: "automobilio_id",
       label: "Automobilis",
-      type: "autocomplete",
-      options: automobiliai.map((a: any) => ({
-        value: a.automobilio_id,
-        label: `${a.marke} ${a.modelis}`,
-      })),
+      type: "select", // ← vietoj "autocomplete"
       required: true,
+      options: cars.map((c: any) => ({
+        value: c.automobilio_id, // ← VALUE = ID (skaičius)
+        label: `${c.marke} ${c.modelis}`,
+      })),
     },
     {
       name: "rezervacijos_pradzia",
@@ -166,7 +169,6 @@ export const useReservationData = () => {
       options: [
         { value: "patvirtinta", label: "Patvirtinta" },
         { value: "laukiama", label: "Laukiama" },
-        { value: "atšaukta", label: "Atšaukta" },
       ],
       required: true,
     },

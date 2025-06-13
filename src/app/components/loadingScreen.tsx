@@ -13,7 +13,7 @@
  */
 export default function LoadingScreen() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-white z-20">
+    <div className="fixed inset-0 flex items-center justify-center bg-[#0E0B1F] z-20">
       <div className="flex flex-col items-center">
         <div className="lds-ring">
           <div></div>

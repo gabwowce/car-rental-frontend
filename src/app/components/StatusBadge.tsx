@@ -9,21 +9,15 @@ type Props = {
  * Supports multiple synonyms and formatting variations for consistent UI representation.
  */
 const statusMap: Record<string, string> = {
-  // Shared statuses across different entities
-  patvirtinta: "bg-blue-100 text-blue-800",
-  užbaigta: "bg-yellow-100 text-yellow-800",
-  apmokėta: "bg-green-100 text-green-800",
-  aktyvi: "bg-green-100 text-green-800",
-  vykdomas: "bg-blue-100 text-blue-800",
-  atšaukta: "bg-red-100 text-red-800",
-  atšauktas: "bg-red-100 text-red-800",
-  laukia: "bg-yellow-100 text-yellow-800",
-  laukiama: "bg-yellow-100 text-yellow-800",
-  vėluojanti: "bg-red-100 text-red-800",
-  išrašyta: "bg-gray-100 text-gray-800",
-  vykdoma: "bg-blue-100 text-blue-800",
-  uzbaigta: "bg-green-100 text-green-800", // fallback without diacritics
-  atsaukta: "bg-red-100 text-red-800", // fallback without diacritics
+  patvirtinta: "bg-[#12344D] text-[#F7F7F7] ",
+  užbaigta: "bg-[#3D3F5A] text-[#F7F7F7] ",
+  apmokėta: "bg-[#1E2B45] text-[#F7F7F7] ",
+  aktyvi: "bg-[#1E2B45] text-[#F7F7F7] ",
+  vykdomas: "bg-[#163858] text-[#F7F7F7] ",
+  atšaukta: "bg-[#5B2C3A] text-[#F7F7F7] ",
+  laukia: "bg-[#4F4F4F] text-[#F7F7F7] ",
+  vėluojanti: "bg-[#5B2C3A] text-[#F7F7F7] ",
+  išrašyta: "bg-[#333645] text-[#F7F7F7] ",
 };
 
 /**

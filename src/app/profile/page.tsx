@@ -6,37 +6,16 @@ import {
   useChangePasswordMutation,
 } from "@/store/carRentalApi";
 
-/**
- * ProfilePage – Displays the current employee's profile and allows password changes.
- *
- * Features:
- * - Fetches the current user's profile using `useMeApiV1MeGetQuery()`
- * - Displays user info: name, surname, email, and role
- * - Provides a form to change the password using `useChangePasswordMutation()`
- * - Validates if the repeated password matches before submitting
- * - Displays form state and error messages inline
- *
- * This page is intended for logged-in users only.
- *
- * @returns {JSX.Element} Rendered profile page with user data and password change form
- */
 export default function ProfilePage() {
-  /** User Info Query */
   const { data: user, isLoading, isError, error } = useMeApiV1MeGetQuery();
   const [changePassword, { isLoading: isChanging }] =
     useChangePasswordMutation();
 
-  /** Form State */
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  /**
-   * Handles password change form submission.
-   *
-   * @param {FormEvent} e - Form submission event
-   */
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (newPassword !== repeatPassword) {
@@ -60,36 +39,41 @@ export default function ProfilePage() {
     }
   };
 
-  /** Conditional Rendering for States */
-  if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p>Error: {(error as any)?.status}</p>;
-  if (!user) return <p>User data not found.</p>;
+  if (isLoading) return <p className="text-white">Loading...</p>;
+  if (isError)
+    return <p className="text-red-400">Error: {(error as any)?.status}</p>;
+  if (!user) return <p className="text-white">User data not found.</p>;
 
-  /** Rendered UI */
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      {/* Darbuotojo informacija */}
-      <section className="bg-white p-6 rounded shadow">
-        <h2 className="text-lg font-semibold mb-4">Darbuotojo informacija</h2>
+    <div className="max-w-3xl mx-auto space-y-8 text-white">
+      <section className="bg-[#0E1525] p-6 rounded-xl shadow-xl">
+        <h2 className="text-lg font-semibold mb-4 text-white">
+          Darbuotojo informacija
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <p>
-            <span className="font-medium">Vardas:</span> {user.vardas}
+            <span className="font-medium text-gray-300">Vardas:</span>{" "}
+            {user.vardas}
           </p>
           <p>
-            <span className="font-medium">Pavardė:</span> {user.pavarde}
+            <span className="font-medium text-gray-300">Pavardė:</span>{" "}
+            {user.pavarde}
           </p>
           <p>
-            <span className="font-medium">El. paštas:</span> {user.el_pastas}
+            <span className="font-medium text-gray-300">El. paštas:</span>{" "}
+            {user.el_pastas}
           </p>
           <p>
-            <span className="font-medium">Pareigos:</span> {user.pareigos}
+            <span className="font-medium text-gray-300">Pareigos:</span>{" "}
+            {user.pareigos}
           </p>
         </div>
       </section>
 
-      {/* Slaptažodžio keitimo forma */}
-      <section className="bg-white p-6 rounded shadow">
-        <h2 className="text-lg font-semibold mb-4">Keisti slaptažodį</h2>
+      <section className="bg-[#0E1525] p-6 rounded-xl shadow-xl">
+        <h2 className="text-lg font-semibold mb-4 text-white">
+          Keisti slaptažodį
+        </h2>
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 gap-4 max-w-md"
@@ -99,30 +83,30 @@ export default function ProfilePage() {
             placeholder="Dabartinis slaptažodis"
             value={oldPassword}
             onChange={(e) => setOldPassword(e.target.value)}
-            className="border p-2 rounded"
+            className="border border-gray-700 bg-[#1E2B45] text-white p-2 rounded"
           />
           <input
             type="password"
             placeholder="Naujas slaptažodis"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="border p-2 rounded"
+            className="border border-gray-700 bg-[#1E2B45] text-white p-2 rounded"
           />
           <input
             type="password"
             placeholder="Pakartokite naują slaptažodį"
             value={repeatPassword}
             onChange={(e) => setRepeatPassword(e.target.value)}
-            className="border p-2 rounded"
+            className="border border-gray-700 bg-[#1E2B45] text-white p-2 rounded"
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-60"
+            className="bg-[#0F597B] text-white py-2 rounded hover:bg-[#0C374D] disabled:opacity-60"
             disabled={isChanging}
           >
             {isChanging ? "Keičiama..." : "Išsaugoti pakeitimus"}
           </button>
-          {message && <p className="text-sm text-red-500">{message}</p>}
+          {message && <p className="text-sm text-red-400">{message}</p>}
         </form>
       </section>
     </div>

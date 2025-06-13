@@ -139,41 +139,35 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-6 text-[#F7F7F7] ">Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
         <StatCard
-          color="bg-blue-100"
-          title="Rezervacijos šiandien"
-          value="5"
-          icon={<FiCalendar />}
-        />
-        <StatCard
-          color="bg-teal-200"
+          color="bg-[#163858]"
           title="Laisvi automobiliai"
           value={laisvi}
           icon={<FiTruck />}
         />
         <StatCard
-          color="bg-yellow-100"
+          color="bg-[#3D3F5A]"
           title="Servise esantys automobiliai"
           value={servise}
           icon={<FiTool />}
         />
         <StatCard
-          color="bg-red-100"
+          color="bg-[#5B2C3A]"
           title="Neapmokėtos sąskaitos"
           value={neapmoketosSaskaitos}
           icon={<FiCreditCard />}
         />
         <StatCard
-          color="bg-purple-100"
+          color="bg-[#533D52]"
           title="Neatsakytos užklausos"
           value={neatsakytosUzklausos}
           icon={<FiAlertCircle />}
         />
         <StatCard
-          color="bg-indigo-100"
+          color="bg-[#12344D]"
           title="Grąžinimai šiandien"
           value={siandienGrązinimai}
           icon={<FiCornerDownLeft />}
@@ -181,14 +175,16 @@ export default function DashboardPage() {
       </div>
 
       {/* Diagramos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 ">
         <BarChartBox title="Užsakymai pagal būsenas" data={barData} />
         <PieChartBox title="Automobilių statusai" data={pieData} />
       </div>
 
       {/* Naujausios rezervacijos */}
-      <div className="bg-white p-6 rounded shadow">
-        <h2 className="text-lg font-bold mb-4">Naujausios rezervacijos</h2>
+      <div className="bg-gray">
+        <h2 className="text-lg font-bold mb-4 text-[#F7F7F7] ">
+          Naujausios rezervacijos
+        </h2>
         <DataTable<Reservation>
           columns={columns}
           data={latestReservations}

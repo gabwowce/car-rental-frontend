@@ -43,6 +43,10 @@ type Props<T extends Record<string, any>> = {
    * Optional initial values for the form.
    */
   initial?: Partial<T>;
+
+  extraData?: {
+    cars?: any[];
+  };
 };
 
 /**
@@ -66,13 +70,14 @@ export default function CreateEntityButton<T extends Record<string, any>>({
   fields,
   onCreate,
   initial = {},
+  extraData,
 }: Props<T>) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <button
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        className="bg-[#0F597B] text-[#F7F7F7]  px-4 py-2 rounded hover:bg-[#0C374D]"
         onClick={() => setOpen(true)}
       >
         {buttonLabel}
@@ -86,6 +91,7 @@ export default function CreateEntityButton<T extends Record<string, any>>({
           fields={fields}
           isOpen={open}
           startInEdit
+          extraData={extraData}
           onClose={() => setOpen(false)}
           onSave={async (created) => {
             await onCreate(created as Omit<T, "id" | `${string}_id`>);

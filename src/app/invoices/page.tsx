@@ -95,11 +95,11 @@ export default function InvoicesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Sąskaitos</h1>
+        <h1 className="text-2xl font-bold text-[#F7F7F7]">Sąskaitos</h1>
       </div>
 
       {/* Search and filter controls */}
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap gap-4 mb-6 text-[#707070]">
         <input
           type="text"
           placeholder="Ieškoti pagal klientą ar sąskaitos nr."

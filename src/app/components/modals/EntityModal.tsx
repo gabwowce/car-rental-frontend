@@ -3,23 +3,21 @@ import { useEffect, useState } from "react";
 import BaseModal from "@/app/components/BaseModal";
 
 export interface FieldConfig<T extends Record<string, any>> {
-  /** Property name on the entity */
-  name: keyof T & string;
-
-  /** Field label shown to the user */
+  name?: keyof T & string;
   label: string;
-
-  /** Input type (default is "text") */
-  type?: "text" | "number" | "select" | "textarea" | "autocomplete" | "date";
-
-  /** Options for select/autocomplete fields */
+  type?:
+    | "text"
+    | "number"
+    | "select"
+    | "textarea"
+    | "autocomplete"
+    | "password"
+    | "date";
   options?: { value: any; label: string }[];
-
-  /** Optional formatter for read-only view */
   format?: (value: any, entity: T) => string;
-
-  /** Whether the field is required for saving */
   required?: boolean;
+  readonly?: boolean;
+  render?: (data: T) => string;
 }
 
 export interface EntityModalProps<T extends Record<string, any>> {
@@ -31,15 +29,11 @@ export interface EntityModalProps<T extends Record<string, any>> {
   fields: FieldConfig<T>[];
   startInEdit?: boolean;
   noCancel?: boolean;
+  extraData?: {
+    cars?: any[];
+  };
 }
 
-/**
- * Generic, reusable modal for viewing or editing entities.
- *
- * Supports two modes:
- * - View mode (read-only with optional formatting)
- * - Edit mode (form with validation)
- */
 export default function EntityModal<T extends Record<string, any>>({
   title,
   entity,
@@ -49,137 +43,174 @@ export default function EntityModal<T extends Record<string, any>>({
   fields,
   noCancel,
   startInEdit = false,
+  extraData,
 }: EntityModalProps<T>) {
   const [form, setForm] = useState<T>(entity);
-  const [isEditing, setIsEditing] = useState(false);
-
-  // Reset form state on open or entity change
+  const [isEditing, setIsEditing] = useState(startInEdit);
+  const isValidDate = (d: any) => d instanceof Date && !isNaN(d.getTime());
+  // Reset form when modal opens or entity changes
   useEffect(() => {
     setForm(entity);
     setIsEditing(startInEdit);
   }, [entity, startInEdit]);
 
-  /**
-   * Handles field changes for various input types.
-   */
+  // 💡 Auto-calculate bendra_kaina
+  useEffect(() => {
+    if (!extraData?.cars?.length) return;
+    if (!isEditing) return;
+    const automId = Number((form as any).automobilio_id);
+    const car = extraData?.cars?.find((c: any) => c.automobilio_id === automId);
+    const start = new Date((form as any).nuomos_data);
+    const end = new Date((form as any).grazinimo_data);
+    if (car && !isNaN(start.getTime()) && !isNaN(end.getTime())) {
+      const diffDays = Math.max(
+        1,
+        Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+      );
+      const total = diffDays * car.kaina_parai;
+
+      if ((form as any).bendra_kaina !== total) {
+        setForm((prev) => ({ ...prev, bendra_kaina: total }));
+      }
+    }
+  }, [
+    form.automobilio_id,
+    form.nuomos_data,
+    form.grazinimo_data,
+    extraData?.cars,
+    isEditing,
+  ]);
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
     const { name, value } = e.target;
-    const field = fields.find((f) => f.name === name);
+    const cfg = fields.find((f) => f.name === name);
 
-    if (field?.type === "autocomplete" && field.options) {
-      const match = field.options.find((opt) => opt.label === value);
-      setForm((prev) => ({ ...prev, [name]: match?.value ?? value }));
+    if (cfg?.type === "autocomplete" && cfg.options) {
+      const match = cfg.options.find((o) => o.label === value);
+      setForm((prev) => ({
+        ...prev,
+        [name]: match ? Number(match.value) : prev[name], // → ID kaip number
+      }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  /**
-   * Validates required fields and triggers onSave.
-   */
   const commit = async () => {
     for (const f of fields) {
-      if (f.required && !form[f.name]) {
+      if (f.required && f.name && !form[f.name]) {
         alert(`Laukas „${f.label}“ yra privalomas`);
         return;
       }
     }
-
     if (onSave) await onSave(form);
     setIsEditing(false);
     onClose();
   };
 
-  /**
-   * Renders a single field in read-only view mode.
-   */
   const renderFieldView = (cfg: FieldConfig<T>) => {
-    const raw = entity[cfg.name];
+    if (cfg.render) {
+      return (
+        <div key={cfg.label} className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-gray-500">{cfg.label}</span>
+          <span className="text-sm break-all text-[#F7F7F7]">
+            {cfg.render(form)}
+          </span>
+        </div>
+      );
+    }
+
+    const raw = cfg.name ? entity[cfg.name] : "";
     const display = cfg.format ? cfg.format(raw, entity) : String(raw ?? "—");
 
     return (
-      <div key={String(cfg.name)} className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-gray-600">{cfg.label}</span>
-        <span className="text-sm text-gray-900 break-all">{display}</span>
+      <div key={cfg.name} className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-gray-500">{cfg.label}</span>
+        <span className="text-sm break-all text-[#F7F7F7]">{display}</span>
       </div>
     );
   };
 
-  /**
-   * Renders a field input based on its type for editing mode.
-   */
   const renderFieldEdit = (cfg: FieldConfig<T>) => {
+    if (cfg.readonly) {
+      return renderFieldView(cfg);
+    }
+
     const common = {
       name: cfg.name,
-      value: (form as any)[cfg.name] ?? "",
+      value: cfg.name ? ((form as any)[cfg.name] ?? "") : "",
       onChange: handleChange,
       className:
-        "border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-600/50",
+        "border border-[#1C2B3A] bg-[#1A2238] text-[#F7F7F7] p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-[#0F597B]/60 placeholder-gray-400",
     } as const;
 
-    const inputField = (() => {
-      switch (cfg.type) {
-        case "textarea":
-          return <textarea rows={3} {...common} />;
-        case "select":
-          return (
-            <select {...common}>
-              {cfg.options?.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
+    let input: JSX.Element;
+    switch (cfg.type) {
+      case "textarea":
+        input = <textarea rows={3} {...common} />;
+        break;
+      case "select":
+        input = (
+          <select {...common}>
+            <option value="" disabled hidden>
+              — Pasirinkite —
+            </option>
+            {cfg.options?.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        );
+        break;
+      case "autocomplete":
+        input = (
+          <>
+            <input type="text" list={`${cfg.name}-list`} {...common} />
+            <datalist id={`${cfg.name}-list`}>
+              {cfg.options?.map((o) => (
+                <option key={o.value} value={o.label} />
               ))}
-            </select>
-          );
-        case "autocomplete":
-          return (
-            <>
-              <input type="text" list={`${cfg.name}-list`} {...common} />
-              <datalist id={`${cfg.name}-list`}>
-                {cfg.options?.map((opt) => (
-                  <option key={opt.value} value={opt.label} />
-                ))}
-              </datalist>
-            </>
-          );
-        case "number":
-          return <input type="number" {...common} />;
-        case "date":
-          return <input type="date" {...common} />;
-        default:
-          return <input type="text" {...common} />;
-      }
-    })();
+            </datalist>
+          </>
+        );
+        break;
+      case "number":
+        input = <input type="number" {...common} />;
+        break;
+      case "date":
+        input = <input type="date" {...common} />;
+        break;
+      case "password":
+        input = <input type="password" {...common} />;
+        break;
+      default:
+        input = <input type="text" {...common} />;
+    }
 
     return (
-      <div key={cfg.name} className="flex flex-col gap-1">
-        <label htmlFor={cfg.name} className="text-xs font-medium text-gray-600">
+      <div key={cfg.name ?? cfg.label} className="flex flex-col gap-1">
+        <label className="text-xs font-medium text-[#F7F7F7]">
           {cfg.label}
           {cfg.required && <span className="text-red-500 ml-1">*</span>}
         </label>
-        {inputField}
+        {input}
       </div>
     );
   };
 
-  /**
-   * Form body: grid layout of fields in either view or edit mode.
-   */
   const body = (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
-      {fields?.map((cfg) =>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2 text-[#F7F7F7]">
+      {fields.map((cfg) =>
         isEditing ? renderFieldEdit(cfg) : renderFieldView(cfg)
       )}
     </div>
   );
 
-  /**
-   * Modal action buttons depending on current mode.
-   */
   const actions = isEditing ? (
     <>
       {!noCancel && (
@@ -188,7 +219,7 @@ export default function EntityModal<T extends Record<string, any>>({
             setIsEditing(false);
             setForm(entity);
           }}
-          className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+          className="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600"
         >
           Atšaukti
         </button>
@@ -196,23 +227,21 @@ export default function EntityModal<T extends Record<string, any>>({
       {onSave && (
         <button
           onClick={commit}
-          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+          className="px-4 py-2 rounded bg-[#0F597B] text-[#F7F7F7] hover:bg-[#0C374D]"
         >
           Išsaugoti
         </button>
       )}
     </>
   ) : (
-    <>
-      {onSave && (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-        >
-          Redaguoti
-        </button>
-      )}
-    </>
+    onSave && (
+      <button
+        onClick={() => setIsEditing(true)}
+        className="px-4 py-2 rounded bg-[#0F597B] text-[#F7F7F7] hover:bg-[#0C374D]"
+      >
+        Redaguoti
+      </button>
+    )
   );
 
   return (

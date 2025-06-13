@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 import LogoutButton from "./LogoutButton";
-
+import Image from "next/image";
+const image = require("@/assets/autorenttextLOGO.png");
 /**
  * Navigation menu items for the sidebar.
  * Each item contains a `label` (display text) and `href` (route path).
@@ -17,6 +18,7 @@ const menu = [
   { label: "Klientai", href: "/clients" },
   { label: "Pagalbos užklausos", href: "/support" },
   { label: "Sąskaitos", href: "/invoices" },
+  { label: "Darbuotojai", href: "/employees" },
   { label: "Profilis", href: "/profile" },
 ];
 
@@ -33,9 +35,18 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-gray-900 text-white flex flex-col min-h-screen px-4 py-6">
+    <aside className="w-64 bg-[#05001D] text-[#F7F7F7] z-10 flex flex-col min-h-screen px-4 py-6">
       {/* Logo or brand heading */}
-      <h2 className="text-2xl font-bold mb-8 text-center">AutoRent</h2>
+      {/* <h2 className="text-2xl font-bold mb-8 text-center">AutoRent</h2> */}
+      <div className="pt-3 pb-10">
+        <Image
+          src={image}
+          alt="Watermark"
+          width={300}
+          height={20}
+          className=" select-none"
+        />
+      </div>
 
       {/* Navigation menu with active route highlighting */}
       <nav className="flex flex-col gap-6 flex-1 justify-between">
@@ -45,8 +56,8 @@ export default function Sidebar() {
               <Link
                 href={item.href}
                 className={clsx(
-                  "block px-4 py-2 rounded hover:bg-gray-800 transition-colors",
-                  pathname === item.href && "bg-gray-800 font-semibold"
+                  "block px-4 py-2 rounded hover:bg-[#0C374D] transition-colors",
+                  pathname === item.href && "bg-[#0F597B] font-semibold"
                 )}
               >
                 {item.label}

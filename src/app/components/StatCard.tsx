@@ -36,12 +36,12 @@ export default function StatCard({
     >
       {/* Header with title and optional icon */}
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-sm font-medium text-gray-600">{title}</h2>
-        {icon && <div className="text-xl text-gray-700">{icon}</div>}
+        <h2 className="text-sm font-medium text-[#F7F7F7] ">{title}</h2>
+        {icon && <div className="text-xl text-[#F7F7F7] ">{icon}</div>}
       </div>
 
       {/* Main value */}
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
+      <p className="text-3xl font-bold text-[#F7F7F7] ">{value}</p>
     </div>
   );
 }

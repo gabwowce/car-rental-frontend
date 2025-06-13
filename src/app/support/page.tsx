@@ -90,14 +90,32 @@ export default function SupportPage() {
       label: "Atsakymas",
       accessor: (u: any) => {
         // Display static response text if answered
-        if (u.atsakymas) return u.atsakymas;
+        if (u.atsakymas && activeReplyId !== u.uzklausos_id) {
+          return (
+            <div className="flex flex-col">
+              <p>{u.atsakymas}</p>
+              <button
+                className="text-sm text-[#0F597B] hover:underline w-max mt-1"
+                onClick={() => {
+                  setActiveReplyId(u.uzklausos_id);
+                  setResponses((prev) => ({
+                    ...prev,
+                    [u.uzklausos_id]: u.atsakymas,
+                  }));
+                }}
+              >
+                Redaguoti
+              </button>
+            </div>
+          );
+        }
 
         // Show reply button if not yet replying
         if (activeReplyId !== u.uzklausos_id) {
           return (
             <button
               onClick={() => setActiveReplyId(u.uzklausos_id)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded text-sm"
+              className="bg-[#0F597B]  hover:bg-[#0C374D] text-[#F7F7F7]  px-4 py-1 rounded text-sm"
             >
               Atsakyti
             </button>
@@ -121,7 +139,7 @@ export default function SupportPage() {
             />
             <div className="flex gap-2">
               <button
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded text-sm"
+                className="bg-[#0F597B] hover:bg-[#0C374D] text-[#F7F7F7]  px-4 py-1 rounded text-sm"
                 disabled={sendingId === u.uzklausos_id}
                 onClick={async () => {
                   const text = responses[u.uzklausos_id]?.trim();
@@ -168,12 +186,14 @@ export default function SupportPage() {
    * - Data table or loading state
    */
   return (
-    <div>
+    <div className="text-[#707070]">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Pagalbos užklausos</h1>
+        <h1 className="text-2xl font-bold text-[#F7F7F7]">
+          Pagalbos užklausos
+        </h1>
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap gap-4 mb-6 text-[#707070]">
         <input
           type="text"
           placeholder="Ieškoti..."

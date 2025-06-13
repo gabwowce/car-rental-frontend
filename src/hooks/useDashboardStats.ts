@@ -117,17 +117,8 @@ export function useDashboardStats() {
   const barData = useMemo(
     () => [
       {
-        name: "Patvirtinti",
-        value: uzsakymai.filter((u) => u.uzsakymo_busena === "patvirtinta")
-          .length,
-      },
-      {
         name: "Vykdomi",
-        value: uzsakymai.filter((u) => u.uzsakymo_busena === "vykdoma").length,
-      },
-      {
-        name: "Laukiami",
-        value: uzsakymai.filter((u) => u.uzsakymo_busena === "laukiama").length,
+        value: uzsakymai.filter((u) => u.uzsakymo_busena === "vykdomas").length,
       },
       {
         name: "Užbaigti",

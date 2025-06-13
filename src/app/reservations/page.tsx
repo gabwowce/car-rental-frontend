@@ -110,19 +110,29 @@ export default function ReservationsPage() {
    */
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Rezervacijos</h1>
+      <div className="flex justify-between items-center mb-6 text-[#707070]">
+        <h1 className="text-2xl font-bold text-[#F7F7F7]">Rezervacijos</h1>
         <CreateEntityButton
           buttonLabel="+ Nauja rezervacija"
           modalTitle="Nauja rezervacija"
           fields={reservationFields}
           onCreate={async (data) => {
-            await saveReservation(null, data); // null = new reservation
+            try {
+              await saveReservation(null, data);
+              alert("Rezervacija sėkmingai išsaugota!");
+            } catch (err: any) {
+              if (err?.status === 409 || err?.response?.status === 409) {
+                alert("Automobilis šiuo laikotarpiu jau rezervuotas.");
+              } else {
+                alert("Nepavyko sukurti rezervacijos.");
+                console.error("Klaida:", err);
+              }
+            }
           }}
         />
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap gap-4 mb-6 text-[#707070]">
         <input
           type="text"
           className="border p-2 rounded w-64"

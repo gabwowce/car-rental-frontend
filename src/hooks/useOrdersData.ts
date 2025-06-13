@@ -1,37 +1,29 @@
 import {
   useGetAllOrdersQuery,
-  useUpdateOrderMutation,
   useDeleteOrderMutation,
   useGetAllClientsQuery,
   useGetAllCarsQuery,
+  useCreateOrderMutation,
+  useUpdateOrderMutation,
+  useMeApiV1MeGetQuery,
 } from "@/store/carRentalApi";
 import { useState, useMemo } from "react";
 import { FieldConfig } from "@/app/components/modals/EntityModal";
-import type { OrderOut } from "@/store/carRentalApi";
+import type { OrderCreate, OrderOut } from "@/store/carRentalApi";
 
-/**
- * Custom hook for managing order data in the AutoRent system.
- *
- * Loads all orders, clients, and cars, and provides utilities for:
- * filtering, displaying, editing, deleting, and configuring modal fields.
- */
 export function useOrdersData() {
-  // === Fetch all orders ===
+  const { data: me, isLoading: loadingMe } = useMeApiV1MeGetQuery();
+  const initialEmployeeId = me?.darbuotojo_id ?? null;
   const {
     data: orders = [],
     isLoading: loadingOrders,
     refetch: refetchOrders,
   } = useGetAllOrdersQuery();
 
-  // === Fetch clients and cars for lookup ===
   const { data: clients = [], isLoading: loadingClients } =
     useGetAllClientsQuery();
   const { data: cars = [], isLoading: loadingCars } = useGetAllCarsQuery();
 
-  /**
-   * Returns the full name of a client by their ID.
-   * @param id - Client ID
-   */
   const getClientName = (id: number) =>
     clients.find((c: any) => c.kliento_id === id)
       ? `${clients.find((c: any) => c.kliento_id === id)!.vardas} ${
@@ -39,45 +31,50 @@ export function useOrdersData() {
         }`
       : `Klientas #${id}`;
 
-  /**
-   * Returns the car brand and model by car ID.
-   * @param id - Car ID
-   */
   const getCarName = (id: number) => {
     const car = cars.find((c: any) => c.automobilio_id === id);
     return car ? `${car.marke} ${car.modelis}` : `Automobilis #${id}`;
   };
 
-  // === Mutations: update + delete ===
   const [updateOrder, { isLoading: updating }] = useUpdateOrderMutation();
   const [deleteOrder, { isLoading: deleting }] = useDeleteOrderMutation();
+  const [createOrder] = useCreateOrderMutation();
 
-  /**
-   * Updates a specific order by ID.
-   * @param id - Order ID
-   * @param data - Partial order data to update
-   */
-  const saveOrder = async (id: number, data: Partial<OrderOut>) => {
-    await updateOrder({ uzsakymoId: id, orderUpdate: data }).unwrap();
+  const saveOrder = async (id: number | null, data: Partial<OrderOut>) => {
+    const selectedCar = cars.find(
+      (c: any) => Number(c.automobilio_id) === Number(data.automobilio_id)
+    );
+    console.log("Car: " + selectedCar?.lokacija?.vietos_id);
+    const processedData = {
+      ...data,
+      kliento_id: Number(data.kliento_id),
+      automobilio_id: Number(data.automobilio_id),
+      darbuotojo_id: Number(data.darbuotojo_id),
+      grazinimo_vietos_id: Number(data.grazinimo_vietos_id),
+      bendra_kaina: Number(data.bendra_kaina),
+      turi_papildomas_paslaugas: Boolean(data.turi_papildomas_paslaugas),
+      paemimo_vietos_id: Number(selectedCar?.lokacija?.vietos_id),
+    };
+    console.log("🟢 Siunčiamas užsakymo body į backend:", processedData);
+    if (id === null) {
+      await createOrder({ orderCreate: processedData as OrderCreate }).unwrap();
+    } else {
+      await updateOrder({
+        uzsakymoId: id,
+        orderUpdate: processedData,
+      }).unwrap();
+    }
     await refetchOrders();
   };
 
-  /**
-   * Deletes a specific order by ID.
-   * @param id - Order ID
-   */
   const handleDelete = async (id: number) => {
     await deleteOrder({ uzsakymoId: id }).unwrap();
     await refetchOrders();
   };
 
-  // === Filter states ===
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("visi");
 
-  /**
-   * Filtered list of orders based on search + status.
-   */
   const filtered = useMemo(() => {
     return orders.filter((o: any) => {
       const target =
@@ -89,24 +86,54 @@ export function useOrdersData() {
     });
   }, [orders, clients, cars, search, statusFilter]);
 
-  /**
-   * Field configuration for rendering the order in a form modal.
-   */
+  const returnOptions = useMemo(() => {
+    const unique = new Map<number, string>();
+    cars.forEach((c: any) => {
+      if (c.lokacija && !unique.has(c.lokacija.vietos_id)) {
+        unique.set(c.lokacija.vietos_id, c.lokacija.adresas);
+      }
+    });
+    return Array.from(unique.entries()).map(([id, address]) => ({
+      value: id,
+      label: address,
+    }));
+  }, [cars]);
+
   const orderFields: FieldConfig<OrderOut>[] = [
-    { name: "kliento_id", label: "Kliento ID", type: "number", required: true },
+    {
+      name: "kliento_id",
+      label: "Klientas",
+      type: "select",
+      required: true,
+      options: clients.map((c: any) => ({
+        value: c.kliento_id,
+        label: `${c.vardas} ${c.pavarde}`,
+      })),
+    },
     {
       name: "automobilio_id",
-      label: "Automobilio ID",
-      type: "number",
+      label: "Automobilis",
+      type: "select", // ← vietoj "autocomplete"
       required: true,
+      options: cars.map((c: any) => ({
+        value: c.automobilio_id, // ← VALUE = ID (skaičius)
+        label: `${c.marke} ${c.modelis}`,
+      })),
     },
     {
       name: "darbuotojo_id",
       label: "Darbuotojo ID",
-      type: "number",
+      type: "text",
+      required: true,
+      readonly: true,
+      render: () => `${me?.vardas ?? "-"} ${me?.pavarde ?? "-"}`,
+    },
+    {
+      name: "nuomos_data",
+      label: "Nuomos data",
+      type: "date",
       required: true,
     },
-    { name: "nuomos_data", label: "Nuomos data", type: "date", required: true },
     {
       name: "grazinimo_data",
       label: "Grąžinimo data",
@@ -114,16 +141,22 @@ export function useOrdersData() {
       required: true,
     },
     {
-      name: "paemimo_vietos_id",
-      label: "Paėmimo vietos ID",
-      type: "number",
-      required: true,
+      label: "Paėmimo vieta",
+      type: "text",
+      readonly: true,
+      render: (form) => {
+        // 👉 konvertuojam į number
+        const carId = form.automobilio_id ? Number(form.automobilio_id) : null;
+        const car = cars.find((c: any) => c.automobilio_id === carId);
+        return car?.lokacija?.adresas || "—";
+      },
     },
     {
       name: "grazinimo_vietos_id",
-      label: "Grąžinimo vietos ID",
-      type: "number",
+      label: "Grąžinimo vieta",
+      type: "select",
       required: true,
+      options: returnOptions,
     },
     {
       name: "bendra_kaina",
@@ -139,7 +172,6 @@ export function useOrdersData() {
       options: [
         { value: "vykdomas", label: "Vykdomas" },
         { value: "užbaigtas", label: "Užbaigtas" },
-        { value: "atšauktas", label: "Atšauktas" },
       ],
     },
     {
@@ -155,31 +187,20 @@ export function useOrdersData() {
   ];
 
   return {
-    // Filtered results for table/UI
     filtered,
-
-    // Loading state across all data operations
     isLoading:
       loadingOrders || loadingClients || loadingCars || updating || deleting,
-
-    // Filtering
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
-
-    // Name helpers
     getClientName,
     getCarName,
-
-    // Update + delete logic
     saveOrder,
     handleDelete,
-
-    // Modal field definitions
     orderFields,
-
-    // Refetch orders externally
     refetchOrders,
+    cars,
+    initialEmployeeId,
   };
 }
