@@ -1,40 +1,65 @@
 "use client";
-
-import { useAppSelector } from "@/store/hooks";
+import { setToken } from "@/store/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { PropsWithChildren, useEffect, useMemo, useRef } from "react";
 
-/**
- * AuthGuard – a route-based client-side authentication guard.
- *
- * This component checks for the presence of an auth token
- * and redirects the user accordingly:
- *
- * - If the user is **unauthenticated** and trying to access any
- *   page **except `/login`**, they are redirected to `/login`.
- * - If the user **has a token** but is visiting `/login`, they
- *   are redirected to the home page (`/`).
- *
- * While redirecting, the component renders nothing to prevent
- * flickering.
- *
- * @param children React children to render when authentication passes
- * @returns {JSX.Element | null} Authenticated content or null during redirect
- */
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const token = useAppSelector((s) => s.auth.token);
-  const pathname = usePathname();
+function readCookie(name: string) {
+  if (typeof document === "undefined") return null;
+  const m = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+export default function AuthGuard({ children }: PropsWithChildren) {
   const router = useRouter();
+  const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const token = useAppSelector(s => s.auth.token);
 
-  const isLogin = pathname === "/login";
+  // Leidžiami keliai be auth (WHITE-LIST)
+  const isPublic = useMemo(() => {
+    if (!pathname) return false;
+    return (
+      pathname === "/login" ||
+      pathname.startsWith("/oauth") ||     // svarbu!
+      pathname.startsWith("/_next") ||
+      pathname.startsWith("/api") ||
+      pathname === "/favicon.ico"
+    );
+  }, [pathname]);
 
+  // Vienkartinė hidracija iš cookie/LS
+  const hydrated = useRef(false);
   useEffect(() => {
-    if (!token && !isLogin) router.replace("/login");
+    if (!hydrated.current && !token) {
+      hydrated.current = true;
+      const fromCookie = readCookie("token");
+      const fromLS = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+      const t = fromCookie || fromLS;
+      if (t) dispatch(setToken(t));
+    }
+  }, [token, dispatch]);
 
-    if (token && isLogin) router.replace("/");
-  }, [token, pathname]);
+  // Nukreipimai
+  useEffect(() => {
+    if (!pathname) return;
+    // jei public – nieko nedarom (leidžiam /oauth suveikti)
+    if (isPublic) return;
 
-  if (!token && !isLogin) return null;
+    // jei ne public ir nėra tokeno – į login
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    // jei esam login, bet turim tokeną – į /
+    if (token && (pathname === "/login")) {
+      router.replace("/");
+    }
+  }, [token, pathname, isPublic, router]);
+
+  // Kol dar neturim tokeno ir kelias ne public – nerenderinam
+  if (!token && !isPublic) return null;
 
   return <>{children}</>;
 }

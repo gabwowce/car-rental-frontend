@@ -1,11 +1,12 @@
 // LoginPage.tsx
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { setToken } from "@/store/authSlice";
 import { useLoginMutation } from "@/store/carRentalApi";
 import { useAppDispatch } from "@/store/hooks";
-import { setToken } from "@/store/authSlice";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 /**
  * LoginPage – basic login screen for employee authentication.
@@ -62,7 +63,6 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold mb-6 text-center text-[#F7F7F7]">
           Prisijungimas
         </h1>
-
         {/* Email field */}
         <input
           type="email"
@@ -71,7 +71,6 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-
         {/* Password field */}
         <input
           type="password"
@@ -80,7 +79,6 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-
         {/* Submit button */}
         <button
           className="bg-[#0F597B] text-[#F7F7F7]  w-full py-2 rounded hover:bg-[#0C374D] transition"
@@ -90,6 +88,15 @@ export default function LoginPage() {
           {isLoading ? "Jungiamasi..." : "Prisijungti"}
         </button>
 
+        <a
+          href={`${API}/api/v1/google/login`}
+          className="block text-center mt-4 underline text-[#F7F7F7]"
+        >
+          Prisijungti su Google
+        </a>
+        <a href={`${API}/api/v1/github/login`} className="block text-center mt-2 underline text-[#F7F7F7]">
+  Prisijungti su Github
+</a>
         {/* Error message */}
         {isError && (
           <p className="text-red-500 text-sm mt-2">Nepavyko prisijungti</p>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, FormEvent } from "react";
 import {
-  useMeApiV1MeGetQuery,
   useChangePasswordMutation,
+  useMeApiV1MeGetQuery,
 } from "@/store/carRentalApi";
+import { FormEvent, useState } from "react";
 
 export default function ProfilePage() {
   const { data: user, isLoading, isError, error } = useMeApiV1MeGetQuery();
@@ -70,45 +70,47 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <section className="bg-[#0E1525] p-6 rounded-xl shadow-xl">
-        <h2 className="text-lg font-semibold mb-4 text-white">
-          Keisti slaptažodį
-        </h2>
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 gap-4 max-w-md"
-        >
-          <input
-            type="password"
-            placeholder="Dabartinis slaptažodis"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            className="border border-gray-700 bg-[#1E2B45] text-white p-2 rounded"
-          />
-          <input
-            type="password"
-            placeholder="Naujas slaptažodis"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="border border-gray-700 bg-[#1E2B45] text-white p-2 rounded"
-          />
-          <input
-            type="password"
-            placeholder="Pakartokite naują slaptažodį"
-            value={repeatPassword}
-            onChange={(e) => setRepeatPassword(e.target.value)}
-            className="border border-gray-700 bg-[#1E2B45] text-white p-2 rounded"
-          />
-          <button
-            type="submit"
-            className="bg-[#0F597B] text-white py-2 rounded hover:bg-[#0C374D] disabled:opacity-60"
-            disabled={isChanging}
+      {user.pareigos !== "Guest" && (
+        <section className="bg-[#0E1525] p-6 rounded-xl shadow-xl">
+          <h2 className="text-lg font-semibold mb-4 text-white">
+            Keisti slaptažodį
+          </h2>
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 gap-4 max-w-md"
           >
-            {isChanging ? "Keičiama..." : "Išsaugoti pakeitimus"}
-          </button>
-          {message && <p className="text-sm text-red-400">{message}</p>}
-        </form>
-      </section>
+            <input
+              type="password"
+              placeholder="Dabartinis slaptažodis"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className="border border-gray-700 bg-[#1E2B45] text-white p-2 rounded"
+            />
+            <input
+              type="password"
+              placeholder="Naujas slaptažodis"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="border border-gray-700 bg-[#1E2B45] text-white p-2 rounded"
+            />
+            <input
+              type="password"
+              placeholder="Pakartokite naują slaptažodį"
+              value={repeatPassword}
+              onChange={(e) => setRepeatPassword(e.target.value)}
+              className="border border-gray-700 bg-[#1E2B45] text-white p-2 rounded"
+            />
+            <button
+              type="submit"
+              className="bg-[#0F597B] text-white py-2 rounded hover:bg-[#0C374D] disabled:opacity-60"
+              disabled={isChanging}
+            >
+              {isChanging ? "Keičiama..." : "Išsaugoti pakeitimus"}
+            </button>
+            {message && <p className="text-sm text-red-400">{message}</p>}
+          </form>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,6 +1,18 @@
 import { baseApi as api } from "./baseApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
+    googleLoginApiV1GoogleLoginGet: build.query<
+      GoogleLoginApiV1GoogleLoginGetApiResponse,
+      GoogleLoginApiV1GoogleLoginGetApiArg
+    >({
+      query: () => ({ url: `/api/v1/google/login` }),
+    }),
+    googleCallbackApiV1GoogleCallbackGet: build.query<
+      GoogleCallbackApiV1GoogleCallbackGetApiResponse,
+      GoogleCallbackApiV1GoogleCallbackGetApiArg
+    >({
+      query: () => ({ url: `/api/v1/google/callback` }),
+    }),
     login: build.mutation<LoginApiResponse, LoginApiArg>({
       query: (queryArg) => ({
         url: `/api/v1/login`,
@@ -355,6 +367,12 @@ const injectedRtkApi = api.injectEndpoints({
   overrideExisting: false,
 });
 export { injectedRtkApi as carRentalApi };
+export type GoogleLoginApiV1GoogleLoginGetApiResponse =
+  /** status 200 Successful Response */ any;
+export type GoogleLoginApiV1GoogleLoginGetApiArg = void;
+export type GoogleCallbackApiV1GoogleCallbackGetApiResponse =
+  /** status 200 Successful Response */ any;
+export type GoogleCallbackApiV1GoogleCallbackGetApiArg = void;
 export type LoginApiResponse =
   /** status 200 Successful Response */ TokenResponse;
 export type LoginApiArg = {
@@ -616,7 +634,6 @@ export type RegisterRequest = {
   slaptazodis: string;
 };
 export type UserInfo = {
-  darbuotojo_id: number;
   vardas: string;
   pavarde: string;
   telefono_nr: string;
@@ -905,6 +922,8 @@ export type GeocodeRequest = {
   adresas: string;
 };
 export const {
+  useGoogleLoginApiV1GoogleLoginGetQuery,
+  useGoogleCallbackApiV1GoogleCallbackGetQuery,
   useLoginMutation,
   useRegisterMutation,
   useLogoutMutation,
