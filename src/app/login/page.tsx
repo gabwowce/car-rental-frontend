@@ -5,7 +5,7 @@ import { setToken } from "@/store/authSlice";
 import { useLoginMutation } from "@/store/carRentalApi";
 import { useAppDispatch } from "@/store/hooks";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 /**
@@ -28,6 +28,29 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    // ?token=...
+    const sp = new URLSearchParams(window.location.search);
+    let t = sp.get("token");
+
+    // #access_token=...
+    if (!t && typeof window !== "undefined") {
+      const h = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : "";
+      t = new URLSearchParams(h).get("access_token");
+    }
+
+    if (!t) return;
+
+    dispatch(setToken(t));
+    document.cookie = `token=${t}; path=/; SameSite=Lax`;
+    localStorage.setItem("accessToken", t);
+
+    // švariai nuvalom hash/query ir keliaujam į /
+    router.replace("/");
+  }, [dispatch, router]);
 
   /** Email input state */
   const [email, setEmail] = useState("");
@@ -94,9 +117,12 @@ export default function LoginPage() {
         >
           Prisijungti su Google
         </a>
-        <a href={`${API}/api/v1/github/login`} className="block text-center mt-2 underline text-[#F7F7F7]">
-  Prisijungti su Github
-</a>
+        <a
+          href={`${API}/api/v1/github/login`}
+          className="block text-center mt-2 underline text-[#F7F7F7]"
+        >
+          Prisijungti su Github
+        </a>
         {/* Error message */}
         {isError && (
           <p className="text-red-500 text-sm mt-2">Nepavyko prisijungti</p>
